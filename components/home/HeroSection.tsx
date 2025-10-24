@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { MapPin, Search, Users, Star } from 'lucide-react';
-import { getCurrentLocation } from '@/lib/utils/geolocation';
+import { getUserLocation } from '@/lib/utils/geolocation';
 import { LocationData } from '@/lib/types/database';
 
 export function HeroSection() {
@@ -13,7 +13,7 @@ export function HeroSection() {
     const fetchLocation = async () => {
       setIsLoadingLocation(true);
       try {
-        const currentLocation = await getCurrentLocation();
+        const currentLocation = await getUserLocation();
         setLocation(currentLocation);
       } catch (error) {
         console.error('Error getting location:', error);

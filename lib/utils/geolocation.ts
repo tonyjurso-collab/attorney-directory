@@ -1,66 +1,97 @@
-import { LocationData } from '@/lib/types/database';
+export interface UserLocation {
+  latitude: number;
+  longitude: number;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+}
 
-export async function getCurrentLocation(): Promise<LocationData | null> {
-  if (!navigator.geolocation) {
-    console.error('Geolocation is not supported by this browser.');
-    return null;
-  }
+export interface GeolocationError {
+  code: number;
+  message: string;
+}
 
-  return new Promise((resolve) => {
+export async function getUserLocation(): Promise<UserLocation> {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject({
+        code: 0,
+        message: 'Geolocation is not supported by this browser.'
+      });
+      return;
+    }
+
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
         
         try {
-          // Reverse geocoding to get address details
-          const addressData = await reverseGeocode(latitude, longitude);
+          // Try to get city/state from coordinates using reverse geocoding
+          const locationInfo = await reverseGeocode(latitude, longitude);
           
           resolve({
             latitude,
             longitude,
-            city: addressData.city,
-            state: addressData.state,
-            zip_code: addressData.zip_code,
+            ...locationInfo
           });
         } catch (error) {
-          console.error('Error getting address from coordinates:', error);
+          // If reverse geocoding fails, just return coordinates
           resolve({
             latitude,
-            longitude,
+            longitude
           });
         }
       },
       (error) => {
-        console.error('Error getting location:', error);
-        resolve(null);
+        let message = 'Unknown error occurred';
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            message = 'User denied the request for Geolocation.';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            message = 'Location information is unavailable.';
+            break;
+          case error.TIMEOUT:
+            message = 'The request to get user location timed out.';
+            break;
+        }
+        
+        reject({
+          code: error.code,
+          message
+        });
       },
       {
         enableHighAccuracy: true,
         timeout: 10000,
-        maximumAge: 300000, // 5 minutes
+        maximumAge: 300000 // 5 minutes
       }
     );
   });
 }
 
-async function reverseGeocode(lat: number, lng: number) {
-  // Using a free reverse geocoding service
-  // In production, you might want to use Google Maps API or another service
-  const response = await fetch(
-    `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`
-  );
-  
-  if (!response.ok) {
-    throw new Error('Reverse geocoding failed');
+async function reverseGeocode(latitude: number, longitude: number): Promise<Partial<UserLocation>> {
+  try {
+    // Using a free reverse geocoding service
+    const response = await fetch(
+      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+    );
+    
+    if (!response.ok) {
+      throw new Error('Reverse geocoding failed');
+    }
+    
+    const data = await response.json();
+    
+    return {
+      city: data.city,
+      state: data.principalSubdivision,
+      zipCode: data.postcode
+    };
+  } catch (error) {
+    console.warn('Reverse geocoding failed:', error);
+    return {};
   }
-  
-  const data = await response.json();
-  
-  return {
-    city: data.city,
-    state: data.principalSubdivision,
-    zip_code: data.postcode,
-  };
 }
 
 export function calculateDistance(
@@ -72,12 +103,22 @@ export function calculateDistance(
   const R = 3959; // Earth's radius in miles
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * Math.PI / 180) *
-      Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  const distance = R * c;
+  return Math.round(distance * 10) / 10; // Round to 1 decimal place
+}
+
+export function getRadiusOptions() {
+  return [
+    { value: 5, label: '5 miles' },
+    { value: 10, label: '10 miles' },
+    { value: 25, label: '25 miles' },
+    { value: 50, label: '50 miles' },
+    { value: 100, label: '100 miles' },
+    { value: 0, label: 'Any distance' }
+  ];
 }

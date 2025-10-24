@@ -53,6 +53,9 @@ export interface Database {
           zip_code: string | null;
           country: string;
           location: string | null; // PostGIS point as string
+          latitude: number | null;
+          longitude: number | null;
+          formatted_address: string | null;
           profile_image_url: string | null;
           firm_logo_url: string | null;
           membership_tier: MembershipTier;
@@ -84,6 +87,9 @@ export interface Database {
           zip_code?: string | null;
           country?: string;
           location?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          formatted_address?: string | null;
           profile_image_url?: string | null;
           firm_logo_url?: string | null;
           membership_tier?: MembershipTier;
@@ -115,6 +121,9 @@ export interface Database {
           zip_code?: string | null;
           country?: string;
           location?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          formatted_address?: string | null;
           profile_image_url?: string | null;
           firm_logo_url?: string | null;
           membership_tier?: MembershipTier;
@@ -290,6 +299,9 @@ export interface AttorneyWithDetails {
   city: string | null;
   state: string | null;
   zip_code: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  formatted_address: string | null;
   profile_image_url: string | null;
   firm_logo_url: string | null;
   membership_tier: MembershipTier;

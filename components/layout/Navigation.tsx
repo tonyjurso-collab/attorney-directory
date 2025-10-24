@@ -63,10 +63,10 @@ export function Navigation() {
               </Link>
               
               <Link
-                href="/attorney/join"
+                href="/register"
                 className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
               >
-                Join as Attorney
+                Attorney Registration
               </Link>
             </div>
           </div>

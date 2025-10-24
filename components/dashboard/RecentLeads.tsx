@@ -7,26 +7,37 @@ interface RecentLeadsProps {
 }
 
 async function getRecentLeads(attorneyId: string) {
-  const supabase = await createClient();
-  
-  const { data: leads, error } = await supabase
-    .from('leads')
-    .select(`
-      *,
-      practice_areas (
-        name
-      )
-    `)
-    .eq('attorney_id', attorneyId)
-    .order('created_at', { ascending: false })
-    .limit(10);
+  try {
+    const supabase = await createClient();
+    
+    // Check if Supabase is properly configured
+    if (!supabase || typeof supabase.from !== 'function') {
+      console.log('Supabase not configured, returning empty leads');
+      return [];
+    }
+    
+    const { data: leads, error } = await supabase
+      .from('leads')
+      .select(`
+        *,
+        practice_areas (
+          name
+        )
+      `)
+      .eq('attorney_id', attorneyId)
+      .order('created_at', { ascending: false })
+      .limit(10);
 
-  if (error) {
-    console.error('Error fetching leads:', error);
+    if (error) {
+      console.error('Error fetching leads:', error);
+      return [];
+    }
+
+    return leads || [];
+  } catch (error) {
+    console.error('Error in getRecentLeads:', error);
     return [];
   }
-
-  return leads || [];
 }
 
 export async function RecentLeads({ attorneyId }: RecentLeadsProps) {

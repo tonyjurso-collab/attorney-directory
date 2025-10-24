@@ -94,15 +94,17 @@ export function ProfileOverview({ attorney }: ProfileOverviewProps) {
         <div>
           <h4 className="text-sm font-medium text-gray-700 mb-2">Practice Areas</h4>
           <div className="flex flex-wrap gap-1">
-            {attorney.practice_areas.slice(0, 3).map((area) => (
+            {attorney.practice_areas?.slice(0, 3).map((area) => (
               <span
                 key={area.id}
                 className="inline-block bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full"
               >
                 {area.name}
               </span>
-            ))}
-            {attorney.practice_areas.length > 3 && (
+            )) || (
+              <span className="text-gray-500 text-sm">No practice areas specified</span>
+            )}
+            {attorney.practice_areas && attorney.practice_areas.length > 3 && (
               <span className="inline-block bg-gray-50 text-gray-600 text-xs px-2 py-1 rounded-full">
                 +{attorney.practice_areas.length - 3} more
               </span>

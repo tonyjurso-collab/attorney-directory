@@ -50,6 +50,12 @@ export function SubscriptionStatus({ attorney }: SubscriptionStatusProps) {
   const currentPlan = membershipPlans[(attorney as any).membership_tier as keyof typeof membershipPlans];
 
   const handleUpgrade = async (tier: string) => {
+    // Check if Stripe is configured
+    if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
+      alert('Stripe is not configured yet. Please contact support.');
+      return;
+    }
+
     setIsLoading(true);
     try {
       const response = await fetch('/api/stripe/checkout', {
@@ -83,6 +89,12 @@ export function SubscriptionStatus({ attorney }: SubscriptionStatusProps) {
   };
 
   const handleManageSubscription = async () => {
+    // Check if Stripe is configured
+    if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
+      alert('Stripe is not configured yet. Please contact support.');
+      return;
+    }
+
     setIsLoading(true);
     try {
       // Create customer portal session
@@ -161,13 +173,23 @@ export function SubscriptionStatus({ attorney }: SubscriptionStatusProps) {
           </div>
         )}
 
+        {/* Stripe Configuration Notice */}
+        {!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+            <p className="text-sm text-yellow-800">
+              <strong>Note:</strong> Stripe payment processing is not configured yet. 
+              Subscription features will be available once payment credentials are set up.
+            </p>
+          </div>
+        )}
+
         {/* Action Buttons */}
         <div className="space-y-2">
           {attorney.membership_tier === 'free' && (
             <>
               <button
                 onClick={() => handleUpgrade('standard')}
-                disabled={isLoading}
+                disabled={isLoading || !process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
                 className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? 'Processing...' : 'Upgrade to Standard ($49/month)'}
@@ -175,7 +197,7 @@ export function SubscriptionStatus({ attorney }: SubscriptionStatusProps) {
               
               <button
                 onClick={() => handleUpgrade('exclusive')}
-                disabled={isLoading}
+                disabled={isLoading || !process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
                 className="w-full bg-yellow-600 text-white py-2 px-4 rounded-lg hover:bg-yellow-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? 'Processing...' : 'Upgrade to Exclusive ($149/month)'}
@@ -186,7 +208,7 @@ export function SubscriptionStatus({ attorney }: SubscriptionStatusProps) {
           {attorney.membership_tier === 'standard' && (
             <button
               onClick={() => handleUpgrade('exclusive')}
-              disabled={isLoading}
+              disabled={isLoading || !process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
               className="w-full bg-yellow-600 text-white py-2 px-4 rounded-lg hover:bg-yellow-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? 'Processing...' : 'Upgrade to Exclusive ($149/month)'}
@@ -196,7 +218,7 @@ export function SubscriptionStatus({ attorney }: SubscriptionStatusProps) {
           {(attorney.membership_tier === 'standard' || attorney.membership_tier === 'exclusive') && (
             <button
               onClick={handleManageSubscription}
-              disabled={isLoading}
+              disabled={isLoading || !process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
               className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? 'Loading...' : 'Manage Subscription'}

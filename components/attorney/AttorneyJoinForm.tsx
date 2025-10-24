@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { geocodeAddress } from '@/lib/utils/geocoding';
 import { 
   User, 
   Building, 
@@ -90,7 +91,42 @@ export function AttorneyJoinForm({ userId }: AttorneyJoinFormProps) {
     setErrorMessage('');
 
     try {
-      // Create attorney record
+      // Geocode the address if address information is provided
+      let geocodingData = {
+        latitude: null as number | null,
+        longitude: null as number | null,
+        formatted_address: null as string | null,
+      };
+
+      if (data.address_line1 || data.city || data.state || data.zip_code) {
+        // Build address string for geocoding
+        const addressParts = [
+          data.address_line1,
+          data.city,
+          data.state,
+          data.zip_code
+        ].filter(Boolean);
+        
+        if (addressParts.length > 0) {
+          const addressString = addressParts.join(', ');
+          
+          try {
+            const geocodingResult = await geocodeAddress(addressString);
+            if (!('error' in geocodingResult)) {
+              geocodingData = {
+                latitude: geocodingResult.latitude,
+                longitude: geocodingResult.longitude,
+                formatted_address: geocodingResult.formatted_address,
+              };
+            }
+          } catch (geocodingError) {
+            console.warn('Geocoding failed for attorney registration:', geocodingError);
+            // Continue with registration even if geocoding fails
+          }
+        }
+      }
+
+      // Create attorney record with geocoding data
       const { data: attorney, error: attorneyError } = await supabase
         .from('attorneys')
         .insert({
@@ -108,6 +144,10 @@ export function AttorneyJoinForm({ userId }: AttorneyJoinFormProps) {
           bio: data.bio,
           experience_years: data.experience_years,
           membership_tier: 'free',
+          // Include geocoding data
+          latitude: geocodingData.latitude,
+          longitude: geocodingData.longitude,
+          formatted_address: geocodingData.formatted_address,
         })
         .select()
         .single();

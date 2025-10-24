@@ -5,65 +5,88 @@ import { ContactForm } from '@/components/attorney/ContactForm';
 import { createClient } from '@/lib/supabase/server';
 
 interface AttorneyPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 async function getAttorney(id: string) {
-  const supabase = await createClient();
-  
-  const { data: attorney, error } = await supabase
-    .from('attorneys')
-    .select(`
-      *,
-      attorney_practice_areas (
-        practice_area_id,
-        is_primary,
-        practice_areas (
+  try {
+    const supabase = await createClient();
+    
+    // Check if Supabase is properly configured
+    if (!supabase || typeof supabase.from !== 'function') {
+      console.log('Supabase not configured, returning null');
+      return null;
+    }
+    
+    console.log('Looking for attorney with ID:', id);
+    
+    const { data: attorney, error } = await supabase
+      .from('attorneys')
+      .select(`
+        *,
+        attorney_practice_areas (
+          practice_area_id,
+          is_primary,
+          practice_areas (
+            id,
+            name,
+            slug,
+            description
+          )
+        ),
+        reviews (
           id,
-          name,
-          slug,
-          description
+          rating,
+          review_text,
+          client_name,
+          created_at
         )
-      ),
-      reviews (
-        id,
-        rating,
-        review_text,
-        client_name,
-        created_at
-      )
-    `)
-    .eq('id', id)
-    .eq('is_active', true)
-    .single();
+      `)
+      .eq('id', id)
+      .eq('is_active', true)
+      .single();
 
-  if (error || !attorney) {
+    if (error) {
+      console.error('Error fetching attorney:', error);
+      return null;
+    }
+    
+    if (!attorney) {
+      console.log('No attorney found with ID:', id);
+      return null;
+    }
+    
+    console.log('Found attorney:', attorney.first_name, attorney.last_name);
+
+    // Calculate average rating
+    const averageRating = attorney.reviews?.length 
+      ? attorney.reviews.reduce((sum: number, review: any) => sum + review.rating, 0) / attorney.reviews.length
+      : 0;
+
+    return {
+      ...attorney,
+      practice_areas: attorney.attorney_practice_areas?.map((apa: any) => ({
+        id: apa.practice_areas?.id,
+        name: apa.practice_areas?.name,
+        slug: apa.practice_areas?.slug,
+        description: apa.practice_areas?.description,
+        is_primary: apa.is_primary,
+      })).filter(pa => pa.id) || [], // Filter out any null/undefined practice areas
+      average_rating: averageRating,
+      review_count: attorney.reviews?.length || 0,
+    };
+  } catch (error) {
+    console.error('Error in getAttorney:', error);
     return null;
   }
-
-  // Calculate average rating
-  const averageRating = attorney.reviews?.length 
-    ? attorney.reviews.reduce((sum: number, review: any) => sum + review.rating, 0) / attorney.reviews.length
-    : 0;
-
-  return {
-    ...attorney,
-    practice_areas: attorney.attorney_practice_areas?.map((apa: any) => ({
-      id: apa.practice_areas.id,
-      name: apa.practice_areas.name,
-      slug: apa.practice_areas.slug,
-      description: apa.practice_areas.description,
-      is_primary: apa.is_primary,
-    })) || [],
-    average_rating: averageRating,
-    review_count: attorney.reviews?.length || 0,
-  };
 }
 
 export default async function AttorneyPage({ params }: AttorneyPageProps) {
-  const attorney = await getAttorney(params.id);
+  // Await the params Promise in Next.js 15
+  const resolvedParams = await params;
+  const attorney = await getAttorney(resolvedParams.id);
 
   if (!attorney) {
     notFound();

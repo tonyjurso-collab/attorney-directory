@@ -4,40 +4,51 @@ import { createClient } from '@/lib/supabase/server';
 import { AttorneyWithDetails } from '@/lib/types/database';
 
 async function getFeaturedAttorneys(): Promise<AttorneyWithDetails[]> {
-  const supabase = await createClient();
-  
-  const { data: attorneys, error } = await supabase
-    .from('attorneys')
-    .select(`
-      *,
-      attorney_practice_areas (
-        practice_area_id,
-        is_primary,
-        practice_areas (
-          id,
-          name,
-          slug
+  try {
+    const supabase = await createClient();
+    
+    // Check if Supabase is properly configured
+    if (!supabase || typeof supabase.from !== 'function') {
+      console.log('Supabase not configured, returning empty array');
+      return [];
+    }
+    
+    const { data: attorneys, error } = await supabase
+      .from('attorneys')
+      .select(`
+        *,
+        attorney_practice_areas (
+          practice_area_id,
+          is_primary,
+          practice_areas (
+            id,
+            name,
+            slug
+          )
         )
-      )
-    `)
-    .eq('is_active', true)
-    .eq('membership_tier', 'exclusive')
-    .limit(6);
+      `)
+      .eq('is_active', true)
+      .eq('membership_tier', 'exclusive')
+      .limit(6);
 
-  if (error) {
-    console.error('Error fetching featured attorneys:', error);
+    if (error) {
+      console.error('Error fetching featured attorneys:', error);
+      return [];
+    }
+
+        return attorneys?.map((attorney: any) => ({
+          ...attorney,
+          practice_areas: attorney.attorney_practice_areas?.map((apa: any) => ({
+            id: apa.practice_areas?.id,
+            name: apa.practice_areas?.name,
+            slug: apa.practice_areas?.slug,
+            is_primary: apa.is_primary,
+          })).filter(pa => pa.id) || [], // Filter out any null/undefined practice areas
+        })) || [];
+  } catch (error) {
+    console.error('Error in getFeaturedAttorneys:', error);
     return [];
   }
-
-  return attorneys?.map((attorney: any) => ({
-    ...attorney,
-    practice_areas: attorney.attorney_practice_areas?.map((apa: any) => ({
-      id: apa.practice_areas.id,
-      name: apa.practice_areas.name,
-      slug: apa.practice_areas.slug,
-      is_primary: apa.is_primary,
-    })) || [],
-  })) || [];
 }
 
 export async function FeaturedAttorneys() {

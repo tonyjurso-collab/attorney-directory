@@ -15,7 +15,7 @@ const registerSchema = z.object({
     .min(8, 'Password must be at least 8 characters')
     .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Password must contain at least one uppercase letter, one lowercase letter, and one number'),
   confirmPassword: z.string(),
-  role: z.enum(['attorney', 'client'], {
+  role: z.enum(['attorney'], {
     required_error: 'Please select your role',
   }),
   agreeToTerms: z.boolean().refine(val => val === true, 'You must agree to the terms and conditions'),
@@ -56,7 +56,7 @@ export function RegisterForm() {
         options: {
           data: {
             full_name: data.full_name,
-            role: data.role,
+            role: 'attorney',
           },
         },
       });
@@ -74,11 +74,12 @@ export function RegisterForm() {
             id: authData.user.id,
             email: data.email,
             full_name: data.full_name,
-            role: data.role,
+            role: 'attorney', // Always attorney since we removed client role
           });
 
         if (profileError) {
-          setError('Failed to create profile. Please try again.');
+          console.error('Profile creation error:', profileError);
+          setError(`Failed to create profile: ${profileError.message}`);
           return;
         }
 
@@ -95,10 +96,13 @@ export function RegisterForm() {
             });
 
           if (attorneyError) {
-            setError('Failed to create attorney profile. Please try again.');
+            console.error('Attorney creation error:', attorneyError);
+            setError(`Failed to create attorney profile: ${attorneyError.message}`);
             return;
           }
         }
+
+        // Note: Only attorneys register, clients submit leads directly
 
         router.push('/auth/verify-email');
       }
@@ -124,9 +128,9 @@ export function RegisterForm() {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Create Account</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Attorney Registration</h2>
         <p className="text-gray-600">
-          Join our platform as an attorney or client
+          Join our platform as a legal professional
         </p>
       </div>
 
@@ -138,54 +142,31 @@ export function RegisterForm() {
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        {/* Role Selection */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">
-            I am a:
-          </label>
-          <div className="grid grid-cols-2 gap-4">
-            <label className="relative">
-              <input
-                {...register('role')}
-                type="radio"
-                value="attorney"
-                className="sr-only"
-              />
-              <div className={`p-4 border-2 rounded-lg cursor-pointer transition-colors ${
-                watch('role') === 'attorney'
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}>
-                <div className="text-center">
-                  <div className="text-lg font-semibold text-gray-900">Attorney</div>
-                  <div className="text-sm text-gray-600">Legal professional</div>
-                </div>
+        {/* Attorney Registration Notice */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-blue-800">
+                Attorney Registration Only
+              </h3>
+              <div className="mt-2 text-sm text-blue-700">
+                <p>
+                  This registration is for attorneys only. If you're looking for legal help, 
+                  please use our <a href="/search" className="underline">attorney search</a> to find a lawyer 
+                  and submit a lead form directly.
+                </p>
               </div>
-            </label>
-
-            <label className="relative">
-              <input
-                {...register('role')}
-                type="radio"
-                value="client"
-                className="sr-only"
-              />
-              <div className={`p-4 border-2 rounded-lg cursor-pointer transition-colors ${
-                watch('role') === 'client'
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}>
-                <div className="text-center">
-                  <div className="text-lg font-semibold text-gray-900">Client</div>
-                  <div className="text-sm text-gray-600">Looking for legal help</div>
-                </div>
-              </div>
-            </label>
+            </div>
           </div>
-          {errors.role && (
-            <p className="mt-1 text-sm text-red-600">{errors.role.message}</p>
-          )}
         </div>
+
+        {/* Hidden role field - always attorney */}
+        <input type="hidden" {...register('role')} value="attorney" />
 
         {/* Full Name */}
         <div>

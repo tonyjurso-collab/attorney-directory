@@ -1,0 +1,147 @@
+[
+  {
+    "objectID": "11111111-1111-1111-1111-111111111111",
+    "name": "John Smith",
+    "firm_name": "Smith & Associates",
+    "bio": "Experienced personal injury attorney with over 15 years of practice. Specializes in car accidents, workplace injuries, and medical malpractice cases.",
+    "experience_years": 15,
+    "phone": "(704) 555-0101",
+    "email": "john.smith@smithlaw.com",
+    "website": "https://smithlaw.com",
+    "city": "Charlotte",
+    "state": "NC",
+    "zip_code": "28202",
+    "membership_tier": "exclusive",
+    "is_verified": true,
+    "practice_areas": [
+      {
+        "name": "Personal Injury",
+        "slug": "personal-injury",
+        "is_primary": true
+      },
+      {
+        "name": "Car Accidents",
+        "slug": "car-accidents",
+        "is_primary": false
+      }
+    ],
+    "average_rating": 4.8,
+    "review_count": 127
+  },
+  {
+    "objectID": "22222222-2222-2222-2222-222222222222",
+    "name": "Sarah Johnson",
+    "firm_name": "Johnson Legal Group",
+    "bio": "Family law specialist with a focus on divorce, child custody, and adoption cases. Committed to helping families navigate difficult legal situations.",
+    "experience_years": 12,
+    "phone": "(704) 555-0102",
+    "email": "sarah.johnson@johnsonlegal.com",
+    "website": "https://johnsonlegal.com",
+    "city": "Charlotte",
+    "state": "NC",
+    "zip_code": "28203",
+    "membership_tier": "standard",
+    "is_verified": true,
+    "practice_areas": [
+      {
+        "name": "Family Law",
+        "slug": "family-law",
+        "is_primary": true
+      },
+      {
+        "name": "Divorce",
+        "slug": "divorce",
+        "is_primary": false
+      }
+    ],
+    "average_rating": 4.6,
+    "review_count": 89
+  },
+  {
+    "objectID": "33333333-3333-3333-3333-333333333333",
+    "name": "Michael Davis",
+    "firm_name": "Davis & Partners",
+    "bio": "Criminal defense attorney with extensive experience in DUI cases, drug offenses, and white-collar crimes. Former prosecutor with insider knowledge.",
+    "experience_years": 18,
+    "phone": "(704) 555-0103",
+    "email": "michael.davis@davislaw.com",
+    "website": "https://davislaw.com",
+    "city": "Charlotte",
+    "state": "NC",
+    "zip_code": "28204",
+    "membership_tier": "exclusive",
+    "is_verified": true,
+    "practice_areas": [
+      {
+        "name": "Criminal Defense",
+        "slug": "criminal-defense",
+        "is_primary": true
+      },
+      {
+        "name": "DUI/DWI",
+        "slug": "dui-dwi",
+        "is_primary": false
+      }
+    ],
+    "average_rating": 4.9,
+    "review_count": 156
+  },
+  {
+    "objectID": "44444444-4444-4444-4444-444444444444",
+    "name": "Emily Wilson",
+    "firm_name": "Wilson Legal Services",
+    "bio": "Real estate attorney specializing in commercial transactions, property disputes, and zoning issues. Helps businesses and individuals with complex real estate matters.",
+    "experience_years": 10,
+    "phone": "(704) 555-0104",
+    "email": "emily.wilson@wilsonlegal.com",
+    "website": "https://wilsonlegal.com",
+    "city": "Charlotte",
+    "state": "NC",
+    "zip_code": "28205",
+    "membership_tier": "free",
+    "is_verified": false,
+    "practice_areas": [
+      {
+        "name": "Real Estate",
+        "slug": "real-estate",
+        "is_primary": true
+      },
+      {
+        "name": "Commercial Law",
+        "slug": "commercial-law",
+        "is_primary": false
+      }
+    ],
+    "average_rating": 4.3,
+    "review_count": 45
+  },
+  {
+    "objectID": "55555555-5555-5555-5555-555555555555",
+    "name": "Robert Brown",
+    "firm_name": "Brown & Associates",
+    "bio": "Estate planning and probate attorney with expertise in wills, trusts, and estate administration. Helps families protect their assets and plan for the future.",
+    "experience_years": 14,
+    "phone": "(704) 555-0105",
+    "email": "robert.brown@brownlaw.com",
+    "website": "https://brownlaw.com",
+    "city": "Charlotte",
+    "state": "NC",
+    "zip_code": "28206",
+    "membership_tier": "standard",
+    "is_verified": true,
+    "practice_areas": [
+      {
+        "name": "Estate Planning",
+        "slug": "estate-planning",
+        "is_primary": true
+      },
+      {
+        "name": "Probate",
+        "slug": "probate",
+        "is_primary": false
+      }
+    ],
+    "average_rating": 4.7,
+    "review_count": 78
+  }
+]

@@ -9,7 +9,7 @@ export default function RegisterPage() {
             Attorney Directory
           </h1>
           <p className="mt-2 text-sm text-gray-600">
-            Join our platform as an attorney or client
+            Join our platform as a legal professional
           </p>
         </div>
       </div>

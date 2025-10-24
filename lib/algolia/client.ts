@@ -1,9 +1,12 @@
+import { liteClient } from 'algoliasearch/lite';
 import { AttorneyWithDetails } from '@/lib/types/database';
 
-// Algolia client will be initialized at runtime
-export const searchClient = null;
+// Initialize Algolia client
+export const searchClient = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID && process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY
+  ? liteClient(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID, process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY)
+  : null;
 
-// export const attorneysIndex = searchClient.initIndex('attorneys');
+export const attorneysIndex = searchClient?.initIndex('attorneys');
 
 // Transform attorney data for Algolia indexing
 export function transformAttorneyForAlgolia(attorney: AttorneyWithDetails) {
@@ -28,9 +31,13 @@ export function transformAttorneyForAlgolia(attorney: AttorneyWithDetails) {
     })),
     average_rating: attorney.average_rating,
     review_count: attorney.review_count,
-    _geoloc: attorney.city && attorney.state ? {
-      lat: 0, // Will be populated with actual coordinates
-      lng: 0, // Will be populated with actual coordinates
+    // Include geocoding data if available
+    latitude: attorney.latitude,
+    longitude: attorney.longitude,
+    formatted_address: attorney.formatted_address,
+    _geoloc: attorney.latitude && attorney.longitude ? {
+      lat: attorney.latitude,
+      lng: attorney.longitude,
     } : undefined,
   };
 }

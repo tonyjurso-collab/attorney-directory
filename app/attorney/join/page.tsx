@@ -3,25 +3,31 @@ import { createClient } from '@/lib/supabase/server';
 import { AttorneyJoinForm } from '@/components/attorney/AttorneyJoinForm';
 
 export default async function AttorneyJoinPage() {
-  const supabase = await createClient();
-  
-  // Get current user
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  
-  if (authError || !user) {
-    redirect('/login');
-  }
+  try {
+    const supabase = await createClient();
+    
+    // Check if Supabase is properly configured
+    if (!supabase || typeof supabase.from !== 'function') {
+      redirect('/login');
+    }
+    
+    // Get current user
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !user) {
+      redirect('/login');
+    }
 
-  // Check if user already has an attorney profile
-  const { data: existingAttorney } = await supabase
-    .from('attorneys')
-    .select('id')
-    .eq('user_id', user.id)
-    .single();
+    // Check if user already has an attorney profile
+    const { data: existingAttorney } = await supabase
+      .from('attorneys')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
 
-  if (existingAttorney) {
-    redirect('/dashboard');
-  }
+    if (existingAttorney) {
+      redirect('/dashboard');
+    }
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
@@ -38,5 +44,9 @@ export default async function AttorneyJoinPage() {
         <AttorneyJoinForm userId={user.id} />
       </div>
     </div>
-  );
+    );
+  } catch (error) {
+    console.error('Error in AttorneyJoinPage:', error);
+    redirect('/login');
+  }
 }

@@ -14,55 +14,71 @@ interface SearchResultsProps {
 }
 
 async function searchAttorneys(searchParams: SearchResultsProps['searchParams']): Promise<AttorneyWithDetails[]> {
-  const supabase = await createClient();
-  
-  let query = supabase
-    .from('attorneys')
-    .select(`
-      *,
-      attorney_practice_areas (
-        practice_area_id,
-        is_primary,
-        practice_areas (
-          id,
-          name,
-          slug
+  try {
+    const supabase = await createClient();
+    
+    // Check if Supabase is properly configured
+    if (!supabase || typeof supabase.from !== 'function') {
+      console.log('Supabase not configured, returning empty array');
+      return [];
+    }
+    
+    let query = supabase
+      .from('attorneys')
+      .select(`
+        *,
+        attorney_practice_areas (
+          practice_area_id,
+          is_primary,
+          practice_areas (
+            id,
+            name,
+            slug
+          )
         )
-      )
-    `)
-    .eq('is_active', true);
+      `)
+      .eq('is_active', true);
 
-  // Apply filters
-  if (searchParams.practice_area) {
-    query = query.eq('attorney_practice_areas.practice_areas.slug', searchParams.practice_area);
-  }
+    if (searchParams.tier) {
+      query = query.eq('membership_tier', searchParams.tier);
+    }
 
-  if (searchParams.tier) {
-    query = query.eq('membership_tier', searchParams.tier);
-  }
+    if (searchParams.location) {
+      // For now, we'll do a simple text search on city/state
+      // In production, you'd want to use PostGIS for proper geospatial queries
+      query = query.or(`city.ilike.%${searchParams.location}%,state.ilike.%${searchParams.location}%`);
+    }
 
-  if (searchParams.location) {
-    // For now, we'll do a simple text search on city/state
-    // In production, you'd want to use PostGIS for proper geospatial queries
-    query = query.or(`city.ilike.%${searchParams.location}%,state.ilike.%${searchParams.location}%`);
-  }
+    const { data: attorneys, error } = await query.limit(20);
 
-  const { data: attorneys, error } = await query.limit(20);
+    if (error) {
+      console.error('Error searching attorneys:', error);
+      return [];
+    }
 
-  if (error) {
-    console.error('Error searching attorneys:', error);
+    // Transform and filter attorneys
+    let transformedAttorneys = attorneys?.map((attorney: any) => ({
+      ...attorney,
+      practice_areas: attorney.attorney_practice_areas?.map((apa: any) => ({
+        id: apa.practice_areas?.id,
+        name: apa.practice_areas?.name,
+        slug: apa.practice_areas?.slug,
+        is_primary: apa.is_primary,
+      })).filter(pa => pa.id) || [], // Filter out any null/undefined practice areas
+    })) || [];
+
+    // Apply practice area filter after transformation
+    if (searchParams.practice_area) {
+      transformedAttorneys = transformedAttorneys.filter(attorney => 
+        attorney.practice_areas.some(pa => pa.slug === searchParams.practice_area)
+      );
+    }
+
+    return transformedAttorneys;
+  } catch (error) {
+    console.error('Error in searchAttorneys:', error);
     return [];
   }
-
-  return attorneys?.map((attorney: any) => ({
-    ...attorney,
-    practice_areas: attorney.attorney_practice_areas?.map((apa: any) => ({
-      id: apa.practice_areas.id,
-      name: apa.practice_areas.name,
-      slug: apa.practice_areas.slug,
-      is_primary: apa.is_primary,
-    })) || [],
-  })) || [];
 }
 
 export async function SearchResults({ searchParams }: SearchResultsProps) {

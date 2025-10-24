@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, MapPin, Filter } from 'lucide-react';
-import { getCurrentLocation } from '@/lib/utils/geolocation';
+import { getUserLocation } from '@/lib/utils/geolocation';
 import { LocationData } from '@/lib/types/database';
 
 interface PracticeArea {
@@ -35,7 +35,7 @@ export function SearchForm() {
   const handleLocationClick = async () => {
     setIsLoadingLocation(true);
     try {
-      const currentLocation = await getCurrentLocation();
+      const currentLocation = await getUserLocation();
       if (currentLocation) {
         const locationString = currentLocation.city && currentLocation.state 
           ? `${currentLocation.city}, ${currentLocation.state}`
