@@ -114,27 +114,66 @@ export function AttorneyProfile({ attorney }: AttorneyProfileProps) {
 
       {/* Content */}
       <div className="p-6">
-        {/* Practice Areas */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Practice Areas</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {attorney.practice_areas.map((area) => (
-              <div key={area.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div>
-                  <h3 className="font-medium text-gray-900">{area.name}</h3>
-                  {(area as any).description && (
-                    <p className="text-sm text-gray-600 mt-1">{(area as any).description}</p>
-                  )}
-                </div>
-                {area.is_primary && (
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    Primary
-                  </span>
-                )}
-              </div>
-            ))}
+        {/* Practice Areas - Hierarchical Display (New Structure) */}
+        {(attorney as any).practice_categories && (attorney as any).practice_categories.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Practice Areas</h2>
+            <div className="space-y-6">
+              {(attorney as any).practice_categories.map((category: any) => {
+                // Find subcategories for this category
+                const categorySubcategories = attorney.practice_areas?.filter((pa: any) => 
+                  pa.category_id === category.id
+                ) || [];
+                
+                return (
+                  <div key={category.id} className="border border-gray-200 rounded-lg p-4">
+                    <div className="mb-3">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        {category.name}
+                      </h3>
+                      {categorySubcategories.length > 0 && (
+                        <div>
+                          <span className="text-sm text-gray-600 font-medium">Specializes in:</span>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                            {categorySubcategories.map((subcategory: any) => (
+                              <div key={subcategory.id} className="flex items-center p-3 bg-blue-50 rounded-lg">
+                                <div className="flex-1">
+                                  <h4 className="font-medium text-gray-900">{subcategory.name}</h4>
+                                  {(subcategory as any).description && (
+                                    <p className="text-sm text-gray-600 mt-1">{(subcategory as any).description}</p>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Practice Areas - Legacy Display (Old Structure) */}
+        {!(attorney as any).practice_categories && attorney.practice_areas && attorney.practice_areas.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Practice Areas</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {attorney.practice_areas.map((area: any) => (
+                <div key={area.id} className="flex items-center p-3 bg-blue-50 rounded-lg">
+                  <div className="flex-1">
+                    <h4 className="font-medium text-gray-900">{area.name}</h4>
+                    {area.description && (
+                      <p className="text-sm text-gray-600 mt-1">{area.description}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Bio */}
         {attorney.bio && (

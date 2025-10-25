@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { DashboardStats } from '@/components/dashboard/DashboardStats';
-import { RecentLeads } from '@/components/dashboard/RecentLeads';
+import { ProfileEditor } from '@/components/dashboard/ProfileEditor';
 import { ProfileOverview } from '@/components/dashboard/ProfileOverview';
 import { SubscriptionStatus } from '@/components/dashboard/SubscriptionStatus';
 
@@ -39,13 +39,21 @@ export default async function DashboardPage() {
       .from('attorneys')
       .select(`
         *,
-        attorney_practice_areas (
-          practice_area_id,
-          is_primary,
-          practice_areas (
+        attorney_practice_categories (
+          category_id,
+          practice_area_categories (
             id,
             name,
             slug
+          )
+        ),
+        attorney_practice_areas (
+          practice_area_id,
+          practice_areas (
+            id,
+            name,
+            slug,
+            category_id
           )
         )
       `)
@@ -59,11 +67,12 @@ export default async function DashboardPage() {
     // Transform the attorney data to match component expectations
     const transformedAttorney = {
       ...attorney,
+      selected_categories: attorney.attorney_practice_categories?.map((apc: any) => apc.category_id) || [],
       practice_areas: attorney.attorney_practice_areas?.map((apa: any) => ({
         id: apa.practice_areas?.id,
         name: apa.practice_areas?.name,
         slug: apa.practice_areas?.slug,
-        is_primary: apa.is_primary,
+        category_id: apa.practice_areas?.category_id,
       })).filter(pa => pa.id) || [], // Filter out any null/undefined practice areas
     };
 
@@ -92,7 +101,7 @@ export default async function DashboardPage() {
 
           <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
-              <RecentLeads attorneyId={transformedAttorney.id} />
+              <ProfileEditor attorney={transformedAttorney} />
             </div>
             
             <div className="space-y-6">

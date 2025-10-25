@@ -1,5 +1,4 @@
 import { Suspense } from 'react';
-import { SearchForm } from '@/components/search/SearchForm';
 import { PracticeAreasGrid } from '@/components/home/PracticeAreasGrid';
 import { FeaturedAttorneys } from '@/components/home/FeaturedAttorneys';
 import { HeroSection } from '@/components/home/HeroSection';
@@ -9,26 +8,11 @@ import { CtaSection } from '@/components/home/CtaSection';
 export default function Home() {
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero Section */}
+      {/* Hero Section with Integrated Search */}
       <HeroSection />
-      
-      {/* Search Form */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
-              Find an Attorney Near You
-            </h2>
-            <p className="mt-4 text-lg text-gray-600">
-              Search by practice area and location to find qualified legal professionals
-            </p>
-          </div>
-          
-          <Suspense fallback={<div className="h-16 bg-gray-200 animate-pulse rounded-lg" />}>
-            <SearchForm />
-          </Suspense>
-        </div>
-      </section>
+
+      {/* Stats Section */}
+      <StatsSection />
 
       {/* Practice Areas */}
       <section className="py-16">
@@ -71,9 +55,6 @@ export default function Home() {
           </Suspense>
         </div>
       </section>
-
-      {/* Stats Section */}
-      <StatsSection />
 
       {/* CTA Section */}
       <CtaSection />

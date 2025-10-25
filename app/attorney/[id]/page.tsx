@@ -26,14 +26,22 @@ async function getAttorney(id: string) {
       .from('attorneys')
       .select(`
         *,
+        attorney_practice_categories (
+          category_id,
+          practice_area_categories (
+            id,
+            name,
+            slug
+          )
+        ),
         attorney_practice_areas (
           practice_area_id,
-          is_primary,
           practice_areas (
             id,
             name,
             slug,
-            description
+            description,
+            category_id
           )
         ),
         reviews (
@@ -67,12 +75,17 @@ async function getAttorney(id: string) {
 
     return {
       ...attorney,
+      practice_categories: attorney.attorney_practice_categories?.map((apc: any) => ({
+        id: apc.practice_area_categories?.id,
+        name: apc.practice_area_categories?.name,
+        slug: apc.practice_area_categories?.slug,
+      })).filter(cat => cat.id) || [],
       practice_areas: attorney.attorney_practice_areas?.map((apa: any) => ({
         id: apa.practice_areas?.id,
         name: apa.practice_areas?.name,
         slug: apa.practice_areas?.slug,
         description: apa.practice_areas?.description,
-        is_primary: apa.is_primary,
+        category_id: apa.practice_areas?.category_id,
       })).filter(pa => pa.id) || [], // Filter out any null/undefined practice areas
       average_rating: averageRating,
       review_count: attorney.reviews?.length || 0,

@@ -90,26 +90,59 @@ export function ProfileOverview({ attorney }: ProfileOverviewProps) {
           </div>
         </div>
 
-        {/* Practice Areas */}
+        {/* Practice Areas - Hierarchical Display */}
         <div>
           <h4 className="text-sm font-medium text-gray-700 mb-2">Practice Areas</h4>
-          <div className="flex flex-wrap gap-1">
-            {attorney.practice_areas?.slice(0, 3).map((area) => (
-              <span
-                key={area.id}
-                className="inline-block bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full"
-              >
-                {area.name}
-              </span>
-            )) || (
-              <span className="text-gray-500 text-sm">No practice areas specified</span>
-            )}
-            {attorney.practice_areas && attorney.practice_areas.length > 3 && (
-              <span className="inline-block bg-gray-50 text-gray-600 text-xs px-2 py-1 rounded-full">
-                +{attorney.practice_areas.length - 3} more
-              </span>
-            )}
-          </div>
+          {(attorney as any).selected_categories && (attorney as any).selected_categories.length > 0 ? (
+            <div className="space-y-2">
+              {(attorney as any).selected_categories.slice(0, 2).map((categoryId: string) => {
+                // Find the category name from the attorney data
+                const categoryName = (attorney as any).attorney_practice_categories?.find(
+                  (apc: any) => apc.category_id === categoryId
+                )?.practice_area_categories?.name || 'Unknown Category';
+                
+                // Find subcategories for this category
+                const categorySubcategories = attorney.practice_areas?.filter((pa: any) => 
+                  pa.category_id === categoryId
+                ) || [];
+                
+                return (
+                  <div key={categoryId} className="border-l-2 border-blue-200 pl-2">
+                    <div className="text-sm font-medium text-gray-900">
+                      {categoryName}
+                    </div>
+                    {categorySubcategories.length > 0 && (
+                      <div className="ml-2 mt-1">
+                        <span className="text-xs text-gray-600">Specializes in:</span>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {categorySubcategories.slice(0, 2).map((subcategory: any) => (
+                            <span
+                              key={subcategory.id}
+                              className="inline-block bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full"
+                            >
+                              {subcategory.name}
+                            </span>
+                          ))}
+                          {categorySubcategories.length > 2 && (
+                            <span className="inline-block bg-gray-50 text-gray-600 text-xs px-2 py-1 rounded-full">
+                              +{categorySubcategories.length - 2} more
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+              {(attorney as any).selected_categories.length > 2 && (
+                <div className="text-xs text-gray-600">
+                  +{(attorney as any).selected_categories.length - 2} more categories
+                </div>
+              )}
+            </div>
+          ) : (
+            <span className="text-gray-500 text-sm">No practice areas specified</span>
+          )}
         </div>
 
         {/* Location */}

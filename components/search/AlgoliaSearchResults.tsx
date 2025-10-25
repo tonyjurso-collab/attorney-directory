@@ -178,8 +178,55 @@ function Hits() {
                   </span>
                 </div>
 
-                {/* Practice Areas */}
-                {hit.practice_areas && hit.practice_areas.length > 0 && (
+                {/* Practice Areas - Hierarchical Display (New Structure) */}
+                {hit.practice_categories && hit.practice_categories.length > 0 && (
+                  <div className="mb-3">
+                    <div className="space-y-2">
+                      {hit.practice_categories.slice(0, 2).map((category: any, categoryIndex: number) => {
+                        // Find subcategories for this category
+                        const categorySubcategories = hit.practice_areas?.filter((pa: any) => 
+                          pa.category_name === category.name
+                        ) || [];
+                        
+                        return (
+                          <div key={category.name || `category-${categoryIndex}`} className="space-y-1">
+                            <div className="text-sm font-medium text-gray-900">
+                              {category.name}
+                            </div>
+                            {categorySubcategories.length > 0 && (
+                              <div className="ml-2">
+                                <span className="text-xs text-gray-600">Specializes in:</span>
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {categorySubcategories.slice(0, 2).map((subcategory: any, subIndex: number) => (
+                                    <span
+                                      key={subcategory.name || `sub-${subIndex}`}
+                                      className="inline-block bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full"
+                                    >
+                                      {subcategory.name}
+                                    </span>
+                                  ))}
+                                  {categorySubcategories.length > 2 && (
+                                    <span className="inline-block bg-gray-50 text-gray-600 text-xs px-2 py-1 rounded-full">
+                                      +{categorySubcategories.length - 2} more
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                      {hit.practice_categories.length > 2 && (
+                        <div className="text-xs text-gray-600">
+                          +{hit.practice_categories.length - 2} more categories
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Practice Areas - Legacy Display (Old Structure) */}
+                {!hit.practice_categories && hit.practice_areas && hit.practice_areas.length > 0 && (
                   <div className="mb-3">
                     <div className="flex flex-wrap gap-1">
                       {hit.practice_areas.slice(0, 3).map((area: any, index: number) => (

@@ -5,6 +5,7 @@ import { AttorneyCard } from '@/components/attorney/AttorneyCard';
 import { liteClient } from 'algoliasearch/lite';
 import { getUserLocation, calculateDistance, getRadiusOptions, UserLocation } from '@/lib/utils/geolocation';
 import { geocodeAddress, GeocodingResult } from '@/lib/utils/geocoding';
+import { detectUserLocation } from '@/lib/utils/ip-geolocation';
 
 interface SimpleAlgoliaSearchProps {
   searchParams: {
@@ -28,12 +29,39 @@ export function SimpleAlgoliaSearch({ searchParams }: SimpleAlgoliaSearchProps) 
   const [locationError, setLocationError] = useState<string | null>(null);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [isGeocoding, setIsGeocoding] = useState(false);
+  const [isDetectingIPLocation, setIsDetectingIPLocation] = useState(true);
+  const [ipLocationDetected, setIpLocationDetected] = useState(false);
 
   useEffect(() => {
     // Check if Algolia is configured
     const appId = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID;
     const searchKey = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY;
     setIsConfigured(!!(appId && searchKey));
+  }, []);
+
+  // Auto-detect user location from IP on page load
+  useEffect(() => {
+    const detectLocation = async () => {
+      try {
+        console.log('🌍 Auto-detecting user location from IP on search page...');
+        const ipLocation = await detectUserLocation();
+        
+        if (ipLocation.success && ipLocation.formatted_address) {
+          // Set the manual location field with the detected location
+          setManualLocation(ipLocation.formatted_address);
+          setIpLocationDetected(true);
+          console.log('✅ Auto-detected location on search page:', ipLocation.formatted_address);
+        } else {
+          console.log('⚠️ IP geolocation failed on search page, user can manually enter location');
+        }
+      } catch (error) {
+        console.error('❌ Error auto-detecting location on search page:', error);
+      } finally {
+        setIsDetectingIPLocation(false);
+      }
+    };
+
+    detectLocation();
   }, []);
 
   const handleGetLocation = async () => {
@@ -116,11 +144,21 @@ export function SimpleAlgoliaSearch({ searchParams }: SimpleAlgoliaSearchProps) 
             hitsPerPage: 20
           };
 
-          // Only add filters if we have them
-          const filters = [];
+          // Handle practice area search with fuzzy matching
           if (searchParams.practice_area) {
-            filters.push(`practice_areas.name:"${searchParams.practice_area}"`);
+            // Use fuzzy search for practice areas instead of exact filter
+            // This allows slug-based searches like "personal-injury" to match "Personal Injury"
+            if (query) {
+              // If both query and practice_area are provided, combine them
+              searchParams_algolia.query = `${query} ${searchParams.practice_area}`;
+            } else {
+              // If only practice_area is provided, use it as the query
+              searchParams_algolia.query = searchParams.practice_area;
+            }
           }
+          
+          // Only add exact filters for other criteria
+          const filters = [];
           if (searchParams.tier) {
             filters.push(`membership_tier:"${searchParams.tier}"`);
           }
@@ -131,7 +169,8 @@ export function SimpleAlgoliaSearch({ searchParams }: SimpleAlgoliaSearchProps) 
           // Add geo search if we have coordinates
           if (searchLocation && selectedRadius > 0) {
             // Convert radius from miles to meters (Algolia uses meters)
-            const radiusInMeters = Math.round(selectedRadius * 1609.34);
+            // Ensure we have a valid integer for aroundRadius
+            const radiusInMeters = Math.floor(selectedRadius * 1609.34);
             
             // Use Algolia's geo search with aroundLatLng
             searchParams_algolia.aroundLatLng = `${searchLocation.latitude},${searchLocation.longitude}`;
@@ -232,11 +271,13 @@ export function SimpleAlgoliaSearch({ searchParams }: SimpleAlgoliaSearchProps) 
               firm_logo_url: hit.firm_logo_url || null,
               membership_tier: hit.membership_tier || 'free',
               is_verified: hit.is_verified || false,
+              practice_categories: hit.practice_categories || [],
               practice_areas: (hit.practice_areas || []).map((area: any, index: number) => ({
                 id: area.id || area.slug || `practice-area-${index}`,
                 name: area.name || 'Unknown Practice Area',
                 slug: area.slug || area.name?.toLowerCase().replace(/\s+/g, '-') || 'unknown',
-                is_primary: area.is_primary || false
+                category_id: area.category_id || null,
+                category_name: area.category_name || null
               })),
               average_rating: hit.average_rating || null,
               review_count: hit.review_count || 0,
@@ -369,8 +410,8 @@ export function SimpleAlgoliaSearch({ searchParams }: SimpleAlgoliaSearchProps) 
                   type="text"
                   value={manualLocation}
                   onChange={(e) => handleManualLocation(e.target.value)}
-                  placeholder="City, state, or zip code (e.g., Charlotte, NC or 28202)"
-                  disabled={isGeocoding}
+                  placeholder={isDetectingIPLocation ? "Auto-detecting your location..." : "City, state, or zip code (e.g., Charlotte, NC or 28202)"}
+                  disabled={isGeocoding || isDetectingIPLocation}
                   className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
                 {isGeocoding && (
@@ -453,6 +494,8 @@ export function SimpleAlgoliaSearch({ searchParams }: SimpleAlgoliaSearchProps) 
                         </div>
                       ) : isGeocoding ? (
                         <p className="text-xs text-green-600">🔄 Geocoding...</p>
+                      ) : ipLocationDetected ? (
+                        <p className="text-xs text-green-600">✅ Auto-detected from your IP address</p>
                       ) : (
                         <p className="text-xs text-green-600">Manual location search</p>
                       )}
@@ -484,6 +527,13 @@ export function SimpleAlgoliaSearch({ searchParams }: SimpleAlgoliaSearchProps) 
               {locationError && (
                 <p className="text-sm text-red-600">{locationError}</p>
               )}
+
+              {/* Privacy Notice */}
+              <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-xs text-blue-700">
+                  We use your IP address to suggest nearby attorneys. You can change the location above.
+                </p>
+              </div>
             </div>
           </div>
         </div>

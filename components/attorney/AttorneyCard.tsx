@@ -76,22 +76,69 @@ export function AttorneyCard({ attorney }: AttorneyCardProps) {
                   <p className="text-sm text-gray-600 mb-2">{attorney.firm_name}</p>
                 )}
 
-                {/* Practice Areas */}
-                {attorney.practice_areas && attorney.practice_areas.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mb-2">
-                    {attorney.practice_areas.slice(0, 3).map((area, index) => (
-                      <span
-                        key={area.id || area.name || `practice-area-${index}`}
-                        className="inline-block bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full"
-                      >
-                        {area.name || 'Unknown Practice Area'}
-                      </span>
-                    ))}
-                    {attorney.practice_areas.length > 3 && (
-                      <span className="inline-block bg-gray-50 text-gray-600 text-xs px-2 py-1 rounded-full">
-                        +{attorney.practice_areas.length - 3} more
-                      </span>
+                {/* Practice Areas - Hierarchical Display (New Structure) */}
+                {(attorney as any).practice_categories && (attorney as any).practice_categories.length > 0 && (
+                  <div className="space-y-2 mb-2">
+                    {(attorney as any).practice_categories.slice(0, 2).map((category: any, categoryIndex: number) => {
+                      // Find subcategories for this category
+                      const categorySubcategories = attorney.practice_areas?.filter((pa: any) => 
+                        pa.category_id === category.id
+                      ) || [];
+                      
+                      return (
+                        <div key={category.id || `category-${categoryIndex}`} className="space-y-1">
+                          <div className="font-medium text-gray-900 text-sm">
+                            {category.name}
+                          </div>
+                          {categorySubcategories.length > 0 && (
+                            <div className="ml-2">
+                              <span className="text-xs text-gray-600">Specializes in:</span>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {categorySubcategories.slice(0, 2).map((subcategory: any, subIndex: number) => (
+                                  <span
+                                    key={subcategory.id || `sub-${subIndex}`}
+                                    className="inline-block bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full"
+                                  >
+                                    {subcategory.name}
+                                  </span>
+                                ))}
+                                {categorySubcategories.length > 2 && (
+                                  <span className="inline-block bg-gray-50 text-gray-600 text-xs px-2 py-1 rounded-full">
+                                    +{categorySubcategories.length - 2} more
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                    {(attorney as any).practice_categories.length > 2 && (
+                      <div className="text-xs text-gray-600">
+                        +{(attorney as any).practice_categories.length - 2} more categories
+                      </div>
                     )}
+                  </div>
+                )}
+
+                {/* Practice Areas - Legacy Display (Old Structure) */}
+                {!(attorney as any).practice_categories && attorney.practice_areas && attorney.practice_areas.length > 0 && (
+                  <div className="mb-2">
+                    <div className="flex flex-wrap gap-1">
+                      {attorney.practice_areas.slice(0, 3).map((area, index) => (
+                        <span
+                          key={area.id || `practice-area-${index}`}
+                          className="inline-block bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full"
+                        >
+                          {area.name || 'Unknown Practice Area'}
+                        </span>
+                      ))}
+                      {attorney.practice_areas.length > 3 && (
+                        <span className="inline-block bg-gray-50 text-gray-600 text-xs px-2 py-1 rounded-full">
+                          +{attorney.practice_areas.length - 3} more
+                        </span>
+                      )}
+                    </div>
                   </div>
                 )}
 

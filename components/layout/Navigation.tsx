@@ -53,7 +53,7 @@ export function Navigation() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-4">
+            <div className="ml-10 flex items-center space-x-4">
               <Link
                 href="/search"
                 className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium flex items-center"
@@ -62,12 +62,14 @@ export function Navigation() {
                 Find Attorneys
               </Link>
               
-              <Link
-                href="/register"
-                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                Attorney Registration
-              </Link>
+              {!user && (
+                <Link
+                  href="/register"
+                  className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Attorney Registration
+                </Link>
+              )}
             </div>
           </div>
 
@@ -167,13 +169,15 @@ export function Navigation() {
               Find Attorneys
             </Link>
             
-            <Link
-              href="/attorney/join"
-              className="text-gray-600 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium"
-              onClick={() => setIsOpen(false)}
-            >
-              Join as Attorney
-            </Link>
+            {!user && (
+              <Link
+                href="/attorney/join"
+                className="text-gray-600 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium"
+                onClick={() => setIsOpen(false)}
+              >
+                Join as Attorney
+              </Link>
+            )}
 
             {user ? (
               <>

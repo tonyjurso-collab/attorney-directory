@@ -1,29 +1,70 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MapPin, Search, Users, Star } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { MapPin, Search } from 'lucide-react';
 import { getUserLocation } from '@/lib/utils/geolocation';
-import { LocationData } from '@/lib/types/database';
+import { detectUserLocation } from '@/lib/utils/ip-geolocation';
 
 export function HeroSection() {
-  const [location, setLocation] = useState<LocationData | null>(null);
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [location, setLocation] = useState('');
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const [isDetectingIPLocation, setIsDetectingIPLocation] = useState(true);
+  const [locationDetected, setLocationDetected] = useState(false);
 
+  // Automatically detect user location on page load
   useEffect(() => {
-    const fetchLocation = async () => {
-      setIsLoadingLocation(true);
+    const detectLocation = async () => {
       try {
-        const currentLocation = await getUserLocation();
-        setLocation(currentLocation);
+        console.log('🌍 Auto-detecting user location from IP...');
+        const ipLocation = await detectUserLocation();
+        
+        if (ipLocation.success && ipLocation.formatted_address) {
+          setLocation(ipLocation.formatted_address);
+          setLocationDetected(true);
+          console.log('✅ Auto-detected location:', ipLocation.formatted_address);
+        } else {
+          console.log('⚠️ IP geolocation failed, user can manually enter location');
+        }
       } catch (error) {
-        console.error('Error getting location:', error);
+        console.error('❌ Error auto-detecting location:', error);
       } finally {
-        setIsLoadingLocation(false);
+        setIsDetectingIPLocation(false);
       }
     };
 
-    fetchLocation();
+    detectLocation();
   }, []);
+
+  const handleLocationClick = async () => {
+    setIsLoadingLocation(true);
+    try {
+      const currentLocation = await getUserLocation();
+      if (currentLocation) {
+        const locationString = currentLocation.city && currentLocation.state 
+          ? `${currentLocation.city}, ${currentLocation.state}`
+          : 'Current Location';
+        setLocation(locationString);
+      }
+    } catch (error) {
+      console.error('Error getting location:', error);
+    } finally {
+      setIsLoadingLocation(false);
+    }
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const params = new URLSearchParams();
+    
+    if (searchQuery) params.set('q', searchQuery);
+    if (location) params.set('location', location);
+    
+    router.push(`/search?${params.toString()}`);
+  };
 
   return (
     <section className="relative bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-white">
@@ -47,49 +88,78 @@ export function HeroSection() {
             Get matched with attorneys who specialize in your specific needs.
           </p>
 
-          {/* Location Display */}
-          <div className="flex items-center justify-center gap-2 mb-8">
-            <MapPin className="h-5 w-5 text-blue-300" />
-            {isLoadingLocation ? (
-              <span className="text-blue-200">Detecting your location...</span>
-            ) : location ? (
-              <span className="text-blue-200">
-                {location.city && location.state 
-                  ? `${location.city}, ${location.state}`
-                  : 'Location detected'
-                }
-              </span>
-            ) : (
-              <span className="text-blue-200">Enter your location to get started</span>
-            )}
+          {/* Search Form */}
+          <div className="max-w-4xl mx-auto mb-8">
+            <form onSubmit={handleSearch} className="space-y-4">
+              {/* Main Search Input */}
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Search className="h-6 w-6 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search for attorneys, firms, or legal services..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="block w-full pl-12 pr-4 py-4 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg text-gray-900"
+                />
+              </div>
+
+              {/* Location Input */}
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <MapPin className="h-6 w-6 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  placeholder={isDetectingIPLocation ? "Detecting your location..." : "City, State, or ZIP Code"}
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  disabled={isDetectingIPLocation}
+                  className="block w-full pl-12 pr-24 py-4 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+                <button
+                  type="button"
+                  onClick={handleLocationClick}
+                  disabled={isLoadingLocation || isDetectingIPLocation}
+                  className="absolute inset-y-0 right-0 px-4 flex items-center text-sm text-blue-600 hover:text-blue-800 disabled:opacity-50 font-medium"
+                >
+                  {isDetectingIPLocation ? 'Auto-detecting...' : isLoadingLocation ? 'Detecting...' : 'Use My Location'}
+                </button>
+              </div>
+
+              {/* Location Detection Success Message */}
+              {locationDetected && (
+                <div className="text-center">
+                  <p className="text-sm text-green-200 flex items-center justify-center">
+                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    Location auto-detected! Showing attorneys near you.
+                  </p>
+                </div>
+              )}
+
+              {/* Privacy Notice */}
+              <div className="text-center">
+                <p className="text-xs text-blue-200">
+                  We use your IP address to suggest nearby attorneys. You can change the location above.
+                </p>
+              </div>
+
+              {/* Search Button */}
+              <div className="flex justify-center">
+                <button
+                  type="submit"
+                  className="inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                >
+                  <Search className="h-5 w-5 mr-2" />
+                  Find Attorneys
+                </button>
+              </div>
+            </form>
           </div>
 
-          {/* Quick Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-2xl mx-auto">
-            <div className="text-center">
-              <div className="flex items-center justify-center mb-2">
-                <Users className="h-8 w-8 text-blue-300" />
-              </div>
-              <div className="text-2xl font-bold">500+</div>
-              <div className="text-blue-200">Qualified Attorneys</div>
-            </div>
-            
-            <div className="text-center">
-              <div className="flex items-center justify-center mb-2">
-                <Search className="h-8 w-8 text-blue-300" />
-              </div>
-              <div className="text-2xl font-bold">50+</div>
-              <div className="text-blue-200">Practice Areas</div>
-            </div>
-            
-            <div className="text-center">
-              <div className="flex items-center justify-center mb-2">
-                <Star className="h-8 w-8 text-blue-300" />
-              </div>
-              <div className="text-2xl font-bold">4.8</div>
-              <div className="text-blue-200">Average Rating</div>
-            </div>
-          </div>
         </div>
       </div>
     </section>
