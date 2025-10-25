@@ -39,12 +39,12 @@ export function AttorneyCard({ attorney }: AttorneyCardProps) {
             {attorney.profile_image_url ? (
               <img
                 src={attorney.profile_image_url}
-                alt={`${attorney.first_name} ${attorney.last_name}`}
+                alt={`${attorney.first_name || ''} ${attorney.last_name || ''}`.trim() || 'Attorney profile'}
                 className="w-16 h-16 rounded-full object-cover"
               />
             ) : (
               <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg">
-                {attorney.first_name[0]}{attorney.last_name[0]}
+                {(attorney.first_name?.[0] || '')}{(attorney.last_name?.[0] || '')}
               </div>
             )}
           </div>
@@ -77,21 +77,23 @@ export function AttorneyCard({ attorney }: AttorneyCardProps) {
                 )}
 
                 {/* Practice Areas */}
-                <div className="flex flex-wrap gap-1 mb-2">
-                  {attorney.practice_areas.slice(0, 3).map((area) => (
-                    <span
-                      key={area.id}
-                      className="inline-block bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full"
-                    >
-                      {area.name}
-                    </span>
-                  ))}
-                  {attorney.practice_areas.length > 3 && (
-                    <span className="inline-block bg-gray-50 text-gray-600 text-xs px-2 py-1 rounded-full">
-                      +{attorney.practice_areas.length - 3} more
-                    </span>
-                  )}
-                </div>
+                {attorney.practice_areas && attorney.practice_areas.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {attorney.practice_areas.slice(0, 3).map((area, index) => (
+                      <span
+                        key={area.id || area.name || `practice-area-${index}`}
+                        className="inline-block bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full"
+                      >
+                        {area.name || 'Unknown Practice Area'}
+                      </span>
+                    ))}
+                    {attorney.practice_areas.length > 3 && (
+                      <span className="inline-block bg-gray-50 text-gray-600 text-xs px-2 py-1 rounded-full">
+                        +{attorney.practice_areas.length - 3} more
+                      </span>
+                    )}
+                  </div>
+                )}
 
                 {/* Location */}
                 {attorney.city && attorney.state && (

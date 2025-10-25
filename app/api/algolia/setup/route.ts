@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { algoliasearch } from 'algoliasearch';
 
 export async function POST(request: NextRequest) {
   try {
     // Initialize Algolia client
+    const { algoliasearch } = await import('algoliasearch');
     const client = algoliasearch(
       process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
       process.env.ALGOLIA_ADMIN_API_KEY!

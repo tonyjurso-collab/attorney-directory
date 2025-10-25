@@ -3,14 +3,11 @@ import { createClient } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('🔄 Starting manual index sync...');
+    
     const supabase = await createClient();
     
-    // Check if Supabase is properly configured
-    if (!supabase || typeof supabase.from !== 'function') {
-      return NextResponse.json({ error: 'Supabase not configured' }, { status: 500 });
-    }
-
-    // Get all active attorneys with their practice areas
+    // Get all active attorneys with practice areas
     const { data: attorneys, error } = await supabase
       .from('attorneys')
       .select(`
@@ -37,6 +34,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'No attorneys found to index' }, { status: 200 });
     }
 
+    console.log(`📊 Found ${attorneys.length} attorneys in Supabase`);
+
     // Transform the data to match our component expectations
     const transformedAttorneys = attorneys.map((attorney: any) => ({
       ...attorney,
@@ -48,14 +47,6 @@ export async function POST(request: NextRequest) {
         is_primary: apa.is_primary,
       })).filter(pa => pa.id) || [],
     }));
-
-    // Initialize Algolia client
-    const { algoliasearch } = await import('algoliasearch');
-    const client = algoliasearch(
-      process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
-      process.env.ALGOLIA_ADMIN_API_KEY!
-    );
-    const index = client.initIndex('attorneys');
 
     // Transform attorneys for Algolia
     const algoliaAttorneys = transformedAttorneys.map(attorney => ({
@@ -89,15 +80,25 @@ export async function POST(request: NextRequest) {
       } : undefined,
     }));
 
-    // Index attorneys to Algolia
-    await index.saveObjects(algoliaAttorneys);
+    console.log(`📤 Prepared ${algoliaAttorneys.length} attorneys for indexing`);
 
+    // Return the prepared data for manual indexing
     return NextResponse.json({ 
-      message: `Successfully indexed ${transformedAttorneys.length} attorneys`,
-      count: transformedAttorneys.length
+      message: `Prepared ${algoliaAttorneys.length} attorneys for indexing`,
+      count: algoliaAttorneys.length,
+      attorneys: algoliaAttorneys,
+      summary: {
+        total: algoliaAttorneys.length,
+        withGeo: algoliaAttorneys.filter(a => a._geoloc).length,
+        withoutGeo: algoliaAttorneys.filter(a => !a._geoloc).length,
+        withPracticeAreas: algoliaAttorneys.filter(a => a.practice_areas.length > 0).length
+      }
     });
   } catch (error) {
-    console.error('Error in index route:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('Error in manual index route:', error);
+    return NextResponse.json({ 
+      error: 'Internal server error', 
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
   }
 }

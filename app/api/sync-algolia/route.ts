@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { attorneysAdminIndex } from '@/lib/algolia/server';
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('🔄 Starting Algolia sync...');
+    
     const supabase = await createClient();
     
-    // Check if Supabase is properly configured
-    if (!supabase || typeof supabase.from !== 'function') {
-      return NextResponse.json({ error: 'Supabase not configured' }, { status: 500 });
-    }
-
     // Get all active attorneys with their practice areas
     const { data: attorneys, error } = await supabase
       .from('attorneys')
@@ -30,12 +28,14 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Error fetching attorneys:', error);
-      return NextResponse.json({ error: 'Failed to fetch attorneys' }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to fetch attorneys', details: error }, { status: 500 });
     }
 
     if (!attorneys || attorneys.length === 0) {
-      return NextResponse.json({ message: 'No attorneys found to index' }, { status: 200 });
+      return NextResponse.json({ message: 'No attorneys found to sync' }, { status: 200 });
     }
+
+    console.log(`📊 Found ${attorneys.length} attorneys in Supabase`);
 
     // Transform the data to match our component expectations
     const transformedAttorneys = attorneys.map((attorney: any) => ({
@@ -49,13 +49,10 @@ export async function POST(request: NextRequest) {
       })).filter(pa => pa.id) || [],
     }));
 
-    // Initialize Algolia client
-    const { algoliasearch } = await import('algoliasearch');
-    const client = algoliasearch(
-      process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
-      process.env.ALGOLIA_ADMIN_API_KEY!
-    );
-    const index = client.initIndex('attorneys');
+    // Use existing Algolia index
+    if (!attorneysAdminIndex) {
+      return NextResponse.json({ error: 'Algolia not configured' }, { status: 500 });
+    }
 
     // Transform attorneys for Algolia
     const algoliaAttorneys = transformedAttorneys.map(attorney => ({
@@ -89,15 +86,24 @@ export async function POST(request: NextRequest) {
       } : undefined,
     }));
 
+    console.log(`📤 Syncing ${algoliaAttorneys.length} attorneys to Algolia...`);
+
     // Index attorneys to Algolia
-    await index.saveObjects(algoliaAttorneys);
+    await attorneysAdminIndex.saveObjects(algoliaAttorneys);
+
+    console.log('✅ Successfully synced attorneys to Algolia');
 
     return NextResponse.json({ 
-      message: `Successfully indexed ${transformedAttorneys.length} attorneys`,
-      count: transformedAttorneys.length
+      message: `Successfully synced ${transformedAttorneys.length} attorneys to Algolia`,
+      count: transformedAttorneys.length,
+      attorneys: algoliaAttorneys.map(a => ({ id: a.objectID, name: a.name, city: a.city, state: a.state }))
     });
   } catch (error) {
-    console.error('Error in index route:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('Error in sync route:', error);
+    return NextResponse.json({ 
+      error: 'Internal server error', 
+      details: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    }, { status: 500 });
   }
 }

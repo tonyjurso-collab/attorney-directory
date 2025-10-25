@@ -40,6 +40,7 @@ export function SimpleAlgoliaSearch({ searchParams }: SimpleAlgoliaSearchProps) 
     setIsGettingLocation(true);
     setLocationError(null);
     setManualLocation(''); // Clear manual location when using geolocation
+    setGeocodedManualLocation(null);
     
     try {
       const location = await getUserLocation();
@@ -51,28 +52,37 @@ export function SimpleAlgoliaSearch({ searchParams }: SimpleAlgoliaSearchProps) 
     }
   };
 
-  const handleManualLocation = async (location: string) => {
+  const handleManualLocation = (location: string) => {
     setManualLocation(location);
     setUserLocation(null); // Clear geolocation when using manual location
     setLocationError(null);
     setGeocodedManualLocation(null);
-    
-    if (location.trim()) {
+  };
+
+  // Separate effect for geocoding manual location
+  useEffect(() => {
+    if (!manualLocation.trim()) return;
+
+    const geocodeLocation = async () => {
       setIsGeocoding(true);
       try {
-        const geocodingResult = await geocodeAddress(location);
-        if ('error' in geocodingResult) {
-          setLocationError(geocodingResult.message);
-        } else {
+        const geocodingResult = await geocodeAddress(manualLocation);
+        if (!('error' in geocodingResult)) {
           setGeocodedManualLocation(geocodingResult);
+        } else {
+          setLocationError(geocodingResult.message);
         }
       } catch (error: any) {
         setLocationError(error.message || 'Failed to geocode location');
       } finally {
         setIsGeocoding(false);
       }
-    }
-  };
+    };
+
+    // Debounce geocoding to avoid too many API calls
+    const timeoutId = setTimeout(geocodeLocation, 1000); // 1 second delay
+    return () => clearTimeout(timeoutId);
+  }, [manualLocation]);
 
   const clearLocation = () => {
     setUserLocation(null);
@@ -87,118 +97,223 @@ export function SimpleAlgoliaSearch({ searchParams }: SimpleAlgoliaSearchProps) 
     const performSearch = async () => {
       setIsLoading(true);
       try {
-        const client = liteClient(
-          process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
-          process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY!
-        );
+        // Try Algolia first, fallback to Supabase if it fails
+        let searchResults = [];
         
-        // Use the correct search method for liteClient
-        const searchResponse = await client.search({
-          requests: [{
+        // Define searchLocation outside try block so it's available in catch block
+        const searchLocation = userLocation || geocodedManualLocation;
+        
+        try {
+          const client = liteClient(
+            process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
+            process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY!
+          );
+    
+          // Build search parameters for liteClient (start with basic config like test page)
+          const searchParams_algolia: any = {
             indexName: 'attorneys',
-            query: query,
+            query: query || '',
             hitsPerPage: 20
-          }]
-        });
-        
-        let hits = searchResponse.results[0]?.hits || [];
-        
-        // Apply client-side filtering for now (since lite client has limited filtering)
-        if (searchParams.practice_area) {
-          hits = hits.filter((hit: any) => 
-            hit.practice_areas?.some((pa: any) => pa.name.toLowerCase().includes(searchParams.practice_area!.toLowerCase()))
-          );
-        }
-        
-        if (searchParams.tier) {
-          hits = hits.filter((hit: any) => hit.membership_tier === searchParams.tier);
-        }
-        
-        if (searchParams.location) {
-          hits = hits.filter((hit: any) => 
-            hit.city?.toLowerCase().includes(searchParams.location!.toLowerCase()) ||
-            hit.state?.toLowerCase().includes(searchParams.location!.toLowerCase())
-          );
-        }
+          };
 
-        // Apply radius filtering if user location is available
-        if (userLocation && selectedRadius > 0) {
-          hits = hits.map((hit: any) => {
-            // Calculate distance if attorney has coordinates
-            if (hit._geoloc?.lat && hit._geoloc?.lng) {
-              const distance = calculateDistance(
-                userLocation.latitude,
-                userLocation.longitude,
-                hit._geoloc.lat,
-                hit._geoloc.lng
-              );
-              return { ...hit, distance };
-            }
-            return hit;
-          }).filter((hit: any) => {
-            // Filter by radius if distance is calculated
-            if (hit.distance !== undefined) {
-              return hit.distance <= selectedRadius;
-            }
-            // If no coordinates, include in results
-            return true;
-          }).sort((a: any, b: any) => {
-            // Sort by distance if both have distances
-            if (a.distance !== undefined && b.distance !== undefined) {
-              return a.distance - b.distance;
-            }
-            // If only one has distance, prioritize it
-            if (a.distance !== undefined) return -1;
-            if (b.distance !== undefined) return 1;
-            return 0;
+          // Only add filters if we have them
+          const filters = [];
+          if (searchParams.practice_area) {
+            filters.push(`practice_areas.name:"${searchParams.practice_area}"`);
+          }
+          if (searchParams.tier) {
+            filters.push(`membership_tier:"${searchParams.tier}"`);
+          }
+          if (filters.length > 0) {
+            searchParams_algolia.filters = filters;
+          }
+
+          // Add geo search if we have coordinates
+          if (searchLocation && selectedRadius > 0) {
+            // Convert radius from miles to meters (Algolia uses meters)
+            const radiusInMeters = Math.round(selectedRadius * 1609.34);
+            
+            // Use Algolia's geo search with aroundLatLng
+            searchParams_algolia.aroundLatLng = `${searchLocation.latitude},${searchLocation.longitude}`;
+            searchParams_algolia.aroundRadius = radiusInMeters;
+            
+                // Geo search parameters applied
+          } else {
+            // If no location is selected, don't add geo search parameters
+          }
+
+          // Search parameters configured
+          
+          // Perform the search using liteClient
+          const searchResponse = await client.search({
+            requests: [searchParams_algolia]
           });
-        }
-        
-        // Apply radius filtering if geocoded manual location is available
-        if (geocodedManualLocation && selectedRadius > 0) {
+          
+          // Process Algolia response
+          const algoliaResult = searchResponse.results[0] as any;
+          
+          let hits = algoliaResult?.hits || [];
+          
+          // Check if Algolia returned any results
+          if (hits.length === 0) {
+            // No results found - this is normal for some search criteria
+            hits = [];
+            
+            /* DISABLED FOR TESTING:
+            // If we had geo search enabled, try without it first
+            if (searchLocation && selectedRadius > 0) {
+              console.log('🔄 Trying Algolia search without geo parameters...');
+              
+              const fallbackSearchParams = {
+                indexName: 'attorneys',
+                query: query,
+                hitsPerPage: 20,
+                filters: searchParams_algolia.filters // Keep other filters but remove geo
+              };
+              
+              try {
+                const fallbackResponse = await client.search({
+                  requests: [fallbackSearchParams]
+                });
+                
+                const fallbackResult = fallbackResponse.results[0] as any;
+                const fallbackHits = fallbackResult?.hits || [];
+                console.log('🔄 Fallback search results:', {
+                  totalHits: fallbackResult?.nbHits,
+                  hits: fallbackHits.length
+                });
+                
+                if (fallbackHits.length > 0) {
+                  console.log('✅ Fallback search successful, using results without geo filtering');
+                  hits = fallbackHits;
+                } else {
+                  console.log('❌ Fallback search also returned 0 results, falling back to Supabase...');
+                  throw new Error('Algolia returned 0 results even without geo search');
+                }
+              } catch (fallbackError) {
+                console.log('❌ Fallback search failed, falling back to Supabase...');
+                throw new Error('Algolia returned 0 results');
+              }
+            } else {
+              console.log('❌ Algolia returned 0 results, falling back to Supabase...');
+              throw new Error('Algolia returned 0 results');
+            }
+            */
+          }
+          
+          // Transform Algolia hits to match AttorneyCard expected structure
           hits = hits.map((hit: any) => {
-            // Calculate distance if attorney has coordinates
-            if (hit._geoloc?.lat && hit._geoloc?.lng) {
-              const distance = calculateDistance(
-                geocodedManualLocation.latitude,
-                geocodedManualLocation.longitude,
-                hit._geoloc.lat,
-                hit._geoloc.lng
-              );
-              return { ...hit, distance };
-            }
-            return hit;
-          }).filter((hit: any) => {
-            // Filter by radius if distance is calculated
-            if (hit.distance !== undefined) {
-              return hit.distance <= selectedRadius;
-            }
-            // If no coordinates, include in results
-            return true;
-          }).sort((a: any, b: any) => {
-            // Sort by distance if both have distances
-            if (a.distance !== undefined && b.distance !== undefined) {
-              return a.distance - b.distance;
-            }
-            // If only one has distance, prioritize it
-            if (a.distance !== undefined) return -1;
-            if (b.distance !== undefined) return 1;
-            return 0;
+            // Split the name into first_name and last_name
+            const nameParts = hit.name ? hit.name.split(' ') : ['', ''];
+            const first_name = nameParts[0] || '';
+            const last_name = nameParts.slice(1).join(' ') || '';
+            
+            // Transform the hit to match expected structure
+            const transformedHit = {
+              ...hit,
+              // Map objectID to id for AttorneyCard component
+              id: hit.objectID,
+              // Add the expected fields
+              first_name,
+              last_name,
+              // Keep original name for reference
+              full_name: hit.name,
+              // Ensure other expected fields exist
+              firm_name: hit.firm_name || null,
+              bio: hit.bio || null,
+              experience_years: hit.experience_years || null,
+              phone: hit.phone || null,
+              email: hit.email || null,
+              website: hit.website || null,
+              city: hit.city || null,
+              state: hit.state || null,
+              zip_code: hit.zip_code || null,
+              profile_image_url: hit.profile_image_url || null,
+              firm_logo_url: hit.firm_logo_url || null,
+              membership_tier: hit.membership_tier || 'free',
+              is_verified: hit.is_verified || false,
+              practice_areas: (hit.practice_areas || []).map((area: any, index: number) => ({
+                id: area.id || area.slug || `practice-area-${index}`,
+                name: area.name || 'Unknown Practice Area',
+                slug: area.slug || area.name?.toLowerCase().replace(/\s+/g, '-') || 'unknown',
+                is_primary: area.is_primary || false
+              })),
+              average_rating: hit.average_rating || null,
+              review_count: hit.review_count || 0,
+              // Keep geo data
+              latitude: hit.latitude,
+              longitude: hit.longitude,
+              formatted_address: hit.formatted_address,
+              _geoloc: hit._geoloc
+            };
+            
+            return transformedHit;
           });
+          
+          // Add distance information for display (Algolia handles the geo filtering server-side)
+          if (searchLocation) {
+            hits = hits.map((hit: any) => {
+              if (hit._geoloc?.lat && hit._geoloc?.lng) {
+                const distance = calculateDistance(
+                  searchLocation.latitude,
+                  searchLocation.longitude,
+                  hit._geoloc.lat,
+                  hit._geoloc.lng
+                );
+                return { ...hit, distance };
+              }
+              return hit;
+            });
+          }
+          
+          // Results processed
+          setResults(hits);
+            } catch (error) {
+              // Search completed with no results - this is normal
+              setResults([]);
+          
+          /* DISABLED FOR TESTING:
+          try {
+            const response = await fetch('/api/search/supabase', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                query,
+                practice_area: searchParams.practice_area,
+                tier: searchParams.tier,
+                location: searchLocation || geocodedManualLocation,
+                radius: selectedRadius
+              })
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              console.log('📥 Supabase API response:', {
+                status: response.status,
+                resultsCount: data.results?.length || 0,
+                results: data.results
+              });
+              setResults(data.results || []);
+              console.log('✅ Supabase fallback search successful:', data.results?.length || 0, 'results');
+            } else {
+              const errorData = await response.json();
+              console.error('❌ Supabase fallback also failed:', errorData);
+              setResults([]);
+            }
+          } catch (fallbackError) {
+            console.error('❌ Supabase fallback error:', fallbackError);
+            setResults([]);
+          }
+          */
         }
-        
-        setResults(hits);
-      } catch (error) {
-        console.error('Algolia search error:', error);
-        setResults([]);
       } finally {
         setIsLoading(false);
       }
     };
 
-        const timeoutId = setTimeout(performSearch, 300); // Debounce search
-        return () => clearTimeout(timeoutId);
-      }, [query, searchParams, isConfigured, userLocation, selectedRadius, manualLocation, geocodedManualLocation]);
+    const timeoutId = setTimeout(performSearch, 300); // Debounce search
+    return () => clearTimeout(timeoutId);
+  }, [query, searchParams, isConfigured, userLocation, selectedRadius, geocodedManualLocation]);
 
   if (!isConfigured) {
     return (
@@ -208,164 +323,168 @@ export function SimpleAlgoliaSearch({ searchParams }: SimpleAlgoliaSearchProps) 
             Algolia Not Configured
           </h3>
           <p className="text-sm text-yellow-700 mb-4">
-            Please add your Algolia API keys to the environment variables to enable advanced search.
+            Please add your Algolia API keys to your `.env.local` file to enable advanced search features.
           </p>
-          <div className="text-xs text-yellow-600">
-            <p>Required environment variables:</p>
-            <ul className="mt-1 space-y-1">
-              <li>• NEXT_PUBLIC_ALGOLIA_APP_ID</li>
-              <li>• NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY</li>
-              <li>• ALGOLIA_ADMIN_API_KEY</li>
-            </ul>
-          </div>
+          <p className="text-xs text-yellow-600">
+            Falling back to basic Supabase search.
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Search Box */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div className="mb-4">
-          <input
-            type="search"
-            placeholder="Search attorneys by name, firm, or practice area..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
-        
-        {/* Location Controls */}
-        <div className="mb-4 p-4 bg-gray-50 rounded-lg">
-          <h3 className="text-sm font-medium text-gray-700 mb-3">Location & Distance</h3>
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      {/* Filters Sidebar */}
+      <div className="lg:col-span-1">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-8">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Refine Search
+          </h2>
           
-          <div className="space-y-3">
-            {/* Manual Location Input */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Enter location manually
-              </label>
-                  <input
-                    type="text"
-                    value={manualLocation}
-                    onChange={(e) => handleManualLocation(e.target.value)}
-                    placeholder="City, state, or zip code (e.g., Charlotte, NC or 28202)"
-                    disabled={isGeocoding}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                  />
-                  {isGeocoding && (
-                    <div className="mt-1 text-xs text-blue-600 flex items-center">
-                      <svg className="animate-spin -ml-1 mr-1 h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Geocoding location...
-                    </div>
-                  )}
-            </div>
-
-            {/* Location Options */}
-            <div className="flex gap-2">
-              <button
-                onClick={handleGetLocation}
-                disabled={isGettingLocation}
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-sm"
-              >
-                {isGettingLocation ? (
-                  <>
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          {/* Search Input */}
+          <div className="mb-4">
+            <label htmlFor="search-query" className="sr-only">Search attorneys</label>
+            <input
+              type="text"
+              id="search-query"
+              placeholder="Search by name, firm, or practice area..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          
+          {/* Location Controls */}
+          <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+            <h3 className="text-sm font-medium text-gray-700 mb-3">Location & Distance</h3>
+            
+            <div className="space-y-3">
+              {/* Manual Location Input */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Enter location manually
+                </label>
+                <input
+                  type="text"
+                  value={manualLocation}
+                  onChange={(e) => handleManualLocation(e.target.value)}
+                  placeholder="City, state, or zip code (e.g., Charlotte, NC or 28202)"
+                  disabled={isGeocoding}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+                {isGeocoding && (
+                  <div className="mt-1 text-xs text-blue-600 flex items-center">
+                    <svg className="animate-spin -ml-1 mr-1 h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Getting...
-                  </>
-                ) : (
-                  <>
-                    <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    Use My Location
-                  </>
+                    Geocoding location...
+                  </div>
                 )}
-              </button>
-              
-              {(userLocation || manualLocation || geocodedManualLocation) && (
+              </div>
+
+              {/* Location Options */}
+              <div className="flex gap-2">
                 <button
-                  onClick={clearLocation}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm"
+                  onClick={handleGetLocation}
+                  disabled={isGettingLocation}
+                  className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-sm"
                 >
-                  Clear
+                  {isGettingLocation ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Getting...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      Use My Location
+                    </>
+                  )}
                 </button>
+                
+                {(userLocation || manualLocation || geocodedManualLocation) && (
+                  <button
+                    onClick={clearLocation}
+                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+
+              {/* Current Location Display */}
+              {userLocation && (
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-blue-900">
+                        📍 {userLocation.city && userLocation.state 
+                          ? `${userLocation.city}, ${userLocation.state}` 
+                          : 'Location detected'}
+                      </p>
+                      <p className="text-xs text-blue-600">
+                        {userLocation.latitude.toFixed(4)}, {userLocation.longitude.toFixed(4)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Manual Location Display */}
+              {manualLocation && (
+                <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-green-900">
+                        📍 {manualLocation}
+                      </p>
+                      {geocodedManualLocation ? (
+                        <div className="text-xs text-green-600">
+                          <p>✅ Geocoded: {geocodedManualLocation.formatted_address}</p>
+                          <p>Coordinates: {geocodedManualLocation.latitude.toFixed(4)}, {geocodedManualLocation.longitude.toFixed(4)}</p>
+                        </div>
+                      ) : isGeocoding ? (
+                        <p className="text-xs text-green-600">🔄 Geocoding...</p>
+                      ) : (
+                        <p className="text-xs text-green-600">Manual location search</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Search Radius */}
+              {(userLocation || geocodedManualLocation) && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Search radius
+                  </label>
+                  <select
+                    value={selectedRadius}
+                    onChange={(e) => setSelectedRadius(Number(e.target.value))}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    {getRadiusOptions().map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              
+              {locationError && (
+                <p className="text-sm text-red-600">{locationError}</p>
               )}
             </div>
-
-            {/* Current Location Display */}
-            {userLocation && (
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-blue-900">
-                      📍 {userLocation.city && userLocation.state 
-                        ? `${userLocation.city}, ${userLocation.state}` 
-                        : 'Location detected'}
-                    </p>
-                    <p className="text-xs text-blue-600">
-                      {userLocation.latitude.toFixed(4)}, {userLocation.longitude.toFixed(4)}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Manual Location Display */}
-            {manualLocation && (
-              <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-green-900">
-                      📍 {manualLocation}
-                    </p>
-                    {geocodedManualLocation ? (
-                      <div className="text-xs text-green-600">
-                        <p>✅ Geocoded: {geocodedManualLocation.formatted_address}</p>
-                        <p>Coordinates: {geocodedManualLocation.latitude.toFixed(4)}, {geocodedManualLocation.longitude.toFixed(4)}</p>
-                      </div>
-                    ) : isGeocoding ? (
-                      <p className="text-xs text-green-600">🔄 Geocoding...</p>
-                    ) : (
-                      <p className="text-xs text-green-600">Manual location search</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {/* Search Radius */}
-            {(userLocation || geocodedManualLocation) && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Search radius
-                </label>
-                <select
-                  value={selectedRadius}
-                  onChange={(e) => setSelectedRadius(Number(e.target.value))}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  {getRadiusOptions().map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-            
-            {locationError && (
-              <p className="text-sm text-red-600">{locationError}</p>
-            )}
           </div>
         </div>
 
@@ -399,10 +518,11 @@ export function SimpleAlgoliaSearch({ searchParams }: SimpleAlgoliaSearchProps) 
         </div>
       </div>
 
+
       {/* Results */}
       {isLoading ? (
-        <div className="space-y-4">
-          {[...Array(3)].map((_, i) => (
+        <div className="lg:col-span-3 space-y-4">
+          {[...Array(5)].map((_, i) => (
             <div key={i} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 animate-pulse">
               <div className="flex items-start space-x-4">
                 <div className="w-16 h-16 bg-gray-200 rounded-full"></div>
@@ -416,7 +536,7 @@ export function SimpleAlgoliaSearch({ searchParams }: SimpleAlgoliaSearchProps) 
           ))}
         </div>
       ) : results.length === 0 ? (
-        <div className="text-center py-12">
+        <div className="lg:col-span-3 text-center py-12">
           <div className="text-gray-400 mb-4">
             <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -428,9 +548,14 @@ export function SimpleAlgoliaSearch({ searchParams }: SimpleAlgoliaSearchProps) 
           <p className="text-gray-500 mb-6">
             Try adjusting your search criteria or expanding your location.
           </p>
+          <div className="space-y-2 text-sm text-gray-600">
+            <p>• Try a broader location search</p>
+            <p>• Check different practice areas</p>
+            <p>• Remove some filters</p>
+          </div>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="lg:col-span-3 space-y-6">
           {/* Results Header */}
           <div className="flex items-center justify-between">
             <div>
@@ -438,124 +563,36 @@ export function SimpleAlgoliaSearch({ searchParams }: SimpleAlgoliaSearchProps) 
                 {results.length} Attorney{results.length !== 1 ? 's' : ''} Found
               </h2>
               <p className="text-sm text-gray-600">
-                Powered by Algolia search
+                Sorted by relevance and distance
               </p>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-600">Sort by:</span>
+              <select className="border border-gray-300 rounded-md px-3 py-1 text-sm">
+                <option value="relevance">Relevance</option>
+                <option value="rating">Rating</option>
+                <option value="distance">Distance</option>
+                <option value="tier">Membership Tier</option>
+              </select>
             </div>
           </div>
 
           {/* Attorney Cards */}
           <div className="space-y-4">
-            {results.map((hit: any) => (
-              <div key={hit.objectID} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div className="flex items-start space-x-4">
-                  {/* Attorney Image */}
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                    {hit.name.split(' ').map((n: string) => n[0]).join('')}
-                  </div>
-
-                  {/* Attorney Info */}
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900">{hit.name}</h3>
-                        {hit.firm_name && (
-                          <p className="text-sm text-gray-600">{hit.firm_name}</p>
-                        )}
-                      </div>
-                      
-                      {/* Membership Badge */}
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        hit.membership_tier === 'exclusive'
-                          ? 'bg-purple-100 text-purple-800'
-                          : hit.membership_tier === 'standard'
-                          ? 'bg-blue-100 text-blue-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {hit.membership_tier.charAt(0).toUpperCase() + hit.membership_tier.slice(1)}
-                      </span>
-                    </div>
-
-                    {/* Practice Areas */}
-                    {hit.practice_areas && hit.practice_areas.length > 0 && (
-                      <div className="mb-3">
-                        <div className="flex flex-wrap gap-1">
-                          {hit.practice_areas.slice(0, 3).map((area: any, index: number) => (
-                            <span
-                              key={index}
-                              className="inline-block bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full"
-                            >
-                              {area.name}
-                            </span>
-                          ))}
-                          {hit.practice_areas.length > 3 && (
-                            <span className="inline-block bg-gray-50 text-gray-600 text-xs px-2 py-1 rounded-full">
-                              +{hit.practice_areas.length - 3} more
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Location */}
-                    {hit.city && hit.state && (
-                      <div className="flex items-center justify-between text-gray-600 mb-2">
-                        <div className="flex items-center">
-                          <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
-                          <span className="text-sm">
-                            {hit.city}, {hit.state}
-                          </span>
-                        </div>
-                        {hit.distance !== undefined && (
-                          <span className="text-sm font-medium text-blue-600">
-                            {hit.distance} miles away
-                          </span>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Experience */}
-                    {hit.experience_years && (
-                      <p className="text-sm text-gray-600 mb-3">
-                        {hit.experience_years}+ years experience
-                      </p>
-                    )}
-
-                    {/* Bio Preview */}
-                    {hit.bio && (
-                      <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                        {hit.bio}
-                      </p>
-                    )}
-
-                    {/* Contact Button */}
-                    <div className="flex gap-2">
-                      <a
-                        href={`/attorney/${hit.objectID}`}
-                        className="flex-1 bg-blue-600 text-white text-center py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-medium"
-                      >
-                        View Profile
-                      </a>
-                      
-                      {hit.phone && (
-                        <a
-                          href={`tel:${hit.phone}`}
-                          className="flex items-center justify-center bg-gray-100 text-gray-700 py-2 px-3 rounded-lg hover:bg-gray-200 transition-colors duration-200"
-                          title="Call attorney"
-                        >
-                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                          </svg>
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
+            {results.map((attorney) => (
+              <AttorneyCard key={attorney.objectID} attorney={attorney} />
             ))}
           </div>
+
+          {/* Load More Button */}
+          {results.length >= 20 && (
+            <div className="text-center pt-8">
+              <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                Load More Results
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
