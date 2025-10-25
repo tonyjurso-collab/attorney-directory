@@ -13,24 +13,65 @@ export default async function DashboardPage() {
     
     // Check if Supabase is properly configured
     if (!supabase || typeof supabase.from !== 'function') {
+      console.error('❌ Supabase not properly configured');
       redirect('/login');
     }
     
     // Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
+    console.log('👤 Auth check:', { 
+      hasUser: !!user, 
+      userId: user?.id, 
+      authError: authError?.message 
+    });
+    
     if (authError || !user) {
+      console.error('❌ Auth error:', authError);
       redirect('/login');
     }
 
     // Get user profile
-    const { data: profile, error: profileError } = await supabase
+    console.log('📋 Fetching profile for user:', user.id);
+    let { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single();
 
-    if (profileError || !profile || profile.role !== 'attorney') {
+    console.log('📋 Profile result:', { 
+      profile, 
+      profileError: profileError?.message 
+    });
+
+    // If profile doesn't exist, create it
+    if (profileError || !profile) {
+      console.log('⚠️ Profile not found, creating new profile...');
+      
+      // Create profile for this user
+      const { data: newProfile, error: createError } = await supabase
+        .from('profiles')
+        .insert({
+          id: user.id,
+          email: user.email || '',
+          full_name: user.user_metadata?.full_name || '',
+          role: 'attorney',
+        })
+        .select()
+        .single();
+
+      if (createError || !newProfile) {
+        console.error('❌ Failed to create profile:', createError);
+        redirect('/login');
+      }
+
+      profile = newProfile;
+      console.log('✅ Profile created:', profile);
+    }
+
+    // Check role
+    if (profile.role !== 'attorney') {
+      console.error('❌ User is not an attorney, role:', profile.role);
       redirect('/');
     }
 

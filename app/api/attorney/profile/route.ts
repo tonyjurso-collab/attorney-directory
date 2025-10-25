@@ -67,6 +67,7 @@ export async function PUT(request: NextRequest) {
     if (body.state !== undefined) updateData.state = body.state;
     if (body.zip_code !== undefined) updateData.zip_code = body.zip_code;
     if (body.experience_years !== undefined) updateData.experience_years = parseInt(body.experience_years) || 0;
+    if (body.profile_image_url !== undefined) updateData.profile_image_url = body.profile_image_url;
 
     console.log('Updating attorney profile with data:', updateData);
 

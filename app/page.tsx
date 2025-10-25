@@ -4,6 +4,7 @@ import { FeaturedAttorneys } from '@/components/home/FeaturedAttorneys';
 import { HeroSection } from '@/components/home/HeroSection';
 import { StatsSection } from '@/components/home/StatsSection';
 import { CtaSection } from '@/components/home/CtaSection';
+import { ChatWidget } from '@/components/chat/ChatWidget';
 
 export default function Home() {
   return (
@@ -58,6 +59,9 @@ export default function Home() {
 
       {/* CTA Section */}
       <CtaSection />
+
+      {/* Global Floating Chat Widget */}
+      <ChatWidget position="floating" />
     </div>
   );
 }

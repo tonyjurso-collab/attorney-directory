@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Save, X, MapPin, Mail, Phone, Globe, Building, User, FileText } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Save, X, MapPin, Mail, Phone, Globe, Building, User, FileText, Upload, Image as ImageIcon } from 'lucide-react';
 import { AttorneyWithDetails } from '@/lib/types/database';
 import { PracticeAreasSelector } from './PracticeAreasSelector';
 
@@ -67,6 +67,9 @@ export function ProfileEditor({ attorney }: ProfileEditorProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [imagePreview, setImagePreview] = useState<string | null>(attorney.profile_image_url || null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     first_name: attorney.first_name || '',
     last_name: attorney.last_name || '',
@@ -82,6 +85,7 @@ export function ProfileEditor({ attorney }: ProfileEditorProps) {
     state: attorney.state || '',
     zip_code: attorney.zip_code || '',
     experience_years: attorney.experience_years || '',
+    profile_image_url: attorney.profile_image_url || '',
   });
 
   // Practice areas state
@@ -215,6 +219,60 @@ export function ProfileEditor({ attorney }: ProfileEditorProps) {
     }
   };
 
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size must be less than 5MB');
+      return;
+    }
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setImagePreview(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    // Upload to Supabase
+    setUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', 'attorney-profiles');
+
+      const response = await fetch('/api/upload-image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to upload image');
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        profile_image_url: data.url,
+      }));
+    } catch (error: any) {
+      console.error('Error uploading image:', error);
+      alert(`Error uploading image: ${error.message || 'Please try again.'}`);
+      setImagePreview(attorney.profile_image_url || null);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
   const handleCancel = () => {
     setFormData({
       first_name: attorney.first_name || '',
@@ -231,9 +289,11 @@ export function ProfileEditor({ attorney }: ProfileEditorProps) {
       state: attorney.state || '',
       zip_code: attorney.zip_code || '',
       experience_years: attorney.experience_years || '',
+      profile_image_url: attorney.profile_image_url || '',
     });
           setSelectedPracticeAreas(attorney.practice_areas?.map(pa => pa.id) || []);
           setSelectedCategories((attorney as any).selected_categories || []);
+    setImagePreview(attorney.profile_image_url || null);
     setIsEditing(false);
   };
 
@@ -251,6 +311,23 @@ export function ProfileEditor({ attorney }: ProfileEditorProps) {
         </div>
 
         <div className="space-y-4">
+          {/* Profile Photo */}
+          {imagePreview && (
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <img
+                  src={imagePreview}
+                  alt={`${attorney.first_name} ${attorney.last_name}`}
+                  className="w-24 h-24 rounded-full object-cover border-2 border-gray-200"
+                />
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 mb-1">Profile Photo</h3>
+                <p className="text-xs text-gray-500">Click "Edit Profile" to change</p>
+              </div>
+            </div>
+          )}
+
           {/* Name */}
           <div>
             <h3 className="text-sm font-medium text-gray-700 mb-2 flex items-center">
@@ -416,6 +493,54 @@ export function ProfileEditor({ attorney }: ProfileEditorProps) {
       </div>
 
       <div className="space-y-6">
+        {/* Profile Photo Upload */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-3">
+            Profile Photo
+          </label>
+          <div className="flex items-center space-x-6">
+            <div className="relative">
+              {imagePreview ? (
+                <img
+                  src={imagePreview}
+                  alt="Profile preview"
+                  className="w-32 h-32 rounded-full object-cover border-2 border-gray-200"
+                />
+              ) : (
+                <div className="w-32 h-32 rounded-full bg-gray-100 border-2 border-gray-300 flex items-center justify-center">
+                  <ImageIcon className="w-12 h-12 text-gray-400" />
+                </div>
+              )}
+              {uploadingImage && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white"></div>
+                </div>
+              )}
+            </div>
+            <div className="flex-1">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageSelect}
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingImage}
+                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                {uploadingImage ? 'Uploading...' : 'Upload Photo'}
+              </button>
+              <p className="mt-2 text-xs text-gray-500">
+                Recommended: Square image, at least 400x400px. Max 5MB.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Basic Information */}
         <div>
           <h3 className="text-sm font-medium text-gray-900 mb-4">Basic Information</h3>

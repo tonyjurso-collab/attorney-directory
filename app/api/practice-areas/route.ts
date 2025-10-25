@@ -1,51 +1,23 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const supabase = await createClient();
     
-    // Fetch practice area categories with their practice areas
-    const { data: categories, error } = await supabase
+    const { data, error } = await supabase
       .from('practice_area_categories')
-      .select(`
-        id,
-        slug,
-        name,
-        description,
-        display_order,
-        practice_areas (
-          id,
-          slug,
-          name,
-          display_order
-        )
-      `)
-      .eq('is_active', true)
-      .order('display_order');
+      .select('id, name, slug, lp_campaign_id, lp_supplier_id, lp_key, lp_config')
+      .order('name');
 
     if (error) {
       console.error('Error fetching practice areas:', error);
       return NextResponse.json({ error: 'Failed to fetch practice areas' }, { status: 500 });
     }
 
-    // Transform the data to match our component expectations
-    const transformedCategories = categories?.map(category => ({
-      ...category,
-      practice_areas: category.practice_areas
-        ?.filter(pa => pa) // Remove null entries
-        .sort((a, b) => a.display_order - b.display_order) || []
-    })) || [];
-
-    return NextResponse.json({
-      categories: transformedCategories,
-      success: true
-    });
+    return NextResponse.json(data || []);
   } catch (error) {
-    console.error('Error in practice areas API:', error);
-    return NextResponse.json({ 
-      error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    console.error('Error in practice-areas API:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
