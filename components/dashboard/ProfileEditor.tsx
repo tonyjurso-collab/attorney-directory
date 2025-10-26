@@ -87,6 +87,7 @@ export function ProfileEditor({ attorney }: ProfileEditorProps) {
     experience_years: attorney.experience_years || '',
     profile_image_url: attorney.profile_image_url || '',
     google_place_id: (attorney as any).google_place_id || '',
+    google_place_url: (attorney as any).google_place_url || '',
   });
 
   // Practice areas state
@@ -292,6 +293,7 @@ export function ProfileEditor({ attorney }: ProfileEditorProps) {
       experience_years: attorney.experience_years || '',
       profile_image_url: attorney.profile_image_url || '',
       google_place_id: (attorney as any).google_place_id || '',
+      google_place_url: (attorney as any).google_place_url || '',
     });
           setSelectedPracticeAreas(attorney.practice_areas?.map(pa => pa.id) || []);
           setSelectedCategories((attorney as any).selected_categories || []);
@@ -851,40 +853,63 @@ export function ProfileEditor({ attorney }: ProfileEditorProps) {
           />
         </div>
 
-        {/* Google Place ID */}
+        {/* Google Reviews */}
         <div>
-          <label htmlFor="google_place_id" className="block text-sm font-medium text-gray-700 mb-2">
-            Google Place ID
-          </label>
-          <input
-            type="text"
-            id="google_place_id"
-            name="google_place_id"
-            value={formData.google_place_id}
-            onChange={handleInputChange}
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            placeholder="ChIJ..."
-          />
-          <p className="mt-1 text-xs text-gray-500">
-            Find your Google Place ID at{' '}
-            <a
-              href="https://developers.google.com/maps/documentation/places/web-service/place-id"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline"
-            >
-              Google Place ID Finder
-            </a>
-          </p>
-          {formData.google_place_id && (
-            <button
-              type="button"
-              onClick={handleSyncReviews}
-              className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-            >
-              Sync Google Reviews Now
-            </button>
-          )}
+          <h3 className="text-sm font-medium text-gray-900 mb-4">Google Reviews</h3>
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="google_place_url" className="block text-sm font-medium text-gray-700 mb-2">
+                Google Reviews/Place URL (Optional)
+              </label>
+              <input
+                type="url"
+                id="google_place_url"
+                name="google_place_url"
+                value={formData.google_place_url}
+                onChange={handleInputChange}
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                placeholder="https://maps.google.com/..."
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Paste your Google Business Profile or Google Maps link to display reviews on your profile
+              </p>
+            </div>
+            
+            <div>
+              <label htmlFor="google_place_id" className="block text-sm font-medium text-gray-700 mb-2">
+                Google Place ID (Advanced)
+              </label>
+              <input
+                type="text"
+                id="google_place_id"
+                name="google_place_id"
+                value={formData.google_place_id}
+                onChange={handleInputChange}
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                placeholder="ChIJ..."
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Find your Google Place ID at{' '}
+                <a
+                  href="https://developers.google.com/maps/documentation/places/web-service/place-id"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline"
+                >
+                  Google Place ID Finder
+                </a>
+              </p>
+              {formData.google_place_id && (
+                <button
+                  type="button"
+                  onClick={handleSyncReviews}
+                  className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  Sync Google Reviews Now
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -1,9 +1,12 @@
 import { notFound } from 'next/navigation';
-import { Suspense } from 'react';
+import { Suspense, cache } from 'react';
 import { AttorneyProfile } from '@/components/attorney/AttorneyProfile';
 import { DynamicLeadForm } from '@/components/attorney/DynamicLeadForm';
 import { createClient } from '@/lib/supabase/server';
-import { getCachedReviews, shouldSyncReviews, syncAttorneyReviews, getTestReviews } from '@/lib/google-places/sync';
+import { getCachedReviews, shouldSyncReviews, syncAttorneyReviews } from '@/lib/google-places/sync';
+
+// Revalidate every hour
+export const revalidate = 3600;
 
 interface AttorneyPageProps {
   params: Promise<{
@@ -11,17 +14,14 @@ interface AttorneyPageProps {
   }>;
 }
 
-async function getAttorney(id: string) {
+const getAttorney = cache(async (id: string) => {
   try {
     const supabase = await createClient();
     
     // Check if Supabase is properly configured
     if (!supabase || typeof supabase.from !== 'function') {
-      console.log('Supabase not configured, returning null');
       return null;
     }
-    
-    console.log('Looking for attorney with ID:', id);
     
     const { data: attorney, error } = await supabase
       .from('attorneys')
@@ -63,18 +63,15 @@ async function getAttorney(id: string) {
     }
     
     if (!attorney) {
-      console.log('No attorney found with ID:', id);
       return null;
     }
-    
-    console.log('Found attorney:', attorney.first_name, attorney.last_name);
 
     // Calculate average rating
     const averageRating = attorney.reviews?.length 
       ? attorney.reviews.reduce((sum: number, review: any) => sum + review.rating, 0) / attorney.reviews.length
       : 0;
 
-    // Fetch Google reviews
+    // Only fetch Google reviews if Place ID exists
     let googleReviews = [];
     if (attorney.google_place_id) {
       // Try to get cached reviews first
@@ -82,17 +79,13 @@ async function getAttorney(id: string) {
       
       // Check if sync is needed
       if (shouldSyncReviews(attorney.google_reviews_last_synced)) {
-        console.log('🔄 Google reviews need sync for', attorney.first_name);
         // Trigger background sync (don't await)
         syncAttorneyReviews(id, attorney.google_place_id).catch(error => {
           console.error('Background sync failed:', error);
         });
       }
-    } else {
-      // Fallback to test reviews for development
-      console.log('📝 No Google Place ID found, using test reviews for', attorney.first_name);
-      googleReviews = getTestReviews(id);
     }
+    // No else block - no test reviews, just empty array
 
     return {
       ...attorney,
@@ -116,7 +109,7 @@ async function getAttorney(id: string) {
     console.error('Error in getAttorney:', error);
     return null;
   }
-}
+});
 
 export default async function AttorneyPage({ params }: AttorneyPageProps) {
   // Await the params Promise in Next.js 15

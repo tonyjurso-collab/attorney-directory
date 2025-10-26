@@ -120,10 +120,37 @@ export function ChatWidget({
     trustedFormCertUrl?: string;
   }>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const scrollToBottom = () => {
+      if (messagesContainerRef.current) {
+        // Calculate the scroll position to the bottom
+        const container = messagesContainerRef.current;
+        const maxScrollTop = container.scrollHeight - container.clientHeight;
+        
+        console.log('🔄 Scrolling chat to bottom:', {
+          scrollHeight: container.scrollHeight,
+          clientHeight: container.clientHeight,
+          maxScrollTop,
+          currentScrollTop: container.scrollTop
+        });
+        
+        // Scroll to the bottom with smooth behavior
+        container.scrollTo({
+          top: maxScrollTop,
+          behavior: 'smooth'
+        });
+      } else {
+        console.warn('⚠️ Messages container ref not found');
+      }
+    };
+    
+    // Use setTimeout to ensure DOM is updated
+    const timeoutId = setTimeout(scrollToBottom, 100);
+    
+    return () => clearTimeout(timeoutId);
   }, [messages, isTyping]);
 
   // Load Jornaya and TrustedForm tracking scripts using self-executing functions
@@ -144,7 +171,7 @@ export function ChatWidget({
             s.id = 'LeadiDscript_campaign';
             s.type = 'text/javascript';
             s.async = true;
-            s.src = 'https://create.lidstatic.com/campaign/${process.env.NEXT_PUBLIC_JORNAYA_CAMPAIGN_ID}.js?snippet_version=2';
+            s.src = 'https://create.lidstatic.com/campaign/${process.env.NEXT_PUBLIC_JORNAYA_CAMPAIGN_ID || '6975963e-58a0-d14c-9f16-96e9130e7e39'}.js?snippet_version=2';
             s.onload = function() {
               console.log('✅ Jornaya LeadID script loaded successfully');
             };
@@ -164,13 +191,13 @@ export function ChatWidget({
       // TrustedForm - Self-executing function pattern with conflict detection
       if (!document.querySelector('script[src*="trustedform.js"]') && !window.TrustedForm) {
         console.log('📡 Loading TrustedForm script...');
-        console.log('🔑 TrustedForm Field:', process.env.NEXT_PUBLIC_TRUSTEDFORM_FIELD);
+        console.log('🔑 TrustedForm Field:', process.env.NEXT_PUBLIC_TRUSTEDFORM_FIELD || 'xxTrustedFormCertUrl');
         
         const trustedFormScript = document.createElement('script');
         trustedFormScript.type = 'text/javascript';
         trustedFormScript.innerHTML = `
           (function () {
-            var field = '${process.env.NEXT_PUBLIC_TRUSTEDFORM_FIELD}';
+            var field = '${process.env.NEXT_PUBLIC_TRUSTEDFORM_FIELD || 'xxTrustedFormCertUrl'}';
             var provideReferrer = false;
             var invertFieldSensitivity = false;
             var tf = document.createElement('script');
@@ -573,7 +600,7 @@ export function ChatWidget({
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
+        <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 bg-gray-50 scroll-smooth">
           {messages.map((msg) => (
             <ChatMessage key={msg.id} message={msg} />
           ))}
@@ -700,7 +727,7 @@ export function ChatWidget({
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
+          <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 bg-gray-50 scroll-smooth">
             {messages.map((msg) => (
               <ChatMessage key={msg.id} message={msg} />
             ))}

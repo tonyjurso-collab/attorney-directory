@@ -9,7 +9,7 @@ export interface ChatSession {
 }
 
 export const sessionOptions: SessionOptions = {
-  password: process.env.IRON_SESSION_PASSWORD!,
+  password: process.env.IRON_SESSION_PASSWORD || 'UFlv4pN7r3LVAwa0zxugRyJkGht1iOsD',
   cookieName: 'legal_intake_session',
   cookieOptions: {
     secure: false, // Set to false for development

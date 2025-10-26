@@ -269,93 +269,22 @@ export function AttorneyProfile({ attorney }: AttorneyProfileProps) {
             </div>
           </div>
         ) : (
-          /* Fallback for test data - show sample Google reviews */
+          /* No reviews available - show message for attorneys */
           <div className="mb-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">Google Reviews</h2>
-              <div className="flex items-center">
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`h-5 w-5 ${
-                        i < 4 ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'
-                      }`}
-                    />
-                  ))}
-                </div>
-                <span className="ml-2 text-lg font-semibold">4.2 (12 reviews)</span>
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
+              <div className="flex items-center justify-center mb-3">
+                <Star className="h-8 w-8 text-gray-400" />
               </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="border-b border-gray-200 pb-4">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 rounded-full bg-gray-200 mr-3"></div>
-                    <div>
-                      <p className="font-semibold">Sarah M.</p>
-                      <p className="text-sm text-gray-500">1 week ago</p>
-                    </div>
-                  </div>
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-4 w-4 ${
-                          i < 5 ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <p className="text-gray-700">Excellent attorney! Very professional and helped me through a difficult time. Highly recommend.</p>
-              </div>
-
-              <div className="border-b border-gray-200 pb-4">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 rounded-full bg-gray-200 mr-3"></div>
-                    <div>
-                      <p className="font-semibold">Michael R.</p>
-                      <p className="text-sm text-gray-500">2 weeks ago</p>
-                    </div>
-                  </div>
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-4 w-4 ${
-                          i < 4 ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <p className="text-gray-700">Great experience. Very knowledgeable and responsive to questions.</p>
-              </div>
-
-              <div>
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 rounded-full bg-gray-200 mr-3"></div>
-                    <div>
-                      <p className="font-semibold">Jennifer L.</p>
-                      <p className="text-sm text-gray-500">3 weeks ago</p>
-                    </div>
-                  </div>
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-4 w-4 ${
-                          i < 5 ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <p className="text-gray-700">Outstanding service. Would definitely use again.</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No Google Reviews Yet</h3>
+              <p className="text-gray-600 mb-4">
+                {attorney.membership_tier === 'free' 
+                  ? "Add your Google reviews link in your dashboard to display client reviews on your profile."
+                  : "Add your Google Place URL to your dashboard to display client reviews on your profile."
+                }
+              </p>
+              <div className="text-sm text-gray-500">
+                <p>Reviews help build trust with potential clients</p>
+                <p>Contact support if you need help setting this up</p>
               </div>
             </div>
           </div>

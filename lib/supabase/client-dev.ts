@@ -11,8 +11,21 @@ export function createClient() {
     from: () => ({
       select: () => ({
         eq: () => ({
-          single: async () => ({ data: null, error: null }),
+          eq: () => ({
+            limit: async () => ({ data: [], error: null }),
+            order: () => ({
+              order: () => ({
+                limit: async () => ({ data: [], error: null }),
+              }),
+            }),
+          }),
           limit: async () => ({ data: [], error: null }),
+          order: () => ({
+            order: () => ({
+              limit: async () => ({ data: [], error: null }),
+            }),
+          }),
+          single: async () => ({ data: null, error: null }),
         }),
         insert: () => ({
           select: () => ({

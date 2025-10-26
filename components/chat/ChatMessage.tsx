@@ -26,7 +26,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
             : 'bg-gray-100 text-gray-900'
         }`}
       >
-        <p className="text-sm whitespace-pre-wrap break-words">
+        <p className={`text-sm whitespace-pre-wrap break-words ${isUser ? 'text-right' : 'text-left'}`}>
           {message.content}
         </p>
         <p

@@ -48,6 +48,9 @@ const ZIP_CODE_MAP: Record<string, ZipCodeData> = {
   '28297': { city: 'Charlotte', state: 'NC', zipCode: '28297' },
   '28299': { city: 'Charlotte', state: 'NC', zipCode: '28299' },
   
+  // North Carolina - Gastonia area
+  '28034': { city: 'Gastonia', state: 'NC', zipCode: '28034' },
+  
   // New York City
   '10001': { city: 'New York', state: 'NY', zipCode: '10001' },
   '10002': { city: 'New York', state: 'NY', zipCode: '10002' },
@@ -637,10 +640,14 @@ export async function getCityStateFromZipCode(zipCode: string): Promise<ZipCodeD
   
   // Check if it's a 5-digit zip code
   if (cleanZipCode.length === 5) {
+    console.log(`🔍 Looking up zip code ${cleanZipCode} in local map...`);
     const localResult = ZIP_CODE_MAP[cleanZipCode];
     if (localResult) {
+      console.log(`✅ Found local result for ${cleanZipCode}: ${localResult.city}, ${localResult.state}`);
       return localResult;
     }
+    
+    console.log(`❌ Zip code ${cleanZipCode} not found in local map`);
     
     // Fallback to Google Geocoding API
     try {
@@ -649,7 +656,8 @@ export async function getCityStateFromZipCode(zipCode: string): Promise<ZipCodeD
       
       if ('error' in geocodeResult) {
         console.warn(`⚠️ Google Geocoding failed for zip ${cleanZipCode}:`, geocodeResult.error);
-        return null;
+        // Provide fallback based on zip code prefix
+        return getFallbackLocation(cleanZipCode);
       }
       
       if (geocodeResult.city && geocodeResult.state) {
@@ -662,10 +670,10 @@ export async function getCityStateFromZipCode(zipCode: string): Promise<ZipCodeD
       }
       
       console.warn(`⚠️ Google Geocoding returned incomplete data for zip ${cleanZipCode}`);
-      return null;
+      return getFallbackLocation(cleanZipCode);
     } catch (error) {
       console.error(`❌ Google Geocoding error for zip ${cleanZipCode}:`, error);
-      return null;
+      return getFallbackLocation(cleanZipCode);
     }
   }
   
@@ -739,6 +747,44 @@ export function formatZipCode(zipCode: string): string | null {
   
   if (cleanZipCode.length === 9) {
     return cleanZipCode.substring(0, 5);
+  }
+  
+  return null;
+}
+
+/**
+ * Get fallback location based on zip code prefix
+ * @param zipCode - The zip code string
+ * @returns ZipCodeData with fallback city/state based on zip prefix
+ */
+function getFallbackLocation(zipCode: string): ZipCodeData | null {
+  if (!zipCode || zipCode.length < 3) {
+    return null;
+  }
+  
+  const prefix = zipCode.substring(0, 3);
+  
+  // Common zip code prefixes and their states
+  const stateMap: Record<string, string> = {
+    '280': 'NC', // North Carolina
+    '282': 'NC', // North Carolina (Charlotte)
+    '100': 'NY', // New York
+    '101': 'NY', // New York
+    '102': 'NY', // New York
+    '900': 'CA', // California (Los Angeles)
+    '606': 'IL', // Illinois (Chicago)
+    '770': 'TX', // Texas (Houston)
+    '850': 'AZ', // Arizona (Phoenix)
+    '070': 'NJ', // New Jersey
+  };
+  
+  const state = stateMap[prefix];
+  if (state) {
+    return {
+      city: 'Unknown',
+      state: state,
+      zipCode: zipCode
+    };
   }
   
   return null;

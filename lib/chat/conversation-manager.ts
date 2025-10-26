@@ -137,6 +137,34 @@ function generateQuestionForField(
       if (practiceArea && practiceArea.field_questions && practiceArea.field_questions[field]) {
         let question = practiceArea.field_questions[field];
         
+        // Handle object-based questions (e.g., date_of_incident with accident/injury/default variants)
+        if (typeof question === 'object' && question !== null) {
+          // Try to determine the appropriate variant based on collected fields
+          const subcategory = collectedFields.sub_category || '';
+          const describe = collectedFields.describe || '';
+          
+          // Check for specific keywords to determine context
+          if (subcategory.toLowerCase().includes('accident') || describe.toLowerCase().includes('accident')) {
+            question = question.accident || question.default;
+          } else if (subcategory.toLowerCase().includes('injury') || describe.toLowerCase().includes('injury')) {
+            question = question.injury || question.default;
+          } else {
+            question = question.default;
+          }
+          
+          // Ensure we have a valid question string
+          if (!question || typeof question !== 'string') {
+            console.warn(`No valid question found for field ${field} with context:`, { subcategory, describe });
+            question = `What is your ${field.replace(/_/g, ' ')}?`;
+          }
+        }
+        
+        // Ensure question is a string
+        if (typeof question !== 'string') {
+          console.warn(`Field question for ${field} is not a string:`, question);
+          question = `What is your ${field.replace(/_/g, ' ')}?`;
+        }
+        
         // Replace placeholders
         question = question.replace(/{name_prefix}/g, namePrefix);
         question = question.replace(/{first_name}/g, firstName);

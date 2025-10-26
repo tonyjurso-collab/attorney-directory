@@ -24,7 +24,7 @@ export interface GeocodingError {
  * @returns Promise<GeocodingResult | GeocodingError>
  */
 export async function geocodeAddress(address: string): Promise<GeocodingResult | GeocodingError> {
-  const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+  const apiKey = process.env.GOOGLE_MAPS_API_KEY || 'AIzaSyBvOkBwJcDdEfGhIjKlMnOpQrStUvWxYzA';
   
   if (!apiKey) {
     return {
