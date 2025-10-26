@@ -12,6 +12,15 @@ export async function GET(request: NextRequest) {
     const zipCode = searchParams.get('zip_code');
     const limit = parseInt(searchParams.get('limit') || '20');
 
+    // Check if Supabase environment variables are set
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      console.log('⚠️ Supabase not configured, returning mock data');
+      return NextResponse.json({ 
+        attorneys: [],
+        message: 'Supabase not configured - returning empty results'
+      });
+    }
+
     const supabase = await createClient();
     
     // Check if Supabase is properly configured
