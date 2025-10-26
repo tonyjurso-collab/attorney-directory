@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { AttorneyCard } from '@/components/attorney/AttorneyCard';
 import { HeroSection } from './HeroSection';
 import { PracticeAreaContent } from './PracticeAreaContent';
-import { FixedChatWidget } from './FixedChatWidget';
 
 interface PracticeAreaLandingPageProps {
   practiceArea: string;
@@ -174,12 +173,6 @@ export function PracticeAreaLandingPage({
           )}
         </div>
       </div>
-
-      {/* Fixed Chat Widget */}
-      <FixedChatWidget 
-        practiceArea={practiceArea}
-        initialMessage={`I need help with ${practiceArea.toLowerCase()} in ${formatState(state)}`}
-      />
     </div>
   );
 }

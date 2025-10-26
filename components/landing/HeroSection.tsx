@@ -1,5 +1,7 @@
 'use client';
 
+import { ChatWidget } from '@/components/chat/ChatWidget';
+
 interface HeroSectionProps {
   practiceArea: string;
   state: string;
@@ -187,7 +189,7 @@ export function HeroSection({ practiceArea, state, category, subcategory }: Hero
             </div>
           </div>
 
-          {/* Right Column - Visual/Form */}
+          {/* Right Column - Chatbot */}
           <div className="relative">
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
               <div className="text-center space-y-6">
@@ -196,36 +198,18 @@ export function HeroSection({ practiceArea, state, category, subcategory }: Hero
                   <p className="text-blue-100">Speak with a qualified attorney in minutes</p>
                 </div>
                 
-                {/* Quick Form */}
-                <div className="space-y-4">
-                  <input 
-                    type="text" 
-                    placeholder="Your name" 
-                    className="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  />
-                  <input 
-                    type="email" 
-                    placeholder="Email address" 
-                    className="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  />
-                  <input 
-                    type="tel" 
-                    placeholder="Phone number" 
-                    className="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  />
-                  <textarea 
-                    placeholder="Briefly describe your legal issue..."
-                    rows={3}
-                    className="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+                {/* Chatbot Widget */}
+                <div className="bg-white rounded-lg shadow-xl">
+                  <ChatWidget 
+                    position="sidebar"
+                    practiceArea={practiceArea}
+                    initialMessage={`I need help with ${practiceArea.toLowerCase()} in ${formatState(state)}`}
+                    welcomeMessage={`Hi! I'm here to help you find a ${practiceArea.toLowerCase()} attorney in ${formatState(state)}. What's your legal situation?`}
                   />
                 </div>
                 
-                <button className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-4 rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl">
-                  Get Free Legal Consultation
-                </button>
-                
                 <p className="text-xs text-blue-200">
-                  By submitting, you agree to our terms and privacy policy. 
+                  By chatting, you agree to our terms and privacy policy. 
                   We'll connect you with qualified attorneys.
                 </p>
               </div>
