@@ -203,7 +203,6 @@ export function HeroSection({ practiceArea, state, category, subcategory }: Hero
                   <ChatWidget 
                     position="sidebar"
                     practiceArea={practiceArea}
-                    initialMessage={`I need help with ${practiceArea.toLowerCase()} in ${formatState(state)}`}
                     welcomeMessage={`Hi! I'm here to help you find a ${practiceArea.toLowerCase()} attorney in ${formatState(state)}. What's your legal situation?`}
                   />
                 </div>
