@@ -194,15 +194,15 @@ export function ChatWidget({
       }
     };
 
-    // Wait for the form to be rendered and DOM to be ready
+    // Wait for the chat widget to be rendered and DOM to be ready
     const timer = setTimeout(() => {
-      // Check if the form exists before loading scripts
-      const form = document.querySelector('form');
-      if (form) {
-        console.log('✅ Form found, loading tracking scripts...');
+      // Check if the chat widget exists before loading scripts
+      const chatWidget = document.querySelector('[class*="bg-white rounded-lg shadow"]');
+      if (chatWidget) {
+        console.log('✅ Chat widget found, loading tracking scripts...');
         loadTrackingScripts();
       } else {
-        console.log('⚠️ Form not found yet, retrying in 500ms...');
+        console.log('⚠️ Chat widget not found yet, retrying in 500ms...');
         setTimeout(loadTrackingScripts, 500);
       }
     }, 100);
@@ -521,9 +521,8 @@ export function ChatWidget({
   // Sidebar layout
   if (position === 'sidebar') {
     return (
-      <form 
+      <div 
         className="bg-white rounded-lg shadow-lg border border-gray-200 h-[600px] flex flex-col overflow-hidden"
-        onSubmit={(e) => e.preventDefault()}
       >
         {/* TCPA Disclosure - Hidden from view but required for Jornaya */}
         <label className="hidden">
@@ -603,7 +602,7 @@ export function ChatWidget({
         
         {/* Jornaya LeadID Field - Hardcoded for capture */}
         <input type="hidden" name="jornaya_leadid" id="jornaya_leadid_field" />
-      </form>
+      </div>
     );
   }
 
@@ -632,9 +631,8 @@ export function ChatWidget({
 
       {/* Chat window */}
       {isOpen && (
-        <form 
+        <div 
           className="fixed bottom-6 right-6 w-96 max-w-[calc(100vw-3rem)] h-[600px] max-h-[calc(100vh-3rem)] bg-white rounded-lg shadow-2xl border border-gray-200 flex flex-col z-50 animate-in slide-in-from-bottom-4 duration-300"
-          onSubmit={(e) => e.preventDefault()}
         >
           {/* TCPA Disclosure - Hidden from view but required for Jornaya */}
           <label className="hidden">
@@ -730,7 +728,7 @@ export function ChatWidget({
           
           {/* Jornaya LeadID Field - Hardcoded for capture */}
           <input type="hidden" name="jornaya_leadid" id="jornaya_leadid_field" />
-        </form>
+        </div>
       )}
     </>
   );
