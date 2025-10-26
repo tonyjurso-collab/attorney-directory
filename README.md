@@ -1,55 +1,74 @@
-# Attorney Directory & Lead Generation Platform
+# Attorney Directory
 
-A comprehensive web platform that connects clients with qualified attorneys through an advanced search system, lead generation, and subscription-based attorney memberships.
+A comprehensive legal services platform that connects clients with qualified attorneys through dynamic landing pages, AI-powered chatbots, and streamlined lead generation.
 
 ## 🚀 Features
 
-### For Clients
-- **Advanced Search**: Find attorneys by practice area, location, and membership tier
-- **Geolocation**: Automatic location detection for local attorney discovery
-- **Attorney Profiles**: Detailed profiles with practice areas, experience, and reviews
-- **Lead Generation**: Contact forms that route leads to subscribed attorneys
-- **Responsive Design**: Mobile-first design with modern UI/UX
+- **Dynamic Landing Pages** - SEO-optimized pages for every practice area and location
+- **AI-Powered Chatbot** - Intelligent conversation flow with lead capture
+- **Attorney Search** - Advanced search with filtering and location-based results
+- **Lead Generation** - Multi-step forms with validation and tracking
+- **Real-time Tracking** - Jornaya LeadID and TrustedForm integration
+- **Responsive Design** - Mobile-first approach with modern UI/UX
 
-### For Attorneys
-- **Profile Management**: Create and manage detailed attorney profiles
-- **Membership Tiers**: Free, Standard ($49/month), and Exclusive ($149/month) plans
-- **Lead Delivery**: Direct lead routing through LeadProsper integration
-- **Dashboard**: Comprehensive dashboard with stats, leads, and subscription management
-- **Search Visibility**: Enhanced visibility based on membership tier
+## 🏗️ Architecture
 
-### For Administrators
-- **User Management**: Role-based access control
-- **Subscription Management**: Stripe integration for billing and webhooks
-- **Lead Tracking**: Monitor lead generation and attorney performance
-
-## 🛠 Tech Stack
-
+### Tech Stack
 - **Frontend**: Next.js 15 (App Router), React 19, TypeScript
-- **Styling**: Tailwind CSS
+- **Styling**: Tailwind CSS, Shadcn UI, Radix UI
 - **Database**: Supabase (PostgreSQL)
-- **Authentication**: Supabase Auth
-- **Payments**: Stripe
 - **Search**: Algolia
+- **AI**: OpenAI GPT-4, Vercel AI SDK
 - **Lead Management**: LeadProsper API
-- **Deployment**: Vercel (recommended)
+- **Tracking**: Jornaya LeadID, TrustedForm
+- **Maps**: Google Places API
 
-## 📋 Prerequisites
+### Key Components
+- Dynamic route structure (`/d/[state]/[category]`)
+- AI chatbot with conversation management
+- Attorney profiles with contact forms
+- Lead capture and submission system
+- Search functionality powered by Algolia
 
-Before running this project, you'll need:
+## 📁 Project Structure
 
-1. **Node.js** (v18 or higher)
-2. **npm** or **yarn**
-3. **Supabase** account and project
-4. **Stripe** account
-5. **Algolia** account
-6. **LeadProsper** account (optional for MVP)
+```
+├── app/
+│   ├── d/[state]/[category]/          # Dynamic landing pages
+│   ├── api/
+│   │   ├── chat/                      # Chat API endpoints
+│   │   ├── search-attorneys/          # Attorney search
+│   │   └── lead-capture/              # Lead submission
+│   └── attorney/[id]/                 # Attorney profile pages
+├── components/
+│   ├── landing/                       # Landing page components
+│   ├── chat/                         # Chatbot components
+│   ├── attorney/                     # Attorney-related components
+│   └── search/                      # Search components
+├── lib/
+│   ├── chat/                         # Chat logic and AI integration
+│   ├── algolia/                      # Search configuration
+│   ├── supabase/                     # Database client
+│   └── utils/                        # Utility functions
+└── public/
+    └── practice_areas_config.json    # Practice area configuration
+```
 
-## 🔧 Installation
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 18+
+- npm or yarn
+- Supabase account
+- OpenAI API key
+- Algolia account
+- LeadProsper account
+
+### Installation
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/your-org/attorney-directory.git
    cd attorney-directory
    ```
 
@@ -60,175 +79,316 @@ Before running this project, you'll need:
 
 3. **Set up environment variables**
    ```bash
-   cp env.example .env.local
-   ```
-   
-   Fill in your environment variables:
-   ```env
-   # Supabase Configuration
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-   SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
-
-   # Stripe Configuration
-   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
-   STRIPE_SECRET_KEY=your_stripe_secret_key
-   STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
-   STRIPE_STANDARD_PRICE_ID=your_standard_price_id
-   STRIPE_EXCLUSIVE_PRICE_ID=your_exclusive_price_id
-
-   # Algolia Configuration
-   NEXT_PUBLIC_ALGOLIA_APP_ID=your_algolia_app_id
-   ALGOLIA_ADMIN_API_KEY=your_algolia_admin_api_key
-   NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY=your_algolia_search_api_key
-
-   # LeadProsper Configuration
-   LEADPROSPER_API_KEY=your_leadprosper_api_key
-   LEADPROSPER_WEBHOOK_SECRET=your_leadprosper_webhook_secret
-
-   # Next.js Configuration
-   NEXT_PUBLIC_SITE_URL=http://localhost:3000
+   cp .env.example .env.local
+   # Edit .env.local with your API keys
    ```
 
-4. **Set up the database**
-   - Run the SQL schema from `lib/database/schema.sql` in your Supabase SQL editor
-   - This will create all necessary tables, indexes, and RLS policies
-
-5. **Run the development server**
+4. **Run the development server**
    ```bash
    npm run dev
    ```
 
-6. **Open your browser**
-   Navigate to [http://localhost:3000](http://localhost:3000)
+5. **Open your browser**
+   ```
+   http://localhost:3000
+   ```
 
-## 🗄 Database Schema
+## 🔧 Configuration
 
-The application uses the following main tables:
+### Environment Variables
 
-- **profiles**: User profiles extending Supabase auth
-- **attorneys**: Attorney information and membership details
-- **practice_areas**: Legal practice area definitions
-- **attorney_practice_areas**: Many-to-many relationship between attorneys and practice areas
-- **leads**: Client leads and case information
-- **reviews**: Client reviews and ratings
+Create `.env.local` with the following variables:
 
-## 🔐 Authentication
+```env
+# Database
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
-The platform uses Supabase Auth with role-based access control:
+# AI
+OPENAI_API_KEY=your_openai_api_key
 
-- **Clients**: Can search for attorneys and submit leads
-- **Attorneys**: Can manage profiles, view leads, and manage subscriptions
-- **Admins**: Full system access
+# Search
+NEXT_PUBLIC_ALGOLIA_APP_ID=your_algolia_app_id
+ALGOLIA_ADMIN_API_KEY=your_algolia_admin_key
+ALGOLIA_SEARCH_API_KEY=your_algolia_search_key
 
-## 💳 Payment Integration
+# Lead Management
+LEADPROSPER_API_KEY=your_leadprosper_key
+LEADPROSPER_SUPPLIER_ID=your_supplier_id
 
-### Stripe Setup
-1. Create Stripe products and prices for Standard and Exclusive plans
-2. Set up webhook endpoints for subscription events
-3. Configure customer portal for subscription management
+# Tracking
+NEXT_PUBLIC_JORNAYA_CAMPAIGN_ID=your_jornaya_campaign_id
+NEXT_PUBLIC_TRUSTEDFORM_FIELD=xxTrustedFormCertUrl
 
-### Membership Tiers
-- **Free**: Basic profile listing, low search ranking
-- **Standard ($49/month)**: Enhanced visibility, direct lead delivery
-- **Exclusive ($149/month)**: Top search ranking, featured placement, profile video
+# Google Places
+GOOGLE_PLACES_API_KEY=your_google_places_key
+```
 
-## 🔍 Search Integration
+### Practice Areas
 
-### Algolia Setup
-1. Create an Algolia application
-2. Set up search indices for attorneys
-3. Configure search filters and sorting
-4. Implement real-time search updates
+The `practice_areas_config.json` file defines:
+- Practice area names and descriptions
+- Required fields for each area
+- Chat flow configuration
+- LeadProsper campaign settings
 
-## 📊 Lead Management
+**Valid Categories**:
+- `personal-injury`, `family-law`, `criminal-defense`
+- `business-law`, `real-estate-law`, `estate-planning`
+- `immigration-law`, `employment-law`, `bankruptcy-law`
+- `dui-law`, `workers-compensation`, `medical-malpractice`
+- `product-liability`, `premises-liability`, `wrongful-death`
 
-### LeadProsper Integration
-1. Set up LeadProsper API credentials
-2. Configure lead routing rules
-3. Implement lead status tracking
+## 📖 Documentation
 
-## 🚀 Deployment
-
-### Vercel Deployment
-1. Connect your GitHub repository to Vercel
-2. Set up environment variables in Vercel dashboard
-3. Deploy and configure custom domains
-
-### Database Setup
-1. Set up production Supabase project
-2. Run database migrations
-3. Configure production environment variables
-
-## 📱 API Routes
-
-- `/api/stripe/checkout` - Create Stripe checkout sessions
-- `/api/stripe/portal` - Create customer portal sessions
-- `/api/stripe/webhook` - Handle Stripe webhooks
-- `/api/leads` - Submit leads to LeadProsper
+- **[Development Guide](DEVELOPMENT_GUIDE.md)** - Comprehensive development documentation
+- **[API Documentation](API_DOCUMENTATION.md)** - Complete API reference
+- **[Testing Guide](TESTING_GUIDE.md)** - Testing strategies and test cases
+- **[Deployment Guide](DEPLOYMENT_GUIDE.md)** - Production deployment instructions
+- **[Product Requirements](PRD.md)** - Product requirements and specifications
 
 ## 🧪 Testing
 
+### Test Pages
+- `/test-chatbot` - Chatbot functionality testing
+- `/test-chatbot-suite` - Comprehensive chatbot testing
+- `/test-dynamic-form` - Form testing
+- `/test-search` - Search functionality testing
+
+### Test Scripts
 ```bash
-# Run linting
-npm run lint
+# Test practice area field requirements
+node test-category-fields.js
 
-# Run type checking
-npm run type-check
+# Test field validation logic
+node test-required-fields.js
 
-# Run build
-npm run build
+# Test session reset functionality
+node test-reset.js
+
+# Windows-specific chatbot testing
+.\test-chatbot.ps1
 ```
 
-## 📈 Performance Optimization
+### Running Tests
+```bash
+# Run all tests
+npm run test
 
-- **Server Components**: Leverage React Server Components for better performance
-- **Image Optimization**: Next.js Image component with WebP support
-- **Caching**: Implement proper caching strategies
-- **Code Splitting**: Automatic code splitting with Next.js
+# Run specific test suites
+npm run test:unit
+npm run test:integration
+npm run test:e2e
+```
+
+## 🚀 Deployment
+
+### Vercel (Recommended)
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy
+vercel --prod
+```
+
+### Docker
+```bash
+# Build Docker image
+docker build -t attorney-directory .
+
+# Run container
+docker run -p 3000:3000 --env-file .env.production attorney-directory
+```
+
+### Traditional Server
+```bash
+# Build for production
+npm run build
+
+# Start with PM2
+pm2 start npm --name "attorney-directory" -- start
+```
+
+## 🔍 API Reference
+
+### Chat API
+```typescript
+POST /api/chat
+{
+  "message": "I need help with a divorce"
+}
+```
+
+### Search API
+```typescript
+POST /api/search-attorneys
+{
+  "practice_area": "Personal Injury",
+  "state": "NC",
+  "category": "personal-injury"
+}
+```
+
+### Lead Capture API
+```typescript
+POST /api/lead-capture
+{
+  "first_name": "John",
+  "last_name": "Doe",
+  "email": "john@example.com",
+  "phone": "(555) 123-4567",
+  "zip_code": "12345",
+  "describe": "I need legal help",
+  "main_category": "personal_injury_law",
+  "sub_category": "car_accident",
+  "has_attorney": "no"
+}
+```
+
+## 🎯 Key Features
+
+### Dynamic Landing Pages
+- URL structure: `/d/[state]/[category]`
+- Example: `/d/nc/personal-injury`
+- SEO-optimized content
+- Mobile-responsive design
+
+### AI Chatbot
+- Natural conversation flow
+- Practice area detection
+- Field extraction and validation
+- Lead capture with tracking
+- TCPA compliance
+
+### Attorney Search
+- Advanced filtering
+- Location-based results
+- Practice area specialization
+- Detailed profiles
+
+### Lead Generation
+- Multi-step forms
+- Field validation
+- Lead scoring
+- CRM integration
+- Tracking and attribution
+
+## 📊 Performance
+
+### Metrics
+- Page load time: < 3 seconds
+- API response time: < 500ms
+- Uptime: 99.9%
+- Mobile performance score: > 90
+
+### Monitoring
+- Health check endpoint: `/api/health`
+- Performance monitoring with PM2
+- Error tracking and logging
+- Automated backups
 
 ## 🔒 Security
 
-- **Row Level Security**: Supabase RLS policies for data protection
-- **Input Validation**: Zod schemas for form validation
-- **Authentication**: Secure authentication with Supabase Auth
-- **API Security**: Protected API routes with proper error handling
+### Security Features
+- SSL/TLS encryption
+- GDPR compliance
+- TCPA compliance
+- Data protection and privacy
+- Secure API endpoints
+- Rate limiting
+- Input validation
 
-## 📝 Contributing
+### Best Practices
+- Regular security audits
+- Dependency updates
+- Environment variable protection
+- CORS configuration
+- Error handling
 
+## 🤝 Contributing
+
+### Development Workflow
 1. Fork the repository
 2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+3. Make changes with descriptive commits
+4. Test thoroughly
+5. Create a pull request
+
+### Code Style
+- Use TypeScript for all new code
+- Follow React 19 best practices
+- Use Tailwind CSS for styling
+- Implement proper error handling
+- Add comprehensive comments
+
+### Testing
+- Write tests for new features
+- Maintain test coverage
+- Use test pages for manual testing
+- Follow testing best practices
+
+## 📈 Roadmap
+
+### Short-term (3-6 months)
+- Advanced search filters
+- Attorney video profiles
+- Client review system
+- Mobile app development
+
+### Medium-term (6-12 months)
+- AI-powered case evaluation
+- Document generation tools
+- Payment processing integration
+- Multi-language support
+
+### Long-term (12+ months)
+- Virtual consultations
+- Legal document templates
+- Case management integration
+- International expansion
+
+## 🐛 Troubleshooting
+
+### Common Issues
+1. **Chatbot not responding**: Check OpenAI API key and session management
+2. **Search not working**: Verify Algolia configuration and index setup
+3. **Lead submission failing**: Check LeadProsper API credentials and field mapping
+4. **Tracking not working**: Verify Jornaya and TrustedForm script loading
+
+### Debug Tools
+- Use test pages for isolated testing
+- Check browser console for JavaScript errors
+- Monitor API responses in Network tab
+- Use Supabase dashboard for database queries
+
+### Support
+- Check documentation first
+- Review existing test pages
+- Check API endpoints and responses
+- Consult troubleshooting guides
+- Create detailed issue reports
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🆘 Support
+## 🙏 Acknowledgments
 
-For support and questions:
-- Create an issue in the GitHub repository
-- Contact the development team
-- Check the documentation
+- OpenAI for AI capabilities
+- Supabase for database services
+- Algolia for search functionality
+- LeadProsper for lead management
+- Vercel for deployment platform
 
-## 🔄 Version History
+## 📞 Support
 
-- **v1.0.0**: Initial MVP release with core functionality
-- **v1.1.0**: Enhanced search and filtering
-- **v1.2.0**: Advanced analytics and reporting
-- **v1.3.0**: Mobile app integration
-
-## 🎯 Roadmap
-
-- [ ] Mobile application (React Native)
-- [ ] Advanced analytics dashboard
-- [ ] AI-powered attorney matching
-- [ ] Video consultation integration
-- [ ] Multi-language support
-- [ ] Advanced reporting and analytics
+For questions or support:
+- **Development Team**: dev-team@company.com
+- **DevOps Team**: devops@company.com
+- **Emergency Contact**: +1-555-0123
 
 ---
 
-Built with ❤️ using Next.js, Supabase, and modern web technologies.
+**Built with ❤️ for the legal community**
