@@ -34,6 +34,18 @@ export function useLeadTracking(): TrackingData {
   });
 
   useEffect(() => {
+    // Don't load tracking scripts on auth pages or dashboard
+    if (typeof window !== 'undefined') {
+      const currentPath = window.location.pathname;
+      if (currentPath.includes('/login') || 
+          currentPath.includes('/register') ||
+          currentPath.includes('/dashboard')) {
+        console.log('🚫 Skipping tracking scripts on non-lead page:', currentPath);
+        setTrackingData(prev => ({ ...prev, isLoading: false }));
+        return;
+      }
+    }
+
     const loadTrackingScripts = () => {
       console.log('🔄 Loading tracking scripts for lead form...');
       
@@ -49,7 +61,7 @@ export function useLeadTracking(): TrackingData {
             s.id = 'LeadiDscript_campaign';
             s.type = 'text/javascript';
             s.async = true;
-            s.src = '//create.lidstatic.com/campaign/${process.env.NEXT_PUBLIC_JORNAYA_CAMPAIGN_ID}.js?snippet_version=2';
+            s.src = '//create.lidstatic.com/campaign/${process.env.NEXT_PUBLIC_JORNAYA_CAMPAIGN_ID || '6975963e-58a0-d14c-9f16-96e9130e7e39'}.js?snippet_version=2';
             var LeadiDscript = document.getElementById('LeadiDscript');
             LeadiDscript.parentNode.insertBefore(s, LeadiDscript);
           })();
@@ -67,7 +79,7 @@ export function useLeadTracking(): TrackingData {
         trustedFormScript.type = 'text/javascript';
         trustedFormScript.innerHTML = `
           (function () {
-            var field = '${process.env.NEXT_PUBLIC_TRUSTEDFORM_FIELD}';
+            var field = '${process.env.NEXT_PUBLIC_TRUSTEDFORM_FIELD || 'xxTrustedFormCertUrl'}';
             var provideReferrer = false;
             var invertFieldSensitivity = false;
             var tf = document.createElement('script');
@@ -115,7 +127,7 @@ export function useLeadTracking(): TrackingData {
     }
 
     // Try to get TrustedForm Cert URL from the dynamically generated hidden input
-    const trustedFormField = document.getElementById(process.env.NEXT_PUBLIC_TRUSTEDFORM_FIELD!) as HTMLInputElement;
+    const trustedFormField = document.getElementById(process.env.NEXT_PUBLIC_TRUSTEDFORM_FIELD || 'xxTrustedFormCertUrl') as HTMLInputElement;
     if (trustedFormField && trustedFormField.value) {
       trustedFormCertUrl = trustedFormField.value;
       console.log('✅ Captured TrustedForm Cert URL from hidden field:', trustedFormCertUrl);
