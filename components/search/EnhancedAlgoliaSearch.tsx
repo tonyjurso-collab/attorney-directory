@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AttorneyCard } from '@/components/attorney/AttorneyCard';
+import { AttorneyCardHorizontal } from '@/components/attorney';
 import { liteClient } from 'algoliasearch/lite';
 import { getUserLocation, calculateDistance, getRadiusOptions, UserLocation } from '@/lib/utils/geolocation';
 import { geocodeAddress, GeocodingResult } from '@/lib/utils/geocoding';
@@ -9,9 +9,7 @@ import { geocodeAddress, GeocodingResult } from '@/lib/utils/geocoding';
 interface EnhancedAlgoliaSearchProps {
   searchParams: {
     q?: string;
-    practice_area?: string;
     location?: string;
-    tier?: string;
     radius?: string;
   };
 }
@@ -100,14 +98,9 @@ export function EnhancedAlgoliaSearch({ searchParams }: EnhancedAlgoliaSearchPro
           filters: []
         };
 
-        // Add practice area filter
-        if (searchParams.practice_area) {
-          searchParams_algolia.filters.push(`practice_areas.name:"${searchParams.practice_area}"`);
-        }
-
-        // Add tier filter
-        if (searchParams.tier) {
-          searchParams_algolia.filters.push(`membership_tier:"${searchParams.tier}"`);
+        // Use the query parameter from URL if available
+        if (searchParams.q) {
+          searchParams_algolia.query = searchParams.q;
         }
 
         // Add geo search if we have coordinates
@@ -126,7 +119,7 @@ export function EnhancedAlgoliaSearch({ searchParams }: EnhancedAlgoliaSearchPro
           requests: [searchParams_algolia]
         });
         
-        let hits = searchResponse.results[0]?.hits || [];
+        let hits = (searchResponse.results[0] as any)?.hits || [];
         
         // Add distance information if we have a search location
         if (searchLocation) {
@@ -340,14 +333,9 @@ export function EnhancedAlgoliaSearch({ searchParams }: EnhancedAlgoliaSearchPro
 
           {/* Active Filters */}
           <div className="flex flex-wrap gap-2">
-            {searchParams.practice_area && (
+            {searchParams.q && (
               <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
-                Practice Area: {searchParams.practice_area}
-              </span>
-            )}
-            {searchParams.tier && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
-                Tier: {searchParams.tier}
+                Keywords: {searchParams.q}
               </span>
             )}
             {searchParams.location && (
@@ -423,7 +411,6 @@ export function EnhancedAlgoliaSearch({ searchParams }: EnhancedAlgoliaSearchPro
                 <option value="relevance">Relevance</option>
                 <option value="rating">Rating</option>
                 <option value="distance">Distance</option>
-                <option value="tier">Membership Tier</option>
               </select>
             </div>
           </div>
@@ -431,7 +418,7 @@ export function EnhancedAlgoliaSearch({ searchParams }: EnhancedAlgoliaSearchPro
           {/* Attorney Cards */}
           <div className="space-y-4">
             {results.map((attorney) => (
-              <AttorneyCard key={attorney.objectID} attorney={attorney} />
+              <AttorneyCardHorizontal key={attorney.objectID} attorney={attorney} />
             ))}
           </div>
 

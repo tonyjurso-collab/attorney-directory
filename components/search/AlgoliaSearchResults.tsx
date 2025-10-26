@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchBox, useHits, useRefinementList, useGeoSearch } from 'react-instantsearch';
-import { AttorneyCard } from '@/components/attorney/AttorneyCard';
+import { AttorneyCardHorizontal } from '@/components/attorney';
 import { attorneysIndex } from '@/lib/algolia/client';
 
 interface AlgoliaSearchResultsProps {

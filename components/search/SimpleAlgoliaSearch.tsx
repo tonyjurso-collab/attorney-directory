@@ -1,18 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AttorneyCard } from '@/components/attorney/AttorneyCard';
+import { AttorneyCardHorizontal } from '@/components/attorney';
 import { liteClient } from 'algoliasearch/lite';
 import { getUserLocation, calculateDistance, getRadiusOptions, UserLocation } from '@/lib/utils/geolocation';
-import { geocodeAddress, GeocodingResult } from '@/lib/utils/geocoding';
+import { GeocodingResult } from '@/lib/utils/geocoding';
 import { detectUserLocation } from '@/lib/utils/ip-geolocation';
 
 interface SimpleAlgoliaSearchProps {
   searchParams: {
     q?: string;
-    practice_area?: string;
     location?: string;
-    tier?: string;
     radius?: string;
   };
 }
@@ -21,7 +19,8 @@ export function SimpleAlgoliaSearch({ searchParams }: SimpleAlgoliaSearchProps) 
   const [query, setQuery] = useState(searchParams.q || '');
   const [results, setResults] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isConfigured, setIsConfigured] = useState(false);
+  const [isConfigured, setIsConfigured] = useState(true); // Start as true, will be set to false if API fails
+  const [isCheckingConfig, setIsCheckingConfig] = useState(false);
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
   const [manualLocation, setManualLocation] = useState<string>('');
   const [geocodedManualLocation, setGeocodedManualLocation] = useState<GeocodingResult | null>(null);
@@ -33,10 +32,25 @@ export function SimpleAlgoliaSearch({ searchParams }: SimpleAlgoliaSearchProps) 
   const [ipLocationDetected, setIpLocationDetected] = useState(false);
 
   useEffect(() => {
-    // Check if Algolia is configured
-    const appId = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID;
-    const searchKey = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY;
-    setIsConfigured(!!(appId && searchKey));
+    // Check if Algolia is configured via API call
+    const checkAlgoliaStatus = async () => {
+      try {
+        console.log('🔍 Starting Algolia status check...');
+        const response = await fetch('/api/algolia-status');
+        const data = await response.json();
+        
+        console.log('🔍 Algolia status check response:', data);
+        if (!data.isConfigured) {
+          setIsConfigured(false);
+          console.log('🔍 Set isConfigured to false');
+        }
+      } catch (error) {
+        console.error('❌ Failed to check Algolia status:', error);
+        setIsConfigured(false);
+      }
+    };
+    
+    checkAlgoliaStatus();
   }, []);
 
   // Auto-detect user location from IP on page load
@@ -94,7 +108,16 @@ export function SimpleAlgoliaSearch({ searchParams }: SimpleAlgoliaSearchProps) 
     const geocodeLocation = async () => {
       setIsGeocoding(true);
       try {
-        const geocodingResult = await geocodeAddress(manualLocation);
+        const response = await fetch('/api/geocode', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ address: manualLocation }),
+        });
+        
+        const geocodingResult = await response.json();
+        
         if (!('error' in geocodingResult)) {
           setGeocodedManualLocation(geocodingResult);
         } else {
@@ -132,36 +155,25 @@ export function SimpleAlgoliaSearch({ searchParams }: SimpleAlgoliaSearchProps) 
         const searchLocation = userLocation || geocodedManualLocation;
         
         try {
-          const client = liteClient(
-            process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
-            process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY!
-          );
+          // Get Algolia credentials from server-side API
+          const configResponse = await fetch('/api/algolia-config');
+          const config = await configResponse.json();
+          
+          if (!config.appId || !config.searchKey) {
+            throw new Error('Algolia credentials not available');
+          }
+          
+          const client = liteClient(config.appId, config.searchKey);
     
           // Build search parameters for liteClient (start with basic config like test page)
           const searchParams_algolia: any = {
             indexName: 'attorneys',
-            query: query || '',
+            query: searchParams.q || query || '', // Prioritize URL parameter over local state
             hitsPerPage: 20
           };
-
-          // Handle practice area search with fuzzy matching
-          if (searchParams.practice_area) {
-            // Use fuzzy search for practice areas instead of exact filter
-            // This allows slug-based searches like "personal-injury" to match "Personal Injury"
-            if (query) {
-              // If both query and practice_area are provided, combine them
-              searchParams_algolia.query = `${query} ${searchParams.practice_area}`;
-            } else {
-              // If only practice_area is provided, use it as the query
-              searchParams_algolia.query = searchParams.practice_area;
-            }
-          }
           
           // Only add exact filters for other criteria
-          const filters = [];
-          if (searchParams.tier) {
-            filters.push(`membership_tier:"${searchParams.tier}"`);
-          }
+          const filters: string[] = [];
           if (filters.length > 0) {
             searchParams_algolia.filters = filters;
           }
@@ -320,8 +332,6 @@ export function SimpleAlgoliaSearch({ searchParams }: SimpleAlgoliaSearchProps) 
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 query,
-                practice_area: searchParams.practice_area,
-                tier: searchParams.tier,
                 location: searchLocation || geocodedManualLocation,
                 radius: selectedRadius
               })
@@ -354,21 +364,28 @@ export function SimpleAlgoliaSearch({ searchParams }: SimpleAlgoliaSearchProps) 
 
     const timeoutId = setTimeout(performSearch, 300); // Debounce search
     return () => clearTimeout(timeoutId);
-  }, [query, searchParams, isConfigured, userLocation, selectedRadius, geocodedManualLocation]);
+  }, [query, searchParams.q, searchParams.location, searchParams.radius, isConfigured, userLocation, selectedRadius, geocodedManualLocation]);
 
   if (!isConfigured) {
     return (
-      <div className="text-center py-12">
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 max-w-md mx-auto">
-          <h3 className="text-lg font-medium text-yellow-800 mb-2">
-            Algolia Not Configured
+      <div className="max-w-2xl mx-auto text-center py-12">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-8">
+          <svg className="mx-auto h-12 w-12 text-red-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <h3 className="text-lg font-semibold text-red-900 mb-2">
+            Search Service Unavailable
           </h3>
-          <p className="text-sm text-yellow-700 mb-4">
-            Please add your Algolia API keys to your `.env.local` file to enable advanced search features.
+          <p className="text-red-700 mb-4">
+            The attorney search service is not properly configured. Please contact the site administrator.
           </p>
-          <p className="text-xs text-yellow-600">
-            Falling back to basic Supabase search.
-          </p>
+          <details className="text-left text-sm text-red-600 mt-4">
+            <summary className="cursor-pointer font-medium">Technical Details</summary>
+            <pre className="mt-2 p-2 bg-red-100 rounded">
+              Missing Algolia credentials.
+              Check .env.local file and restart server.
+            </pre>
+          </details>
         </div>
       </div>
     );
@@ -540,14 +557,9 @@ export function SimpleAlgoliaSearch({ searchParams }: SimpleAlgoliaSearchProps) 
 
         {/* Active Filters */}
         <div className="flex flex-wrap gap-2">
-          {searchParams.practice_area && (
+          {searchParams.q && (
             <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
-              Practice Area: {searchParams.practice_area}
-            </span>
-          )}
-          {searchParams.tier && (
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
-              Tier: {searchParams.tier}
+              Keywords: {searchParams.q}
             </span>
           )}
           {searchParams.location && (
@@ -623,7 +635,6 @@ export function SimpleAlgoliaSearch({ searchParams }: SimpleAlgoliaSearchProps) 
                 <option value="relevance">Relevance</option>
                 <option value="rating">Rating</option>
                 <option value="distance">Distance</option>
-                <option value="tier">Membership Tier</option>
               </select>
             </div>
           </div>
@@ -631,7 +642,7 @@ export function SimpleAlgoliaSearch({ searchParams }: SimpleAlgoliaSearchProps) 
           {/* Attorney Cards */}
           <div className="space-y-4">
             {results.map((attorney) => (
-              <AttorneyCard key={attorney.objectID} attorney={attorney} />
+              <AttorneyCardHorizontal key={attorney.objectID} attorney={attorney} />
             ))}
           </div>
 

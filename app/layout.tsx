@@ -2,6 +2,19 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Navigation } from "@/components/layout/Navigation";
+import { validateAlgoliaEnv, logEnvStatus } from "@/lib/utils/env-validation";
+
+// Validate environment variables on startup
+if (process.env.NODE_ENV === 'development') {
+  const algoliaValidation = validateAlgoliaEnv();
+  if (!algoliaValidation.isValid) {
+    logEnvStatus('⚠️  Environment Validation Warning');
+    console.warn('Algolia environment variables are missing. Search functionality will be limited.');
+    console.warn('Missing variables:', algoliaValidation.missingVars.join(', '));
+  } else {
+    console.log('✅ Algolia environment variables validated successfully');
+  }
+}
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

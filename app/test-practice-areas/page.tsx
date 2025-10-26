@@ -51,7 +51,7 @@ export default function TestPracticeAreas() {
       const practiceAreasResponse = await fetch('/api/practice-areas');
       const practiceAreasData = await practiceAreasResponse.json();
       
-      if (!practiceAreasData.success || !practiceAreasData.categories || practiceAreasData.categories.length === 0) {
+      if (!practiceAreasData.categories || practiceAreasData.categories.length === 0) {
         throw new Error('No practice areas available for testing');
       }
 

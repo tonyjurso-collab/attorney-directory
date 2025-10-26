@@ -7,7 +7,21 @@ export async function GET() {
     
     const { data, error } = await supabase
       .from('practice_area_categories')
-      .select('id, name, slug, lp_campaign_id, lp_supplier_id, lp_key, lp_config')
+      .select(`
+        id,
+        name,
+        slug,
+        description,
+        lp_campaign_id,
+        lp_supplier_id,
+        lp_key,
+        lp_config,
+        practice_areas (
+          id,
+          name,
+          slug
+        )
+      `)
       .order('name');
 
     if (error) {
@@ -15,7 +29,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Failed to fetch practice areas' }, { status: 500 });
     }
 
-    return NextResponse.json(data || []);
+    return NextResponse.json({ categories: data || [] });
   } catch (error) {
     console.error('Error in practice-areas API:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

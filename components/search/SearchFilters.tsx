@@ -2,36 +2,17 @@
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { MapPin, Filter, X } from 'lucide-react';
+import { MapPin, Search, X } from 'lucide-react';
 
 interface SearchFiltersProps {
   searchParams: {
     q?: string;
-    practice_area?: string;
     location?: string;
-    tier?: string;
     radius?: string;
   };
 }
 
-const practiceAreas = [
-  { id: 'personal-injury', name: 'Personal Injury' },
-  { id: 'family-law', name: 'Family Law' },
-  { id: 'criminal-defense', name: 'Criminal Defense' },
-  { id: 'business-law', name: 'Business Law' },
-  { id: 'real-estate-law', name: 'Real Estate Law' },
-  { id: 'estate-planning', name: 'Estate Planning' },
-  { id: 'immigration-law', name: 'Immigration Law' },
-  { id: 'employment-law', name: 'Employment Law' },
-  { id: 'bankruptcy', name: 'Bankruptcy' },
-  { id: 'dui-defense', name: 'DUI/DWI Defense' },
-];
 
-const membershipTiers = [
-  { id: 'exclusive', name: 'Exclusive', description: 'Premium features' },
-  { id: 'standard', name: 'Standard', description: 'Enhanced visibility' },
-  { id: 'free', name: 'Free', description: 'Basic listing' },
-];
 
 const radiusOptions = [
   { value: '5', label: '5 miles' },
@@ -45,9 +26,8 @@ export function SearchFilters({ searchParams }: SearchFiltersProps) {
   const router = useRouter();
   const currentSearchParams = useSearchParams();
   const [filters, setFilters] = useState({
-    practice_area: searchParams.practice_area || '',
+    q: searchParams.q || '',
     location: searchParams.location || '',
-    tier: searchParams.tier || '',
     radius: searchParams.radius || '25',
   });
 
@@ -68,16 +48,14 @@ export function SearchFilters({ searchParams }: SearchFiltersProps) {
 
   const clearFilters = () => {
     setFilters({
-      practice_area: '',
+      q: '',
       location: '',
-      tier: '',
       radius: '25',
     });
     
     const params = new URLSearchParams(currentSearchParams);
-    params.delete('practice_area');
+    params.delete('q');
     params.delete('location');
-    params.delete('tier');
     params.delete('radius');
     
     router.push(`/search?${params.toString()}`);
@@ -101,23 +79,26 @@ export function SearchFilters({ searchParams }: SearchFiltersProps) {
         </div>
       )}
 
-      {/* Practice Area Filter */}
+      {/* Keyword Search */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Practice Area
+          Search Keywords
         </label>
-        <select
-          value={filters.practice_area}
-          onChange={(e) => updateFilter('practice_area', e.target.value)}
-          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        >
-          <option value="">All Practice Areas</option>
-          {practiceAreas.map((area) => (
-            <option key={area.id} value={area.id}>
-              {area.name}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search className="h-4 w-4 text-gray-400" />
+          </div>
+          <input
+            type="text"
+            placeholder="e.g., personal injury, divorce, criminal defense..."
+            value={filters.q}
+            onChange={(e) => updateFilter('q', e.target.value)}
+            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+        <p className="mt-1 text-xs text-gray-500">
+          Search by practice area, attorney name, or firm name
+        </p>
       </div>
 
       {/* Location Filter */}
@@ -159,34 +140,6 @@ export function SearchFilters({ searchParams }: SearchFiltersProps) {
         </div>
       )}
 
-      {/* Membership Tier Filter */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Membership Tier
-        </label>
-        <div className="space-y-2">
-          {membershipTiers.map((tier) => (
-            <label key={tier.id} className="flex items-center">
-              <input
-                type="radio"
-                name="tier"
-                value={tier.id}
-                checked={filters.tier === tier.id}
-                onChange={(e) => updateFilter('tier', e.target.value)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-              />
-              <div className="ml-3">
-                <div className="text-sm font-medium text-gray-700">
-                  {tier.name}
-                </div>
-                <div className="text-xs text-gray-500">
-                  {tier.description}
-                </div>
-              </div>
-            </label>
-          ))}
-        </div>
-      </div>
 
       {/* Active Filters Display */}
       {hasActiveFilters && (
@@ -195,11 +148,11 @@ export function SearchFilters({ searchParams }: SearchFiltersProps) {
             Active Filters:
           </div>
           <div className="flex flex-wrap gap-2">
-            {filters.practice_area && (
+            {filters.q && (
               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                {practiceAreas.find(pa => pa.id === filters.practice_area)?.name}
+                Keywords: {filters.q}
                 <button
-                  onClick={() => updateFilter('practice_area', '')}
+                  onClick={() => updateFilter('q', '')}
                   className="ml-1 hover:text-blue-600"
                 >
                   <X className="h-3 w-3" />
@@ -219,17 +172,6 @@ export function SearchFilters({ searchParams }: SearchFiltersProps) {
               </span>
             )}
             
-            {filters.tier && (
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                {membershipTiers.find(t => t.id === filters.tier)?.name}
-                <button
-                  onClick={() => updateFilter('tier', '')}
-                  className="ml-1 hover:text-purple-600"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </span>
-            )}
           </div>
         </div>
       )}

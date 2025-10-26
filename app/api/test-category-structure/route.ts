@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     const practiceAreasResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/practice-areas`);
     const practiceAreasData = await practiceAreasResponse.json();
     
-    if (!practiceAreasData.success || !practiceAreasData.categories || practiceAreasData.categories.length === 0) {
+    if (!practiceAreasData.categories || practiceAreasData.categories.length === 0) {
       throw new Error('No practice areas available for testing');
     }
 

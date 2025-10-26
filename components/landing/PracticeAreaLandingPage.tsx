@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AttorneyCard } from '@/components/attorney/AttorneyCard';
+import { AttorneyCardVertical } from '@/components/attorney';
 import { HeroSection } from './HeroSection';
 import { PracticeAreaContent } from './PracticeAreaContent';
 
@@ -163,10 +163,9 @@ export function PracticeAreaLandingPage({
           {!loading && !error && attorneys.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {attorneys.map((attorney) => (
-                <AttorneyCard 
+                <AttorneyCardVertical 
                   key={attorney.id} 
                   attorney={attorney}
-                  showContactButton={true}
                 />
               ))}
             </div>

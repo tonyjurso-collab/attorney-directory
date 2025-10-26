@@ -54,8 +54,20 @@ export function DynamicLeadForm({ attorney, practiceArea, state, category, subca
       try {
         const response = await fetch('/api/practice-areas');
         if (response.ok) {
-          const areas = await response.json();
-          setPracticeAreas(areas);
+          const data = await response.json();
+          // Extract all practice areas from categories
+          const allPracticeAreas = data.categories?.flatMap((category: any) => 
+            category.practice_areas?.map((pa: any) => ({
+              id: pa.id,
+              name: pa.name,
+              slug: pa.slug,
+              lp_campaign_id: category.lp_campaign_id || 0,
+              lp_supplier_id: category.lp_supplier_id || 0,
+              lp_key: category.lp_key || '',
+              lp_config: category.lp_config || {}
+            })) || []
+          ) || [];
+          setPracticeAreas(allPracticeAreas);
         }
       } catch (error) {
         console.error('Error fetching practice areas:', error);

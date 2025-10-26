@@ -3,13 +3,14 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Menu, X, Search, User, LogOut, Settings } from 'lucide-react';
+import { Menu, X, Search, User, LogOut, Settings, Shield } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useEffect } from 'react';
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const supabase = createClient();
@@ -18,13 +19,36 @@ export function Navigation() {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
+      
+      if (user) {
+        // Get user profile to check role
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+        setUserProfile(profile);
+      }
+      
       setLoading(false);
     };
 
     getUser();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: any, session: any) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
       setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        // Get user profile to check role
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
+        setUserProfile(profile);
+      } else {
+        setUserProfile(null);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -70,6 +94,16 @@ export function Navigation() {
                   Attorney Registration
                 </Link>
               )}
+              
+              {userProfile?.role === 'admin' && (
+                <Link
+                  href="/admin"
+                  className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium flex items-center"
+                >
+                  <Shield className="h-4 w-4 mr-1" />
+                  Admin Dashboard
+                </Link>
+              )}
             </div>
           </div>
 
@@ -87,6 +121,16 @@ export function Navigation() {
                     <User className="h-4 w-4 mr-1" />
                     Dashboard
                   </Link>
+                  
+                  {userProfile?.role === 'admin' && (
+                    <Link
+                      href="/admin"
+                      className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium flex items-center"
+                    >
+                      <Shield className="h-4 w-4 mr-1" />
+                      Admin
+                    </Link>
+                  )}
                   
                   <div className="relative group">
                     <button className="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
@@ -178,6 +222,17 @@ export function Navigation() {
                 Join as Attorney
               </Link>
             )}
+            
+            {userProfile?.role === 'admin' && (
+              <Link
+                href="/admin"
+                className="text-gray-600 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium flex items-center"
+                onClick={() => setIsOpen(false)}
+              >
+                <Shield className="h-4 w-4 mr-2" />
+                Admin Dashboard
+              </Link>
+            )}
 
             {user ? (
               <>
@@ -189,6 +244,17 @@ export function Navigation() {
                   <User className="h-4 w-4 mr-2" />
                   Dashboard
                 </Link>
+                
+                {userProfile?.role === 'admin' && (
+                  <Link
+                    href="/admin"
+                    className="text-gray-600 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium flex items-center"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <Shield className="h-4 w-4 mr-2" />
+                    Admin Dashboard
+                  </Link>
+                )}
                 
                 <Link
                   href="/dashboard/profile"

@@ -1,12 +1,29 @@
 import { liteClient } from 'algoliasearch/lite';
 import { AttorneyWithDetails } from '@/lib/types/database';
 
-// Initialize Algolia client
-export const searchClient = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID && process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY
-  ? liteClient(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID, process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY)
-  : null;
+// Lazy initialization - only create client when actually needed
+let _searchClient: ReturnType<typeof liteClient> | null = null;
 
-export const attorneysIndex = searchClient?.initIndex('attorneys');
+export function getSearchClient() {
+  if (_searchClient) return _searchClient;
+  
+  const appId = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID;
+  const searchKey = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY;
+  
+  if (!appId || !searchKey) {
+    console.error('Algolia credentials not found:', { 
+      appId: appId ? 'SET' : 'MISSING', 
+      searchKey: searchKey ? 'SET' : 'MISSING' 
+    });
+    return null;
+  }
+  
+  _searchClient = liteClient(appId, searchKey);
+  return _searchClient;
+}
+
+export const searchClient = getSearchClient();
+// Note: liteClient doesn't have initIndex method, we'll use search directly
 
 // Transform attorney data for Algolia indexing
 export function transformAttorneyForAlgolia(attorney: AttorneyWithDetails) {

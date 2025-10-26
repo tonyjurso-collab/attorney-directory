@@ -1,14 +1,17 @@
+/**
+ * @deprecated This component is deprecated and will be removed in a future version.
+ * All attorney searches now use Algolia exclusively for better geo-search capabilities.
+ * Use SimpleAlgoliaSearch component instead.
+ */
 import { Suspense } from 'react';
-import { AttorneyCard } from '@/components/attorney/AttorneyCard';
+import { AttorneyCardHorizontal } from '@/components/attorney';
 import { createClient } from '@/lib/supabase/server';
 import { AttorneyWithDetails } from '@/lib/types/database';
 
 interface SearchResultsProps {
   searchParams: {
     q?: string;
-    practice_area?: string;
     location?: string;
-    tier?: string;
     radius?: string;
   };
 }
@@ -39,8 +42,10 @@ async function searchAttorneys(searchParams: SearchResultsProps['searchParams'])
       `)
       .eq('is_active', true);
 
-    if (searchParams.tier) {
-      query = query.eq('membership_tier', searchParams.tier);
+    // Add keyword search if provided
+    if (searchParams.q) {
+      // Search across multiple fields for keyword matches
+      query = query.or(`first_name.ilike.%${searchParams.q}%,last_name.ilike.%${searchParams.q}%,firm_name.ilike.%${searchParams.q}%,bio.ilike.%${searchParams.q}%`);
     }
 
     if (searchParams.location) {
@@ -56,23 +61,16 @@ async function searchAttorneys(searchParams: SearchResultsProps['searchParams'])
       return [];
     }
 
-    // Transform and filter attorneys
-    let transformedAttorneys = attorneys?.map((attorney: any) => ({
+    // Transform attorneys
+    const transformedAttorneys = attorneys?.map((attorney: any) => ({
       ...attorney,
       practice_areas: attorney.attorney_practice_areas?.map((apa: any) => ({
         id: apa.practice_areas?.id,
         name: apa.practice_areas?.name,
         slug: apa.practice_areas?.slug,
         is_primary: apa.is_primary,
-      })).filter(pa => pa.id) || [], // Filter out any null/undefined practice areas
+      })).filter((pa: any) => pa.id) || [], // Filter out any null/undefined practice areas
     })) || [];
-
-    // Apply practice area filter after transformation
-    if (searchParams.practice_area) {
-      transformedAttorneys = transformedAttorneys.filter(attorney => 
-        attorney.practice_areas.some(pa => pa.slug === searchParams.practice_area)
-      );
-    }
 
     return transformedAttorneys;
   } catch (error) {
@@ -116,7 +114,7 @@ export async function SearchResults({ searchParams }: SearchResultsProps) {
             {attorneys.length} Attorney{attorneys.length !== 1 ? 's' : ''} Found
           </h2>
           <p className="text-sm text-gray-600">
-            Sorted by membership tier and relevance
+            Sorted by relevance
           </p>
         </div>
         
@@ -126,7 +124,6 @@ export async function SearchResults({ searchParams }: SearchResultsProps) {
             <option value="relevance">Relevance</option>
             <option value="rating">Rating</option>
             <option value="distance">Distance</option>
-            <option value="tier">Membership Tier</option>
           </select>
         </div>
       </div>
@@ -134,7 +131,7 @@ export async function SearchResults({ searchParams }: SearchResultsProps) {
       {/* Attorney Cards */}
       <div className="space-y-4">
         {attorneys.map((attorney) => (
-          <AttorneyCard key={attorney.id} attorney={attorney} />
+          <AttorneyCardHorizontal key={attorney.id} attorney={attorney} />
         ))}
       </div>
 
