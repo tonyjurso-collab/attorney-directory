@@ -22,13 +22,6 @@ export function LoginForm() {
   const router = useRouter();
   const supabase = createClient();
 
-  // Debug Supabase client
-  console.log('🔧 Supabase client:', supabase);
-  console.log('🔧 Supabase auth methods:', typeof supabase.auth);
-  console.log('🔧 Environment check:', {
-    url: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'MISSING',
-    key: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'SET' : 'MISSING'
-  });
 
   const {
     register,
@@ -39,33 +32,21 @@ export function LoginForm() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    console.log('🚀 Login form submitted with data:', data);
     setIsLoading(true);
     setError('');
 
     try {
-      console.log('📡 Attempting Supabase authentication...');
       const { data: authData, error } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       });
 
-      console.log('🔐 Auth result:', { authData, error });
-      console.log('🔍 AuthData details:', {
-        hasUser: !!authData.user,
-        hasSession: !!authData.session,
-        userKeys: authData.user ? Object.keys(authData.user) : 'no user',
-        sessionKeys: authData.session ? Object.keys(authData.session) : 'no session'
-      });
-
       if (error) {
-        console.error('❌ Authentication error:', error);
         setError(error.message);
         return;
       }
 
       if (authData.user) {
-        console.log('✅ User authenticated:', authData.user.id);
         // Check if user has an attorney profile
         const { data: profile } = await supabase
           .from('profiles')
@@ -73,21 +54,15 @@ export function LoginForm() {
           .eq('id', authData.user.id)
           .single();
 
-        console.log('👤 Profile data:', profile);
-
         if (profile?.role === 'attorney') {
-          console.log('🏛️ Redirecting to dashboard...');
           router.push('/dashboard');
         } else {
-          console.log('🏠 Redirecting to homepage...');
           router.push('/');
         }
       } else {
-        console.error('❌ No user data returned from authentication');
         setError('Authentication failed - no user data returned. Please check your credentials and try again.');
       }
     } catch (error) {
-      console.error('💥 Unexpected error:', error);
       setError('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
@@ -110,9 +85,7 @@ export function LoginForm() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit, (errors) => {
-        console.log('❌ Form validation errors:', errors);
-      })} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
             Email Address
