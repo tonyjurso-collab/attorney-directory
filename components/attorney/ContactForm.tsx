@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { Phone, Mail, MapPin, MessageSquare, Send } from 'lucide-react';
 import { AttorneyWithDetails } from '@/lib/types/database';
 import { submitLeadToLeadProsper } from '@/lib/leadprosper/api';
+import { useLeadTracking, LeadTrackingElements, LeadTrackingFooter } from '@/lib/hooks/use-lead-tracking';
 
 const contactFormSchema = z.object({
   first_name: z.string().min(1, 'First name is required'),
@@ -30,6 +31,9 @@ export function ContactForm({ attorney }: ContactFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  
+  // Lead tracking hook
+  const { captureTrackingIds, isLoading: trackingLoading } = useLeadTracking();
 
   const {
     register,
@@ -49,9 +53,19 @@ export function ContactForm({ attorney }: ContactFormProps) {
     setErrorMessage('');
 
     try {
+      // Capture tracking IDs before submission
+      const { jornayaLeadId, trustedFormCertUrl } = captureTrackingIds();
+      
+      console.log('📋 ContactForm Compliance Data:', {
+        jornayaLeadId: jornayaLeadId || 'not captured',
+        trustedFormCertUrl: trustedFormCertUrl || 'not captured',
+      });
+
       const result = await submitLeadToLeadProsper({
         ...data,
         case_value: data.case_value ? parseFloat(data.case_value) : undefined,
+        jornaya_leadid: jornayaLeadId,
+        trustedform_cert_url: trustedFormCertUrl,
       }, attorney.id);
 
       if (result.success) {
@@ -120,6 +134,8 @@ export function ContactForm({ attorney }: ContactFormProps) {
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {/* Lead tracking elements */}
+        <LeadTrackingElements />
         {/* Name Fields */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -290,7 +306,7 @@ export function ContactForm({ attorney }: ContactFormProps) {
         {/* Submit Button */}
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || trackingLoading}
           className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
         >
           {isSubmitting ? (
@@ -308,13 +324,11 @@ export function ContactForm({ attorney }: ContactFormProps) {
             </>
           )}
         </button>
+
+        {/* Lead tracking footer */}
+        <LeadTrackingFooter />
       </form>
 
-      <div className="mt-4 text-xs text-gray-500">
-        <p>
-          By submitting this form, you agree to be contacted by {attorney.first_name} regarding your legal matter.
-        </p>
-      </div>
     </div>
   );
 }

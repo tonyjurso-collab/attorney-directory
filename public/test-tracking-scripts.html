@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Tracking Scripts</title>
+</head>
+<body>
+    <h1>Tracking Scripts Test</h1>
+    <div id="status"></div>
+    <button onclick="testTracking()">Test Tracking IDs</button>
+    
+    <script>
+        // Load Jornaya LeadID script
+        const jornayaScript = document.createElement('script');
+        jornayaScript.src = 'https://secure.leadid.com/leadid.js';
+        jornayaScript.async = true;
+        jornayaScript.onload = () => {
+            console.log('✅ Jornaya LeadID script loaded');
+            document.getElementById('status').innerHTML += '<p>✅ Jornaya LeadID script loaded</p>';
+        };
+        jornayaScript.onerror = () => {
+            console.error('❌ Jornaya LeadID script failed');
+            document.getElementById('status').innerHTML += '<p>❌ Jornaya LeadID script failed</p>';
+        };
+        document.head.appendChild(jornayaScript);
+
+        // Load TrustedForm script
+        const trustedFormScript = document.createElement('script');
+        trustedFormScript.src = 'https://api.trustedform.com/trustedform.js';
+        trustedFormScript.async = true;
+        trustedFormScript.onload = () => {
+            console.log('✅ TrustedForm script loaded');
+            document.getElementById('status').innerHTML += '<p>✅ TrustedForm script loaded</p>';
+        };
+        trustedFormScript.onerror = () => {
+            console.error('❌ TrustedForm script failed');
+            document.getElementById('status').innerHTML += '<p>❌ TrustedForm script failed</p>';
+        };
+        document.head.appendChild(trustedFormScript);
+
+        function testTracking() {
+            console.log('Testing tracking IDs...');
+            
+            // Test Jornaya LeadID
+            if (window.LeadID && typeof window.LeadID.getLeadId === 'function') {
+                try {
+                    const jornayaId = window.LeadID.getLeadId();
+                    console.log('✅ Jornaya LeadID:', jornayaId);
+                    document.getElementById('status').innerHTML += `<p>✅ Jornaya LeadID: ${jornayaId}</p>`;
+                } catch (error) {
+                    console.error('❌ Error getting Jornaya LeadID:', error);
+                    document.getElementById('status').innerHTML += '<p>❌ Error getting Jornaya LeadID</p>';
+                }
+            } else {
+                console.warn('⚠️ Jornaya LeadID not available');
+                document.getElementById('status').innerHTML += '<p>⚠️ Jornaya LeadID not available</p>';
+            }
+
+            // Test TrustedForm
+            if (window.TrustedForm && typeof window.TrustedForm.createToken === 'function') {
+                try {
+                    const trustedFormToken = window.TrustedForm.createToken();
+                    const trustedFormUrl = `https://cert.trustedform.com/${trustedFormToken}`;
+                    console.log('✅ TrustedForm token:', trustedFormToken);
+                    console.log('✅ TrustedForm URL:', trustedFormUrl);
+                    document.getElementById('status').innerHTML += `<p>✅ TrustedForm token: ${trustedFormToken}</p>`;
+                    document.getElementById('status').innerHTML += `<p>✅ TrustedForm URL: ${trustedFormUrl}</p>`;
+                } catch (error) {
+                    console.error('❌ Error getting TrustedForm token:', error);
+                    document.getElementById('status').innerHTML += '<p>❌ Error getting TrustedForm token</p>';
+                }
+            } else {
+                console.warn('⚠️ TrustedForm not available');
+                document.getElementById('status').innerHTML += '<p>⚠️ TrustedForm not available</p>';
+            }
+        }
+    </script>
+</body>
+</html>

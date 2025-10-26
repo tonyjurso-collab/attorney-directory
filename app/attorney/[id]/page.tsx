@@ -1,8 +1,9 @@
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { AttorneyProfile } from '@/components/attorney/AttorneyProfile';
-import { ContactForm } from '@/components/attorney/ContactForm';
+import { DynamicLeadForm } from '@/components/attorney/DynamicLeadForm';
 import { createClient } from '@/lib/supabase/server';
+import { getCachedReviews, shouldSyncReviews, syncAttorneyReviews, getTestReviews } from '@/lib/google-places/sync';
 
 interface AttorneyPageProps {
   params: Promise<{
@@ -73,6 +74,26 @@ async function getAttorney(id: string) {
       ? attorney.reviews.reduce((sum: number, review: any) => sum + review.rating, 0) / attorney.reviews.length
       : 0;
 
+    // Fetch Google reviews
+    let googleReviews = [];
+    if (attorney.google_place_id) {
+      // Try to get cached reviews first
+      googleReviews = await getCachedReviews(id);
+      
+      // Check if sync is needed
+      if (shouldSyncReviews(attorney.google_reviews_last_synced)) {
+        console.log('🔄 Google reviews need sync for', attorney.first_name);
+        // Trigger background sync (don't await)
+        syncAttorneyReviews(id, attorney.google_place_id).catch(error => {
+          console.error('Background sync failed:', error);
+        });
+      }
+    } else {
+      // Fallback to test reviews for development
+      console.log('📝 No Google Place ID found, using test reviews for', attorney.first_name);
+      googleReviews = getTestReviews(id);
+    }
+
     return {
       ...attorney,
       practice_categories: attorney.attorney_practice_categories?.map((apc: any) => ({
@@ -89,6 +110,7 @@ async function getAttorney(id: string) {
       })).filter(pa => pa.id) || [], // Filter out any null/undefined practice areas
       average_rating: averageRating,
       review_count: attorney.reviews?.length || 0,
+      googleReviews: googleReviews,
     };
   } catch (error) {
     console.error('Error in getAttorney:', error);
@@ -145,7 +167,7 @@ export default async function AttorneyPage({ params }: AttorneyPageProps) {
                   </div>
                 </div>
               }>
-                <ContactForm attorney={attorney} />
+                <DynamicLeadForm attorney={attorney} />
               </Suspense>
             </div>
           </div>

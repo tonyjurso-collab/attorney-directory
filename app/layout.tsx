@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Script from "next/script";
 import "./globals.css";
 import { Navigation } from "@/components/layout/Navigation";
 
@@ -39,19 +38,6 @@ export default function RootLayout({
       >
         <Navigation />
         {children}
-        
-        {/* TrustedForm Certificate */}
-        <Script
-          src="https://api.trustedform.com/trustedform.js"
-          strategy="afterInteractive"
-          id="tf_script"
-        />
-        
-        {/* Jornaya LeadID */}
-        <Script
-          src="https://cdn.tp-leadid.com/co.ash-leadid.js?cdnver=0.0.0"
-          strategy="afterInteractive"
-        />
       </body>
     </html>
   );

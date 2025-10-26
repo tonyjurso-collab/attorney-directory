@@ -56,6 +56,9 @@ function transformAttorneyForAlgolia(attorney: AttorneyWithDetails) {
     practice_area_names: attorney.practice_areas.map(pa => pa.name),
     average_rating: attorney.average_rating,
     review_count: attorney.review_count,
+    // Google Reviews data
+    google_rating: (attorney as any).google_rating || 0,
+    google_review_count: (attorney as any).google_review_count || 0,
     // Include geocoding data if available
     latitude: attorney.latitude,
     longitude: attorney.longitude,
