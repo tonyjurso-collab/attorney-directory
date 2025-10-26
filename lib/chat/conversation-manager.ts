@@ -1,4 +1,6 @@
 import { getCityStateFromZipCode } from '@/lib/utils/zipcode-geocoding';
+import fs from 'fs';
+import path from 'path';
 
 export function getNextQuestion(
   collectedFields: Record<string, any>,

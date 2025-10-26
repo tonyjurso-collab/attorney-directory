@@ -521,8 +521,9 @@ export function ChatWidget({
   // Sidebar layout
   if (position === 'sidebar') {
     return (
-      <div 
+      <form 
         className="bg-white rounded-lg shadow-lg border border-gray-200 h-[600px] flex flex-col overflow-hidden"
+        onSubmit={(e) => e.preventDefault()}
       >
         {/* TCPA Disclosure - Hidden from view but required for Jornaya */}
         <label className="hidden">
@@ -602,7 +603,7 @@ export function ChatWidget({
         
         {/* Jornaya LeadID Field - Hardcoded for capture */}
         <input type="hidden" name="jornaya_leadid" id="jornaya_leadid_field" />
-      </div>
+      </form>
     );
   }
 
@@ -631,8 +632,9 @@ export function ChatWidget({
 
       {/* Chat window */}
       {isOpen && (
-        <div 
+        <form 
           className="fixed bottom-6 right-6 w-96 max-w-[calc(100vw-3rem)] h-[600px] max-h-[calc(100vh-3rem)] bg-white rounded-lg shadow-2xl border border-gray-200 flex flex-col z-50 animate-in slide-in-from-bottom-4 duration-300"
+          onSubmit={(e) => e.preventDefault()}
         >
           {/* TCPA Disclosure - Hidden from view but required for Jornaya */}
           <label className="hidden">
@@ -728,7 +730,7 @@ export function ChatWidget({
           
           {/* Jornaya LeadID Field - Hardcoded for capture */}
           <input type="hidden" name="jornaya_leadid" id="jornaya_leadid_field" />
-        </div>
+        </form>
       )}
     </>
   );
