@@ -25,6 +25,10 @@ export function LoginForm() {
   // Debug Supabase client
   console.log('🔧 Supabase client:', supabase);
   console.log('🔧 Supabase auth methods:', typeof supabase.auth);
+  console.log('🔧 Environment check:', {
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'MISSING',
+    key: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'SET' : 'MISSING'
+  });
 
   const {
     register,
@@ -47,6 +51,12 @@ export function LoginForm() {
       });
 
       console.log('🔐 Auth result:', { authData, error });
+      console.log('🔍 AuthData details:', {
+        hasUser: !!authData.user,
+        hasSession: !!authData.session,
+        userKeys: authData.user ? Object.keys(authData.user) : 'no user',
+        sessionKeys: authData.session ? Object.keys(authData.session) : 'no session'
+      });
 
       if (error) {
         console.error('❌ Authentication error:', error);
@@ -72,6 +82,9 @@ export function LoginForm() {
           console.log('🏠 Redirecting to homepage...');
           router.push('/');
         }
+      } else {
+        console.error('❌ No user data returned from authentication');
+        setError('Authentication failed - no user data returned. Please check your credentials and try again.');
       }
     } catch (error) {
       console.error('💥 Unexpected error:', error);
