@@ -16,10 +16,12 @@ interface AttorneyPageProps {
 
 const getAttorney = cache(async (id: string) => {
   try {
+    console.log('🔍 Fetching attorney with ID:', id);
     const supabase = await createClient();
     
     // Check if Supabase is properly configured
     if (!supabase || typeof supabase.from !== 'function') {
+      console.error('❌ Supabase not properly configured');
       return null;
     }
     
@@ -57,14 +59,19 @@ const getAttorney = cache(async (id: string) => {
       .eq('is_active', true)
       .single();
 
+    console.log('📋 Attorney query result:', { attorney: !!attorney, error: error?.message });
+
     if (error) {
-      console.error('Error fetching attorney:', error);
+      console.error('❌ Error fetching attorney:', error);
       return null;
     }
     
     if (!attorney) {
+      console.log('❌ No attorney found with ID:', id);
       return null;
     }
+
+    console.log('✅ Attorney found:', attorney.first_name, attorney.last_name);
 
     // Calculate average rating
     const averageRating = attorney.reviews?.length 
@@ -114,11 +121,16 @@ const getAttorney = cache(async (id: string) => {
 export default async function AttorneyPage({ params }: AttorneyPageProps) {
   // Await the params Promise in Next.js 15
   const resolvedParams = await params;
+  console.log('🎯 AttorneyPage called with ID:', resolvedParams.id);
+  
   const attorney = await getAttorney(resolvedParams.id);
 
   if (!attorney) {
+    console.log('❌ Attorney not found, calling notFound()');
     notFound();
   }
+
+  console.log('✅ Rendering attorney profile for:', attorney.first_name, attorney.last_name);
 
   return (
     <div className="min-h-screen bg-gray-50">

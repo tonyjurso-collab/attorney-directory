@@ -1,6 +1,7 @@
 import { Star, MapPin, Phone, Mail, Globe, Award, Calendar, Users } from 'lucide-react';
 import { AttorneyWithDetails } from '@/lib/types/database';
 import { formatPhoneNumber } from '@/lib/utils/format';
+import { AttorneyAvatar } from '@/components/ui/AttorneyAvatar';
 
 interface AttorneyProfileProps {
   attorney: AttorneyWithDetails & {
@@ -53,17 +54,13 @@ export function AttorneyProfile({ attorney }: AttorneyProfileProps) {
         <div className="flex items-start space-x-6">
           {/* Profile Image */}
           <div className="flex-shrink-0">
-            {attorney.profile_image_url ? (
-              <img
-                src={attorney.profile_image_url}
-                alt={`${attorney.first_name} ${attorney.last_name}`}
-                className="w-24 h-24 rounded-full object-cover border-4 border-white"
-              />
-            ) : (
-              <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-2xl border-4 border-white">
-                {attorney.first_name[0]}{attorney.last_name[0]}
-              </div>
-            )}
+            <AttorneyAvatar
+              profileImageUrl={attorney.profile_image_url}
+              firstName={attorney.first_name}
+              lastName={attorney.last_name}
+              size="xl"
+              className="border-4 border-white"
+            />
           </div>
 
           {/* Basic Info */}

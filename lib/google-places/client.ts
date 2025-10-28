@@ -108,6 +108,107 @@ export function getGoogleMapsUrl(placeId: string): string {
 }
 
 /**
+ * Get city and state from a zip code using Google Places API
+ * @param zipCode - 5-digit US zip code
+ * @returns Object with city and state or null if not found
+ */
+export async function getCityStateFromZipCode(zipCode: string): Promise<{ city: string; state: string } | null> {
+  if (!GOOGLE_PLACES_API_KEY) {
+    console.warn('Google Places API key not configured, using mock data for testing');
+    // Mock data for testing - remove this in production
+    const mockData: Record<string, { city: string; state: string }> = {
+      '28034': { city: 'Charlotte', state: 'NC' },
+      '90210': { city: 'Beverly Hills', state: 'CA' },
+      '10001': { city: 'New York', state: 'NY' },
+      '60601': { city: 'Chicago', state: 'IL' },
+      '33101': { city: 'Miami', state: 'FL' },
+    };
+    
+    if (mockData[zipCode]) {
+      console.log(`✅ Mock lookup for zip code ${zipCode}:`, mockData[zipCode]);
+      return mockData[zipCode];
+    }
+    
+    return null;
+  }
+
+  if (!zipCode || !/^\d{5}$/.test(zipCode)) {
+    console.error('Invalid zip code format:', zipCode);
+    return null;
+  }
+
+  try {
+    // Use Google Places API Text Search to find location by zip code
+    const response = await fetch(
+      `${PLACES_API_BASE}/places:searchText`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': GOOGLE_PLACES_API_KEY,
+          'X-Goog-FieldMask': 'places.formattedAddress,places.addressComponents',
+        },
+        body: JSON.stringify({
+          textQuery: zipCode,
+          maxResultCount: 1,
+          languageCode: 'en',
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData: GooglePlacesError = await response.json();
+      console.error('Google Places API error for zip code lookup:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorData.error,
+      });
+      return null;
+    }
+
+    const data = await response.json();
+    
+    if (!data.places || data.places.length === 0) {
+      console.warn(`No location found for zip code: ${zipCode}`);
+      return null;
+    }
+
+    const place = data.places[0];
+    const addressComponents = place.addressComponents || [];
+    
+    // Extract city and state from address components
+    let city = '';
+    let state = '';
+    
+    for (const component of addressComponents) {
+      const types = component.types || [];
+      
+      if (types.includes('locality')) {
+        city = component.longText || component.shortText || '';
+      } else if (types.includes('administrative_area_level_1')) {
+        state = component.shortText || component.longText || '';
+      }
+    }
+
+    if (!city || !state) {
+      console.warn(`Could not extract city/state from zip code ${zipCode}:`, {
+        city,
+        state,
+        addressComponents,
+      });
+      return null;
+    }
+
+    console.log(`✅ Successfully resolved zip code ${zipCode} to:`, { city, state });
+
+    return { city, state };
+  } catch (error) {
+    console.error('Error fetching city/state from zip code:', error);
+    return null;
+  }
+}
+
+/**
  * Extract Google Place ID from various Google Maps URL formats
  * @param url - Google Maps URL
  * @returns Place ID string or null if not found

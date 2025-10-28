@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { AttorneyCardVertical } from '@/components/attorney';
 import { HeroSection } from './HeroSection';
 import { PracticeAreaContent } from './PracticeAreaContent';
+import { fadeIn, slideUp, staggerContainer, staggerItem } from '@/lib/animations/variants';
 
 interface PracticeAreaLandingPageProps {
   practiceArea: string;
@@ -14,7 +16,8 @@ interface PracticeAreaLandingPageProps {
 
 interface Attorney {
   id: string;
-  full_name: string;
+  first_name: string;
+  last_name: string;
   email: string;
   phone: string;
   bio: string;
@@ -123,9 +126,21 @@ export function PracticeAreaLandingPage({
       />
 
       {/* Attorneys Section */}
-      <div className="bg-gray-50 py-16">
+      <motion.div 
+        className="bg-gray-50 py-16"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        viewport={{ once: true }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+          <motion.div 
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            viewport={{ once: true }}
+          >
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
               {formatPracticeArea(practiceArea)} Attorneys in {formatState(state)}
             </h2>
@@ -133,7 +148,7 @@ export function PracticeAreaLandingPage({
               Browse our network of qualified {formatPracticeArea(practiceArea).toLowerCase()} attorneys 
               serving clients in {formatState(state)}.
             </p>
-          </div>
+          </motion.div>
 
           {loading && (
             <div className="text-center py-12">
@@ -161,17 +176,23 @@ export function PracticeAreaLandingPage({
           )}
 
           {!loading && !error && attorneys.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {attorneys.map((attorney) => (
-                <AttorneyCardVertical 
-                  key={attorney.id} 
-                  attorney={attorney}
-                />
+            <motion.div 
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+              variants={staggerContainer}
+              initial="initial"
+              animate="animate"
+            >
+              {attorneys.map((attorney, index) => (
+                <motion.div key={attorney.id} variants={staggerItem}>
+                  <AttorneyCardVertical 
+                    attorney={attorney}
+                  />
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

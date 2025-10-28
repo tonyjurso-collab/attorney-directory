@@ -58,12 +58,16 @@ export function ProfileOverview({ attorney }: ProfileOverviewProps) {
           {attorney.profile_image_url ? (
             <img
               src={attorney.profile_image_url}
-              alt={`${attorney.first_name} ${attorney.last_name}`}
+              alt={`${attorney.first_name || ''} ${attorney.last_name || ''}`.trim() || 'Attorney profile'}
               className="w-16 h-16 rounded-full object-cover"
             />
           ) : (
             <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg">
-              {attorney.first_name[0]}{attorney.last_name[0]}
+              {(() => {
+                const firstInitial = attorney.first_name?.[0] || '';
+                const lastInitial = attorney.last_name?.[0] || '';
+                return firstInitial + lastInitial || '?';
+              })()}
             </div>
           )}
           

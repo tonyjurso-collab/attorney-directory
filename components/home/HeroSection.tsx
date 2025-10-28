@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { MapPin, Search } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { getUserLocation } from '@/lib/utils/geolocation';
 import { detectUserLocation } from '@/lib/utils/ip-geolocation';
+import { fadeIn, slideUp, hoverScale } from '@/lib/animations/variants';
 
 export function HeroSection() {
   const router = useRouter();
@@ -78,18 +80,33 @@ export function HeroSection() {
       
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <div className="text-center">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+          <motion.h1 
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          >
             Find the Right
             <span className="block text-blue-300">Attorney for You</span>
-          </h1>
+          </motion.h1>
           
-          <p className="text-xl sm:text-2xl text-blue-100 mb-8 max-w-3xl mx-auto">
+          <motion.p 
+            className="text-xl sm:text-2xl text-blue-100 mb-8 max-w-3xl mx-auto"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+          >
             Connect with qualified legal professionals in your area. 
             Get matched with attorneys who specialize in your specific needs.
-          </p>
+          </motion.p>
 
           {/* Search Form */}
-          <div className="max-w-4xl mx-auto mb-8">
+          <motion.div 
+            className="max-w-4xl mx-auto mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
+          >
             <form onSubmit={handleSearch} className="space-y-4">
               {/* Main Search Input */}
               <div className="relative">
@@ -149,16 +166,18 @@ export function HeroSection() {
 
               {/* Search Button */}
               <div className="flex justify-center">
-                <button
+                <motion.button
                   type="submit"
                   className="inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                  whileHover={hoverScale}
+                  whileTap={{ scale: 0.98 }}
                 >
                   <Search className="h-5 w-5 mr-2" />
                   Find Attorneys
-                </button>
+                </motion.button>
               </div>
             </form>
-          </div>
+          </motion.div>
 
         </div>
       </div>

@@ -20,9 +20,135 @@ Content-Type: application/json
 
 ## Endpoints
 
-### Chat API
+### Chat API (New System)
 
 #### POST /api/chat
+
+Main chat endpoint for AI-powered conversations with enhanced field collection and validation.
+
+**Request Body**:
+```json
+{
+  "message": "I was in a car accident and got injured",
+  "meta": {
+    "location": "https://example.com/page",
+    "referrer": "https://google.com"
+  }
+}
+```
+
+**Response**:
+```json
+{
+  "reply": "I understand you were in a car accident and got injured. Let me ask you a few questions to connect you with the right attorney. What's your full name?",
+  "next_field": "first_name",
+  "prefill": {
+    "first_name": "John"
+  },
+  "complete": false,
+  "session_id": "session-123",
+  "debug": {
+    "collectedFields": {
+      "main_category": "personal_injury_law",
+      "sub_category": "car accident"
+    },
+    "mainCategory": "personal_injury_law",
+    "subCategory": "car accident",
+    "stage": "COLLECTING",
+    "transcriptLength": 2
+  }
+}
+```
+
+**Error Response**:
+```json
+{
+  "reply": "I'm having trouble connecting right now. Please try again in a moment, or feel free to call us directly.",
+  "complete": false,
+  "error": "Rate limit exceeded. Please wait a moment before sending another message.",
+  "errorCode": "RATE_LIMIT_ERROR"
+}
+```
+
+**Status Codes**:
+- `200` - Success
+- `400` - Invalid request
+- `429` - Rate limit exceeded
+- `500` - Server error
+
+#### POST /api/chat/reset
+
+Reset the current chat session.
+
+**Request Body**:
+```json
+{}
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "message": "Session reset successfully"
+}
+```
+
+#### POST /api/chat/submit
+
+Submit collected lead data for processing.
+
+**Request Body**:
+```json
+{
+  "sessionId": "session-123",
+  "trackingData": {
+    "jornayaLeadId": "jornaya-id-123",
+    "trustedFormCertUrl": "https://cert.trustedform.com/abc123"
+  }
+}
+```
+
+**Response**:
+```json
+{
+  "status": "queued",
+  "jobId": "lead_1234567890_abcdef",
+  "message": "Your information has been submitted successfully. You should hear from qualified attorneys soon."
+}
+```
+
+#### POST /api/cron/process-leads
+
+Process queued leads (protected endpoint).
+
+**Headers**:
+```
+x-cron-secret: your-cron-secret
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "summary": {
+    "processed": 5,
+    "succeeded": 4,
+    "failed": 1,
+    "totalTime": 1500
+  },
+  "details": [
+    {
+      "jobId": "lead_123",
+      "status": "success",
+      "processingTime": 300
+    }
+  ]
+}
+```
+
+### Legacy Chat API
+
+#### POST /api/chat (Legacy)
 
 Main chat endpoint for AI-powered conversations.
 
@@ -61,7 +187,7 @@ Main chat endpoint for AI-powered conversations.
 - `400` - Invalid request
 - `500` - Server error
 
-#### POST /api/chat/reset
+#### POST /api/chat/reset (Legacy)
 
 Reset the current chat session.
 
@@ -80,7 +206,7 @@ Reset the current chat session.
 }
 ```
 
-#### POST /api/chat/submit
+#### POST /api/chat/submit (Legacy)
 
 Submit a completed lead form.
 
@@ -363,7 +489,33 @@ interface Lead {
 }
 ```
 
-### Chat Session
+### Chat Session (New System)
+
+```typescript
+interface ChatSessionData {
+  sid: string;
+  ipAddress?: string;
+  userAgent?: string;
+  createdAt: string;
+  updatedAt: string;
+  expiresAt: string;
+  main_category?: string;
+  sub_category?: string;
+  stage: 'COLLECTING' | 'READY_TO_SUBMIT' | 'SUBMITTED' | 'FAILED_SUBMISSION';
+  answers: Record<string, any>;
+  asked: string[];
+  transcript: Array<{
+    role: 'user' | 'assistant' | 'system';
+    text: string;
+    timestamp: string;
+    metadata?: Record<string, any>;
+  }>;
+  leadId?: string;
+  leadStatus?: string;
+}
+```
+
+### Chat Session (Legacy)
 
 ```typescript
 interface ChatSession {
@@ -453,6 +605,19 @@ curl -X POST http://localhost:3000/api/lead-capture \
     "has_attorney": "no"
   }'
 ```
+
+## Migration Notes
+
+The new chat system is a complete rewrite of the original PHP implementation with the following improvements:
+
+- **Modern Architecture**: Next.js 15 with TypeScript
+- **Better Performance**: Redis caching and optimized queries
+- **Enhanced Reliability**: Comprehensive error handling and retry logic
+- **Improved Monitoring**: Structured logging and health checks
+- **Scalable Design**: Queue-based lead processing
+- **Better UX**: Real-time validation and error messages
+
+The system maintains backward compatibility with existing integrations while providing enhanced functionality and reliability.
 
 ## Support
 

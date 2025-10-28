@@ -10,6 +10,7 @@ import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
 import { ConsentModal } from './ConsentModal';
 import { TypingIndicator } from './TypingIndicator';
+import { getOrCreateSessionId, clearSessionId, setSessionId } from '@/lib/chat/remote-session';
 
 // Declare global types for tracking scripts
 declare global {
@@ -23,33 +24,45 @@ declare global {
   }
 }
 
-// Local API functions
-async function sendChatMessage(message: string, practiceArea?: string) {
+// Local API functions - Updated to use sessionStorage for session management
+async function sendChatMessage(message: string, meta?: { location?: string; referrer?: string }, sessionId?: string) {
+  // Use session ID from parameter or get/create from sessionStorage
+  const sid = sessionId || getOrCreateSessionId();
+  
+  const requestBody: any = { message, meta, session_id: sid };
+
   const response = await fetch('/api/chat', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ message, practiceArea }),
+    body: JSON.stringify(requestBody),
   });
 
   if (!response.ok) {
     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
   }
 
-  return response.json();
+  const result = await response.json();
+  
+  // Update sessionStorage with the session ID from response
+  if (result.session_id) {
+    setSessionId(result.session_id);
+  }
+
+  return result;
 }
 
-async function submitLead(leadData: any) {
-  console.log('📤 Submitting lead data:', leadData);
+async function submitLead(payload: { sessionId: string; trackingData: any }) {
+  console.log('📤 Submitting lead for session:', payload.sessionId);
   
   try {
-    const response = await fetch('/api/lead-capture', {
+    const response = await fetch('/api/chat/submit', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(leadData),
+      body: JSON.stringify(payload),
     });
 
     console.log('📡 Lead submission response:', {
@@ -73,12 +86,20 @@ async function submitLead(leadData: any) {
   }
 }
 
-async function resetConversation() {
+async function resetConversation(sessionId?: string) {
+  const requestBody: any = {};
+  
+  // Include session ID if available
+  if (sessionId) {
+    requestBody.session_id = sessionId;
+  }
+
   const response = await fetch('/api/chat/reset', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
+    body: JSON.stringify(requestBody),
   });
 
   if (!response.ok) {
@@ -119,6 +140,10 @@ export function ChatWidget({
     jornayaLeadId?: string;
     trustedFormCertUrl?: string;
   }>({});
+  const [currentField, setCurrentField] = useState<string | null>(null);
+  const [prefill, setPrefill] = useState<Record<string, string>>({});
+  const [isComplete, setIsComplete] = useState(false);
+  const [collectedAnswers, setCollectedAnswers] = useState<Record<string, any>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
@@ -301,32 +326,75 @@ export function ChatWidget({
     setIsTyping(true);
 
     try {
-      const response = await sendChatMessage(text, practiceArea);
+      const response = await sendChatMessage(text, {
+        location: window.location.href,
+        referrer: document.referrer,
+      });
+
+      console.log('📡 Chat API Response:', response);
+
+      // Session ID is now managed via sessionStorage in sendChatMessage
+
+      // Update collected answers from debug info
+      if (response.debug?.collectedFields) {
+        setCollectedAnswers(response.debug.collectedFields);
+      }
+
+      // Update current field and prefill
+      if (response.field_asked) {
+        setCurrentField(response.field_asked);
+      } else {
+        setCurrentField(null);
+      }
+
+      if (response.prefill) {
+        setPrefill(response.prefill);
+      }
+
+      // Update completion status
+      setIsComplete(response.complete || false);
 
       // Add assistant response only if there's content
-      if (response.answer && response.answer.trim()) {
+      if (response.reply && response.reply.trim()) {
         const assistantMessage: Message = {
           id: `assistant-${Date.now()}`,
           role: 'assistant',
-          content: response.answer,
+          content: response.reply,
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev, assistantMessage]);
       }
 
-      // Check if we need to show consent modal
-      if (response.submit_lead && response.lead_data) {
-        setLeadData(response.lead_data);
+      // Handle completion - show consent modal when form is complete
+      if (response.complete) {
+        console.log('✅ Form is complete, showing consent modal');
         setShowConsent(true);
+        
+        // Store the collected data for lead submission
+        if (response.debug && response.debug.collectedFields) {
+          setLeadData(response.debug.collectedFields);
+        }
       }
+
+      // Handle next field collection (if the new API provides this)
+      if (response.field_asked) {
+        console.log('📝 Next field to collect:', response.field_asked);
+        // The new system handles field collection automatically
+        // We can show a prefill hint if provided
+        if (response.prefill && response.prefill[response.field_asked]) {
+          console.log('💡 Prefill suggestion:', response.prefill[response.field_asked]);
+        }
+      }
+
     } catch (error) {
+      console.error('❌ Chat API Error:', error);
       setHasError(true);
+      
       // Show error message
       const errorMessage: Message = {
         id: `error-${Date.now()}`,
         role: 'assistant',
-        content:
-          "I'm having trouble connecting right now. Please try again in a moment, or feel free to call us directly.",
+        content: "I'm having trouble connecting right now. Please try again in a moment, or feel free to call us directly.",
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMessage]);
@@ -456,14 +524,19 @@ export function ChatWidget({
         trustedFormCertUrl: trustedFormCertUrl || 'NOT CAPTURED'
       });
 
-      // Update lead data with tracking IDs
-      const leadDataWithTracking = {
-        ...leadData,
-        jornaya_leadid: jornayaLeadId,
-        trustedform_cert_url: trustedFormCertUrl
-      };
-
-      await submitLead(leadDataWithTracking);
+      // Get current session ID from sessionStorage
+      const currentSessionId = getOrCreateSessionId();
+      
+      await submitLead({
+        sessionId: currentSessionId,
+        trackingData: {
+          jornayaLeadId: jornayaLeadId,
+          trustedFormCertUrl: trustedFormCertUrl
+        }
+      });
+      
+      // Clear session after successful submission
+      clearSessionId();
       setShowConsent(false);
 
       // Show success message
@@ -514,10 +587,14 @@ export function ChatWidget({
     try {
       // Reset server session
       console.log('📡 Calling resetConversation API...');
-      await resetConversation();
+      const currentSessionId = getOrCreateSessionId();
+      await resetConversation(currentSessionId);
     } catch (error) {
       console.error('❌ Error resetting conversation:', error);
     } finally {
+      // Clear sessionStorage
+      clearSessionId();
+      
       // Clear all client-side state immediately
       console.log('🧹 Clearing client-side state...');
       setMessages([]);
@@ -525,6 +602,10 @@ export function ChatWidget({
       setHasError(false);
       setShowConsent(false);
       setIsTyping(false);
+      setCollectedAnswers({});
+      setCurrentField(null);
+      setPrefill({});
+      setIsComplete(false);
       
       // Force add welcome message immediately after reset
       setTimeout(() => {

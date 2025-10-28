@@ -1,0 +1,272 @@
+{
+  "defaultWelcomeMessage": "Hello! I'm here to help you find the right attorney for your legal needs. What legal issue can I help you with today?",
+  "defaultDisclaimer": "I am not a lawyer and cannot provide legal advice. I can help connect you with qualified attorneys who can assist you with your legal matter.",
+  "practiceAreas": [
+    {
+      "name": "Personal Injury Law",
+      "slug": "personal_injury_law",
+      "description": "Legal representation for injury cases including car accidents, slip and falls, and medical malpractice",
+      "keywords": ["injury", "accident", "hurt", "injured", "damages", "pain", "suffering", "medical", "hospital", "doctor", "negligence"],
+      "initialMessage": "I understand you've been injured. Let me help you find a qualified personal injury attorney who can evaluate your case.",
+      "disclaimer": "I am not a lawyer and cannot provide legal advice. I can help connect you with qualified personal injury attorneys who can evaluate your case.",
+      "fields": [
+        {
+          "name": "first_name",
+          "question": "What's your first name?",
+          "type": "text",
+          "required": true,
+          "validation": "^[a-zA-Z\\s'-]{2,50}$",
+          "errorMessage": "Please enter a valid first name (2-50 characters, letters only)"
+        },
+        {
+          "name": "last_name",
+          "question": "What's your last name?",
+          "type": "text",
+          "required": true,
+          "validation": "^[a-zA-Z\\s'-]{2,50}$",
+          "errorMessage": "Please enter a valid last name (2-50 characters, letters only)"
+        },
+        {
+          "name": "email",
+          "question": "What's your email address?",
+          "type": "email",
+          "required": true,
+          "validation": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+          "errorMessage": "Please enter a valid email address"
+        },
+        {
+          "name": "phone",
+          "question": "What's your phone number?",
+          "type": "phone",
+          "required": true,
+          "validation": "^\\(?([0-9]{3})\\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$",
+          "errorMessage": "Please enter a valid phone number"
+        },
+        {
+          "name": "zip_code",
+          "question": "What's your ZIP code?",
+          "type": "zip",
+          "required": true,
+          "validation": "^\\d{5}(-\\d{4})?$",
+          "errorMessage": "Please enter a valid ZIP code"
+        },
+        {
+          "name": "describe",
+          "question": "Can you briefly describe what happened?",
+          "type": "text",
+          "required": true,
+          "validation": "^.{10,500}$",
+          "errorMessage": "Please provide a description of at least 10 characters"
+        },
+        {
+          "name": "date_of_incident",
+          "question": "When did this incident occur?",
+          "type": "date",
+          "required": false,
+          "validation": "^\\d{4}-\\d{2}-\\d{2}$",
+          "errorMessage": "Please enter a valid date (YYYY-MM-DD)"
+        },
+        {
+          "name": "bodily_injury",
+          "question": "Did you suffer any bodily injury?",
+          "type": "boolean",
+          "required": false,
+          "validation": "^(yes|no)$",
+          "errorMessage": "Please answer yes or no"
+        },
+        {
+          "name": "at_fault",
+          "question": "Do you believe you were at fault for this incident?",
+          "type": "boolean",
+          "required": false,
+          "validation": "^(yes|no)$",
+          "errorMessage": "Please answer yes or no"
+        },
+        {
+          "name": "has_attorney",
+          "question": "Do you currently have an attorney representing you?",
+          "type": "boolean",
+          "required": true,
+          "validation": "^(yes|no)$",
+          "errorMessage": "Please answer yes or no"
+        }
+      ],
+      "subCategories": [
+        {
+          "name": "Car Accident",
+          "slug": "car_accident",
+          "description": "Motor vehicle accident cases",
+          "keywords": ["car", "auto", "vehicle", "crash", "collision", "traffic", "driving", "road"],
+          "fields": [
+            {
+              "name": "children_involved",
+              "question": "Were any children involved in the accident?",
+              "type": "boolean",
+              "required": false,
+              "validation": "^(yes|no)$",
+              "errorMessage": "Please answer yes or no"
+            }
+          ]
+        },
+        {
+          "name": "Slip and Fall",
+          "slug": "slip_and_fall",
+          "description": "Premises liability cases",
+          "keywords": ["slip", "fall", "trip", "premises", "property", "sidewalk", "floor", "wet", "ice", "snow"]
+        },
+        {
+          "name": "Medical Malpractice",
+          "slug": "medical_malpractice",
+          "description": "Medical negligence cases",
+          "keywords": ["medical", "malpractice", "doctor", "hospital", "surgery", "treatment", "misdiagnosis", "negligence"]
+        }
+      ]
+    },
+    {
+      "name": "Family Law",
+      "slug": "family_law",
+      "description": "Legal matters involving family relationships including divorce, custody, and adoption",
+      "keywords": ["divorce", "custody", "child", "support", "adoption", "family", "marriage", "separation", "alimony"],
+      "initialMessage": "I understand you need help with a family law matter. Let me help you find a qualified family law attorney.",
+      "disclaimer": "I am not a lawyer and cannot provide legal advice. I can help connect you with qualified family law attorneys who can assist you.",
+      "fields": [
+        {
+          "name": "first_name",
+          "question": "What's your first name?",
+          "type": "text",
+          "required": true,
+          "validation": "^[a-zA-Z\\s'-]{2,50}$",
+          "errorMessage": "Please enter a valid first name (2-50 characters, letters only)"
+        },
+        {
+          "name": "last_name",
+          "question": "What's your last name?",
+          "type": "text",
+          "required": true,
+          "validation": "^[a-zA-Z\\s'-]{2,50}$",
+          "errorMessage": "Please enter a valid last name (2-50 characters, letters only)"
+        },
+        {
+          "name": "email",
+          "question": "What's your email address?",
+          "type": "email",
+          "required": true,
+          "validation": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+          "errorMessage": "Please enter a valid email address"
+        },
+        {
+          "name": "phone",
+          "question": "What's your phone number?",
+          "type": "phone",
+          "required": true,
+          "validation": "^\\(?([0-9]{3})\\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$",
+          "errorMessage": "Please enter a valid phone number"
+        },
+        {
+          "name": "zip_code",
+          "question": "What's your ZIP code?",
+          "type": "zip",
+          "required": true,
+          "validation": "^\\d{5}(-\\d{4})?$",
+          "errorMessage": "Please enter a valid ZIP code"
+        },
+        {
+          "name": "describe",
+          "question": "Can you briefly describe your family law matter?",
+          "type": "text",
+          "required": true,
+          "validation": "^.{10,500}$",
+          "errorMessage": "Please provide a description of at least 10 characters"
+        },
+        {
+          "name": "has_attorney",
+          "question": "Do you currently have an attorney representing you?",
+          "type": "boolean",
+          "required": true,
+          "validation": "^(yes|no)$",
+          "errorMessage": "Please answer yes or no"
+        }
+      ],
+      "subCategories": [
+        {
+          "name": "Divorce",
+          "slug": "divorce",
+          "description": "Marriage dissolution cases",
+          "keywords": ["divorce", "dissolution", "separation", "marriage", "spouse", "alimony", "property"]
+        },
+        {
+          "name": "Child Custody",
+          "slug": "child_custody",
+          "description": "Child custody and visitation cases",
+          "keywords": ["custody", "visitation", "parenting", "child", "children", "support"]
+        }
+      ]
+    },
+    {
+      "name": "Criminal Defense",
+      "slug": "criminal_defense",
+      "description": "Legal representation for criminal charges and violations",
+      "keywords": ["criminal", "arrest", "charge", "violation", "court", "trial", "defense", "attorney", "lawyer"],
+      "initialMessage": "I understand you need criminal defense representation. Let me help you find a qualified criminal defense attorney.",
+      "disclaimer": "I am not a lawyer and cannot provide legal advice. I can help connect you with qualified criminal defense attorneys who can assist you.",
+      "fields": [
+        {
+          "name": "first_name",
+          "question": "What's your first name?",
+          "type": "text",
+          "required": true,
+          "validation": "^[a-zA-Z\\s'-]{2,50}$",
+          "errorMessage": "Please enter a valid first name (2-50 characters, letters only)"
+        },
+        {
+          "name": "last_name",
+          "question": "What's your last name?",
+          "type": "text",
+          "required": true,
+          "validation": "^[a-zA-Z\\s'-]{2,50}$",
+          "errorMessage": "Please enter a valid last name (2-50 characters, letters only)"
+        },
+        {
+          "name": "email",
+          "question": "What's your email address?",
+          "type": "email",
+          "required": true,
+          "validation": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+          "errorMessage": "Please enter a valid email address"
+        },
+        {
+          "name": "phone",
+          "question": "What's your phone number?",
+          "type": "phone",
+          "required": true,
+          "validation": "^\\(?([0-9]{3})\\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$",
+          "errorMessage": "Please enter a valid phone number"
+        },
+        {
+          "name": "zip_code",
+          "question": "What's your ZIP code?",
+          "type": "zip",
+          "required": true,
+          "validation": "^\\d{5}(-\\d{4})?$",
+          "errorMessage": "Please enter a valid ZIP code"
+        },
+        {
+          "name": "describe",
+          "question": "Can you briefly describe your legal matter?",
+          "type": "text",
+          "required": true,
+          "validation": "^.{10,500}$",
+          "errorMessage": "Please provide a description of at least 10 characters"
+        },
+        {
+          "name": "has_attorney",
+          "question": "Do you currently have an attorney representing you?",
+          "type": "boolean",
+          "required": true,
+          "validation": "^(yes|no)$",
+          "errorMessage": "Please answer yes or no"
+        }
+      ]
+    }
+  ]
+}

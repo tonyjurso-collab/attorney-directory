@@ -152,9 +152,17 @@ function Hits() {
           <div key={hit.objectID} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-start space-x-4">
               {/* Attorney Image */}
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                {hit.name.split(' ').map((n: string) => n[0]).join('')}
-              </div>
+              {hit.profile_image_url ? (
+                <img
+                  src={hit.profile_image_url}
+                  alt={hit.name || 'Attorney profile'}
+                  className="w-16 h-16 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                  {hit.name.split(' ').map((n: string) => n[0]).join('')}
+                </div>
+              )}
 
               {/* Attorney Info */}
               <div className="flex-1">

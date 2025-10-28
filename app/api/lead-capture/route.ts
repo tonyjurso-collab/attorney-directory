@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { submitLeadToLeadProsper, LeadProsperSubmission } from '@/lib/leadprosper/client';
-import practiceAreasConfig from '@/lib/practice_areas_config.json';
+import practiceAreasConfig from '@/chat/practice_areas_config.json';
 import { getCityStateFromZipCode } from '@/lib/utils/zipcode-geocoding';
 
 export async function POST(request: NextRequest) {
@@ -8,6 +8,9 @@ export async function POST(request: NextRequest) {
     const leadData = await request.json();
     
     console.log('📤 Lead submission data:', leadData);
+    console.log('🔍 sub_category value:', leadData.sub_category);
+    console.log('🔍 subcategory value:', leadData.subcategory);
+    console.log('🔍 All keys in leadData:', Object.keys(leadData));
     
     // Get the practice area configuration
     const practiceArea = leadData.category || 'general';
@@ -97,7 +100,7 @@ export async function POST(request: NextRequest) {
       // Legal case information
       describe: leadData.describe || '',
       main_category: leadData.main_category || leadData.category || '',
-      sub_category: leadData.sub_category || leadData.subcategory || '',
+      sub_category: leadData.sub_category || leadData.subcategory || 'other',
       
       // Additional fields
       has_attorney: leadData.has_attorney || '',
@@ -135,7 +138,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         message: result.message || 'Lead submitted successfully',
-        lead_id: result.lead_id,
+        lead_id: result.leadId,
         practice_area: practiceArea,
         campaign_id: lpConfig.lp_campaign_id
       });

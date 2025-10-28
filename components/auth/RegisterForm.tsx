@@ -9,7 +9,8 @@ import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
 const registerSchema = z.object({
-  full_name: z.string().min(2, 'Full name must be at least 2 characters'),
+  first_name: z.string().min(1, 'First name is required'),
+  last_name: z.string().min(1, 'Last name is required'),
   email: z.string().email('Please enter a valid email address'),
   password: z.string()
     .min(8, 'Password must be at least 8 characters')
@@ -26,7 +27,7 @@ const registerSchema = z.object({
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
-export function RegisterForm() {
+export function RegisterForm({ selectedPlan }: { selectedPlan?: string | null }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -73,7 +74,8 @@ export function RegisterForm() {
           .insert({
             id: authData.user.id,
             email: data.email,
-            full_name: data.full_name,
+            first_name: data.first_name,
+            last_name: data.last_name,
             role: 'attorney', // Always attorney since we removed client role
           });
 
@@ -89,8 +91,8 @@ export function RegisterForm() {
             .from('attorneys')
             .insert({
               user_id: authData.user.id,
-              first_name: data.full_name.split(' ')[0],
-              last_name: data.full_name.split(' ').slice(1).join(' '),
+              first_name: data.first_name,
+              last_name: data.last_name,
               email: data.email,
               membership_tier: 'free',
             });
@@ -168,24 +170,45 @@ export function RegisterForm() {
         {/* Hidden role field - always attorney */}
         <input type="hidden" {...register('role')} value="attorney" />
 
-        {/* Full Name */}
+        {/* First Name */}
         <div>
-          <label htmlFor="full_name" className="block text-sm font-medium text-gray-700 mb-1">
-            Full Name
+          <label htmlFor="first_name" className="block text-sm font-medium text-gray-700 mb-1">
+            First Name
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <User className="h-4 w-4 text-gray-400" />
             </div>
             <input
-              {...register('full_name')}
+              {...register('first_name')}
               type="text"
               className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Your full name"
+              placeholder="Your first name"
             />
           </div>
-          {errors.full_name && (
-            <p className="mt-1 text-sm text-red-600">{errors.full_name.message}</p>
+          {errors.first_name && (
+            <p className="mt-1 text-sm text-red-600">{errors.first_name.message}</p>
+          )}
+        </div>
+
+        {/* Last Name */}
+        <div>
+          <label htmlFor="last_name" className="block text-sm font-medium text-gray-700 mb-1">
+            Last Name
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <User className="h-4 w-4 text-gray-400" />
+            </div>
+            <input
+              {...register('last_name')}
+              type="text"
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Your last name"
+            />
+          </div>
+          {errors.last_name && (
+            <p className="mt-1 text-sm text-red-600">{errors.last_name.message}</p>
           )}
         </div>
 

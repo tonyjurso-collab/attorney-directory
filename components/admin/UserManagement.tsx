@@ -6,7 +6,9 @@ import { UserRole } from '@/lib/types/database';
 interface User {
   id: string;
   email: string;
-  full_name: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  full_name: string | null; // Keep for backwards compatibility
   avatar_url: string | null;
   role: UserRole;
   created_at: string;
@@ -118,7 +120,9 @@ export function UserManagement() {
   const filteredUsers = users.filter(user => {
     const matchesSearch = 
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) || // Keep for backwards compatibility
       user.attorney?.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.attorney?.last_name.toLowerCase().includes(searchTerm.toLowerCase());
     
@@ -210,23 +214,23 @@ export function UserManagement() {
                     <div className="flex items-center">
                       <div className="h-10 w-10 flex-shrink-0">
                         {user.avatar_url ? (
-                          <img
-                            className="h-10 w-10 rounded-full"
-                            src={user.avatar_url}
-                            alt={user.full_name || user.email}
-                          />
-                        ) : (
-                          <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-                            <span className="text-sm font-medium text-gray-700">
-                              {user.full_name ? user.full_name[0] : user.email[0].toUpperCase()}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">
-                          {user.full_name || 'No Name'}
+                        <img
+                          className="h-10 w-10 rounded-full"
+                          src={user.avatar_url}
+                          alt={user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : user.full_name || user.email}
+                        />
+                      ) : (
+                        <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                          <span className="text-sm font-medium text-gray-700">
+                            {user.first_name ? user.first_name[0] : user.full_name ? user.full_name[0] : user.email[0].toUpperCase()}
+                          </span>
                         </div>
+                      )}
+                    </div>
+                    <div className="ml-4">
+                      <div className="text-sm font-medium text-gray-900">
+                        {user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : user.full_name || 'No Name'}
+                      </div>
                         <div className="text-sm text-gray-500">{user.email}</div>
                       </div>
                     </div>
@@ -327,7 +331,9 @@ interface UserFormProps {
 function UserForm({ user, onSave, onCancel }: UserFormProps) {
   const [formData, setFormData] = useState({
     email: user?.email || '',
-    full_name: user?.full_name || '',
+    first_name: user?.first_name || '',
+    last_name: user?.last_name || '',
+    full_name: user?.full_name || '', // Keep for backwards compatibility
     role: user?.role || 'attorney' as UserRole,
   });
 
@@ -356,12 +362,22 @@ function UserForm({ user, onSave, onCancel }: UserFormProps) {
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Full Name</label>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">First Name</label>
               <input
                 type="text"
-                value={formData.full_name}
-                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                value={formData.first_name}
+                onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">Last Name</label>
+              <input
+                type="text"
+                value={formData.last_name}
+                onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>

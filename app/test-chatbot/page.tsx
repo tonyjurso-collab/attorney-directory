@@ -6,6 +6,7 @@ export default function TestChatbot() {
   const [message, setMessage] = useState('');
   const [response, setResponse] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
   const sendMessage = async () => {
     if (!message.trim()) return;
@@ -17,11 +18,20 @@ export default function TestChatbot() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ 
+          message,
+          session_id: sessionId // Send existing session ID if available
+        }),
       });
       
       const data = await res.json();
       setResponse(data);
+      
+      // Store session ID from response for next message
+      if (data.session_id) {
+        setSessionId(data.session_id);
+      }
+      
       console.log('Chatbot response:', data);
     } catch (error) {
       console.error('Error:', error);
@@ -38,8 +48,12 @@ export default function TestChatbot() {
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          session_id: sessionId
+        }),
       });
       setResponse(null);
+      setSessionId(null); // Clear session ID
       console.log('Chat reset');
     } catch (error) {
       console.error('Reset error:', error);
@@ -86,6 +100,16 @@ export default function TestChatbot() {
             <pre className="whitespace-pre-wrap text-sm">
               {JSON.stringify(response, null, 2)}
             </pre>
+          </div>
+        )}
+        
+        {sessionId && (
+          <div className="mt-4 p-3 bg-green-50 rounded-lg">
+            <p className="text-sm text-green-800">
+              <strong>Session ID:</strong> {sessionId.substring(0, 24)}...
+              <br />
+              <span className="text-xs">This session ID is being reused for conversation continuity</span>
+            </p>
           </div>
         )}
       </div>

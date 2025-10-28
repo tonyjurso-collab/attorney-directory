@@ -14,7 +14,9 @@ CREATE TYPE lead_status AS ENUM ('new', 'contacted', 'qualified', 'converted', '
 CREATE TABLE public.profiles (
   id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
   email TEXT UNIQUE NOT NULL,
-  full_name TEXT,
+  first_name TEXT,
+  last_name TEXT,
+  full_name TEXT, -- Keep for backwards compatibility
   avatar_url TEXT,
   role user_role DEFAULT 'attorney',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

@@ -72,6 +72,7 @@ export async function POST(request: NextRequest) {
       zip_code: attorney.zip_code,
       membership_tier: attorney.membership_tier,
       is_verified: attorney.is_verified,
+      profile_image_url: attorney.profile_image_url,
       practice_areas: attorney.practice_areas.map(pa => ({
         name: pa.name,
         slug: pa.slug,

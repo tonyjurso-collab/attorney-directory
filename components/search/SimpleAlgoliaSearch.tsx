@@ -268,7 +268,7 @@ export function SimpleAlgoliaSearch({ searchParams }: SimpleAlgoliaSearchProps) 
               first_name,
               last_name,
               // Keep original name for reference
-              full_name: hit.name,
+              full_name: `${first_name} ${last_name}`,
               // Ensure other expected fields exist
               firm_name: hit.firm_name || null,
               bio: hit.bio || null,

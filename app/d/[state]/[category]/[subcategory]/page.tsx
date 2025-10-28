@@ -114,6 +114,38 @@ const VALID_SUBCATEGORIES: Record<string, string[]> = {
     'license-suspension',
     'ignition-interlock',
     'field-sobriety-test'
+  ],
+  'workers-compensation': [
+    'workplace-injury',
+    'occupational-disease',
+    'permanent-disability',
+    'return-to-work',
+    'benefits-dispute'
+  ],
+  'medical-malpractice': [
+    'surgical-errors',
+    'misdiagnosis',
+    'birth-injury',
+    'medication-errors',
+    'hospital-negligence'
+  ],
+  'product-liability': [
+    'defective-product',
+    'dangerous-drugs',
+    'consumer-safety',
+    'manufacturing-defects'
+  ],
+  'premises-liability': [
+    'slip-and-fall',
+    'unsafe-property',
+    'security-negligence',
+    'dog-bites'
+  ],
+  'wrongful-death': [
+    'car-accident-death',
+    'medical-malpractice-death',
+    'workplace-fatalities',
+    'product-liability-death'
   ]
 };
 

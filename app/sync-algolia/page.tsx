@@ -87,25 +87,15 @@ export default function SyncAlgoliaPage() {
 
           {results && (
             <div className="mt-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Attorney Summary</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Summary Statistics</h3>
               <div className="space-y-2 max-h-96 overflow-y-auto">
-                {results.attorneys.map((attorney: any) => (
-                  <div key={attorney.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div>
-                      <span className="font-medium">{attorney.name}</span>
-                      <span className="text-gray-600 ml-2">
-                        {attorney.city}, {attorney.state}
-                      </span>
-                      <span className="text-blue-600 text-sm ml-2">
-                        ({attorney.practiceAreas} practice areas)
-                      </span>
-                    </div>
-                    <div className="flex items-center">
-                      {attorney.hasGeo ? (
-                        <span className="text-green-600 text-sm">📍 Has Geo</span>
-                      ) : (
-                        <span className="text-red-600 text-sm">❌ No Geo</span>
-                      )}
+                {results.attorneys.map((item: any, index: number) => (
+                  <div key={`summary-${index}`} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="text-sm text-gray-700">
+                      {item.total !== undefined && <span>Total attorneys: <strong>{item.total}</strong></span>}
+                      {item.withGeo !== undefined && <span>With geo data: <strong>{item.withGeo}</strong></span>}
+                      {item.withoutGeo !== undefined && <span>Without geo data: <strong>{item.withoutGeo}</strong></span>}
+                      {item.withPracticeAreas !== undefined && <span>With practice areas: <strong>{item.withPracticeAreas}</strong></span>}
                     </div>
                   </div>
                 ))}

@@ -1,4 +1,5 @@
 import { Bell, Settings, User } from 'lucide-react';
+import Link from 'next/link';
 import { AttorneyWithDetails } from '@/lib/types/database';
 
 interface DashboardHeaderProps {
@@ -33,21 +34,28 @@ export function DashboardHeader({ attorney }: DashboardHeaderProps) {
           </button>
 
           {/* Settings */}
-          <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+          <Link 
+            href="/dashboard/profile"
+            className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+          >
             <Settings className="h-6 w-6" />
-          </button>
+          </Link>
 
           {/* Profile */}
           <div className="flex items-center space-x-3">
             {attorney.profile_image_url ? (
               <img
                 src={attorney.profile_image_url}
-                alt={`${attorney.first_name} ${attorney.last_name}`}
+                alt={`${attorney.first_name || ''} ${attorney.last_name || ''}`.trim() || 'Attorney profile'}
                 className="h-8 w-8 rounded-full object-cover"
               />
             ) : (
               <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold text-sm">
-                {attorney.first_name[0]}{attorney.last_name[0]}
+                {(() => {
+                  const firstInitial = attorney.first_name?.[0] || '';
+                  const lastInitial = attorney.last_name?.[0] || '';
+                  return firstInitial + lastInitial || '?';
+                })()}
               </div>
             )}
             <div className="hidden sm:block">

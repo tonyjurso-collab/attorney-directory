@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { 
   Scale, 
   Heart, 
@@ -11,6 +12,7 @@ import {
   CreditCard, 
   Car 
 } from 'lucide-react';
+import { staggerContainer, staggerItem, hoverLift } from '@/lib/animations/variants';
 
 const practiceAreas = [
   {
@@ -107,35 +109,45 @@ const practiceAreas = [
 
 export function PracticeAreasGrid() {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+    <motion.div 
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6"
+      variants={staggerContainer}
+      initial="initial"
+      animate="animate"
+    >
       {practiceAreas.map((area) => {
         const IconComponent = area.icon;
         
         return (
-          <Link
-            key={area.id}
-            href={area.href}
-            className="group relative bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg hover:border-gray-300 transition-all duration-200"
-          >
-            <div className="flex flex-col items-center text-center">
-              <div className={`${area.bgColor} rounded-full p-3 mb-4 group-hover:scale-110 transition-transform duration-200`}>
-                <IconComponent className={`h-6 w-6 ${area.color}`} />
-              </div>
+          <motion.div key={area.id} variants={staggerItem}>
+            <Link
+              href={area.href}
+              className="group relative bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg hover:border-gray-300 transition-all duration-200 block"
+            >
+              <motion.div 
+                className="flex flex-col items-center text-center"
+                whileHover={hoverLift}
+                transition={{ duration: 0.2 }}
+              >
+                <div className={`${area.bgColor} rounded-full p-3 mb-4 group-hover:scale-110 transition-transform duration-200`}>
+                  <IconComponent className={`h-6 w-6 ${area.color}`} />
+                </div>
+                
+                <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors duration-200">
+                  {area.name}
+                </h3>
+                
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  {area.description}
+                </p>
+              </motion.div>
               
-              <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors duration-200">
-                {area.name}
-              </h3>
-              
-              <p className="text-sm text-gray-600 leading-relaxed">
-                {area.description}
-              </p>
-            </div>
-            
-            {/* Hover effect overlay */}
-            <div className="absolute inset-0 rounded-lg bg-blue-50 opacity-0 group-hover:opacity-10 transition-opacity duration-200"></div>
-          </Link>
+              {/* Hover effect overlay */}
+              <div className="absolute inset-0 rounded-lg bg-blue-50 opacity-0 group-hover:opacity-10 transition-opacity duration-200"></div>
+            </Link>
+          </motion.div>
         );
       })}
-    </div>
+    </motion.div>
   );
 }

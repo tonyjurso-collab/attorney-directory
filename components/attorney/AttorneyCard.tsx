@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import { Star, MapPin, Phone, ExternalLink, Award } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { AttorneyWithDetails } from '@/lib/types/database';
 import { formatPhoneNumber } from '@/lib/utils/format';
+import { hoverLift } from '@/lib/animations/variants';
 
 interface AttorneyCardHorizontalProps {
   attorney: AttorneyWithDetails;
@@ -31,7 +33,11 @@ export function AttorneyCardHorizontal({ attorney }: AttorneyCardHorizontalProps
   const tierBadge = getTierBadge(attorney.membership_tier);
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
+    <motion.div 
+      className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200"
+      whileHover={hoverLift}
+      transition={{ duration: 0.2 }}
+    >
       <div className="p-6">
         <div className="flex items-start space-x-4">
           {/* Attorney Photo */}
@@ -206,6 +212,6 @@ export function AttorneyCardHorizontal({ attorney }: AttorneyCardHorizontalProps
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

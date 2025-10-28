@@ -1,4 +1,4 @@
-import practiceAreasConfig from '../practice_areas_config.json';
+import practiceAreasConfig from '../../chat/practice_areas_config.json';
 
 interface PracticeAreaConfig {
   name: string;

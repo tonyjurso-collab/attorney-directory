@@ -1,29 +1,62 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getIronSession } from 'iron-session';
-import { cookies } from 'next/headers';
-import { sessionOptions, ChatSession } from '@/lib/chat/session';
+import { resetSession } from '@/lib/chat/remote-api-client';
+import { logger } from '@/lib/logging/logger';
 
+/**
+ * POST /api/chat/reset - Proxy to remote PHP session reset API
+ * Maintains backward compatibility with existing Next.js format
+ */
 export async function POST(request: NextRequest) {
   try {
-    const session = await getIronSession<ChatSession>(await cookies(), sessionOptions);
+    let sessionId: string | undefined;
     
-    // Clear all session data
-    session.collectedFields = {};
-    session.conversationHistory = [];
-    session.conversationStep = 'collecting_fields';
-    session.category = undefined;
-    session.subcategory = undefined;
+    try {
+      const body = await request.json();
+      sessionId = body.session_id;
+    } catch (error) {
+      // Request body might be empty or invalid JSON, that's okay
+    }
     
-    await session.save();
+    if (!sessionId) {
+      logger.debug('No session ID provided for reset');
+      return NextResponse.json({ 
+        success: true,
+        message: 'No session to reset' 
+      });
+    }
     
-    console.log('Chat session reset');
+    logger.info(`Proxying session reset to remote API: ${sessionId}`);
     
-    return NextResponse.json({ success: true });
+    // Call remote PHP API to reset session
+    const result = await resetSession(sessionId);
+    
+    logger.info(`Session reset successful for ${sessionId}`, {
+      success: result.success,
+    });
+    
+    return NextResponse.json({ 
+      success: result.success,
+      message: result.message,
+      session_id: result.session_id,
+    });
+    
   } catch (error) {
-    console.error('Reset API error:', error);
+    logger.error('Session reset error:', error instanceof Error ? error.message : String(error));
     return NextResponse.json(
-      { error: 'Failed to reset session' },
+      { error: 'Failed to reset session', success: false },
       { status: 500 }
     );
   }
+}
+
+/**
+ * GET /api/chat/reset - Health check
+ */
+export async function GET() {
+  return NextResponse.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    version: '3.0.0',
+    mode: 'remote',
+  });
 }

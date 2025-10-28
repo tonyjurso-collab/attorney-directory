@@ -39,3 +39,20 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Cursor IDE
+.cursor/
+
+# Test results and data files
+*-test-results-*.json
+test-lead-data.json
+submission-results.json
+submission-results-template.json
+lead-comparison-results.json
+test-avatar-component.html
+
+# Logs (keep directory structure but ignore logs)
+*.log
+
+# Test data
+chat/logs/

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Star, MapPin, Phone, ExternalLink, Award } from 'lucide-react';
 import { AttorneyWithDetails } from '@/lib/types/database';
 import { formatPhoneNumber } from '@/lib/utils/format';
+import { AttorneyAvatar } from '@/components/ui/AttorneyAvatar';
 
 interface AttorneyCardHorizontalProps {
   attorney: AttorneyWithDetails;
@@ -36,17 +37,12 @@ export function AttorneyCardHorizontal({ attorney }: AttorneyCardHorizontalProps
         <div className="flex items-start space-x-4">
           {/* Attorney Photo */}
           <div className="flex-shrink-0">
-            {attorney.profile_image_url ? (
-              <img
-                src={attorney.profile_image_url}
-                alt={`${attorney.first_name || ''} ${attorney.last_name || ''}`.trim() || 'Attorney profile'}
-                className="w-16 h-16 rounded-full object-cover"
-              />
-            ) : (
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg">
-                {(attorney.first_name?.[0] || '')}{(attorney.last_name?.[0] || '')}
-              </div>
-            )}
+            <AttorneyAvatar
+              profileImageUrl={attorney.profile_image_url}
+              firstName={attorney.first_name}
+              lastName={attorney.last_name}
+              size="md"
+            />
           </div>
 
           {/* Attorney Info */}

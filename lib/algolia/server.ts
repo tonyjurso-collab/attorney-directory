@@ -40,6 +40,7 @@ function transformAttorneyForAlgolia(attorney: AttorneyWithDetails) {
     zip_code: attorney.zip_code,
     membership_tier: attorney.membership_tier,
     is_verified: attorney.is_verified,
+    profile_image_url: attorney.profile_image_url,
     practice_categories: (attorney as any).practice_categories?.map((cat: any) => ({
       name: cat.name,
       slug: cat.slug,

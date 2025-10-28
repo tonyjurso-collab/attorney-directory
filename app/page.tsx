@@ -1,10 +1,13 @@
-import { Suspense } from 'react';
+'use client';
+
+import { motion } from 'framer-motion';
 import { PracticeAreasGrid } from '@/components/home/PracticeAreasGrid';
 import { FeaturedAttorneys } from '@/components/home/FeaturedAttorneys';
 import { HeroSection } from '@/components/home/HeroSection';
 import { StatsSection } from '@/components/home/StatsSection';
 import { CtaSection } from '@/components/home/CtaSection';
 import { ChatWidget } from '@/components/chat/ChatWidget';
+import { fadeIn, slideUp } from '@/lib/animations/variants';
 
 export default function Home() {
   return (
@@ -16,46 +19,60 @@ export default function Home() {
       <StatsSection />
 
       {/* Practice Areas */}
-      <section className="py-16">
+      <motion.section 
+        className="py-16"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        viewport={{ once: true }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+          <motion.div 
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            viewport={{ once: true }}
+          >
             <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
               Popular Practice Areas
             </h2>
             <p className="mt-4 text-lg text-gray-600">
               Find attorneys specializing in your specific legal needs
             </p>
-          </div>
+          </motion.div>
           
           <PracticeAreasGrid />
         </div>
-      </section>
+      </motion.section>
 
       {/* Featured Attorneys */}
-      <section className="py-16 bg-gray-50">
+      <motion.section 
+        className="py-16 bg-gray-50"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        viewport={{ once: true }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+          <motion.div 
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            viewport={{ once: true }}
+          >
             <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
               Featured Attorneys
             </h2>
             <p className="mt-4 text-lg text-gray-600">
               Top-rated legal professionals in your area
             </p>
-          </div>
+          </motion.div>
           
-          <Suspense fallback={<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="bg-white rounded-lg shadow-md p-6 animate-pulse">
-                <div className="h-4 bg-gray-200 rounded mb-4"></div>
-                <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-              </div>
-            ))}
-          </div>}>
-            <FeaturedAttorneys />
-          </Suspense>
+          <FeaturedAttorneys />
         </div>
-      </section>
+      </motion.section>
 
       {/* CTA Section */}
       <CtaSection />

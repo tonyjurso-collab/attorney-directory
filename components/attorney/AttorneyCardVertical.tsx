@@ -1,6 +1,9 @@
 import Link from 'next/link';
 import { Star, MapPin, Award } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { AttorneyWithDetails } from '@/lib/types/database';
+import { hoverLift } from '@/lib/animations/variants';
+import { AttorneyAvatar } from '@/components/ui/AttorneyAvatar';
 
 interface AttorneyCardVerticalProps {
   attorney: AttorneyWithDetails;
@@ -33,21 +36,20 @@ export function AttorneyCardVertical({ attorney }: AttorneyCardVerticalProps) {
   const experienceYears = attorney.experience_years || (attorney as any).years_experience;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 h-full flex flex-col">
+    <motion.div 
+      className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 h-full flex flex-col"
+      whileHover={hoverLift}
+      transition={{ duration: 0.2 }}
+    >
       <div className="p-6 flex flex-col h-full">
         {/* Attorney Photo - Centered at top */}
         <div className="flex justify-center mb-4">
-          {attorney.profile_image_url ? (
-            <img
-              src={attorney.profile_image_url}
-              alt={`${attorney.first_name || ''} ${attorney.last_name || ''}`.trim() || 'Attorney profile'}
-              className="w-20 h-20 rounded-full object-cover"
-            />
-          ) : (
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xl">
-              {(attorney.first_name?.[0] || '')}{(attorney.last_name?.[0] || '')}
-            </div>
-          )}
+          <AttorneyAvatar
+            profileImageUrl={attorney.profile_image_url}
+            firstName={attorney.first_name}
+            lastName={attorney.last_name}
+            size="lg"
+          />
         </div>
 
         {/* Attorney Info - Centered */}
@@ -166,6 +168,6 @@ export function AttorneyCardVertical({ attorney }: AttorneyCardVerticalProps) {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

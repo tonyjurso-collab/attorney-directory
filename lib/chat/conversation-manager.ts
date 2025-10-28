@@ -61,7 +61,7 @@ function getRequiredFieldsForCategory(category: string): string[] {
   const path = require('path');
   
   try {
-    const configPath = path.join(process.cwd(), 'lib', 'practice_areas_config.json');
+    const configPath = path.join(process.cwd(), 'chat', 'practice_areas_config.json');
     const configData = fs.readFileSync(configPath, 'utf8');
     const config = JSON.parse(configData);
     
@@ -129,7 +129,7 @@ function generateQuestionForField(
     try {
       const fs = require('fs');
       const path = require('path');
-      const configPath = path.join(process.cwd(), 'lib', 'practice_areas_config.json');
+      const configPath = path.join(process.cwd(), 'chat', 'practice_areas_config.json');
       const configData = fs.readFileSync(configPath, 'utf8');
       const config = JSON.parse(configData);
       

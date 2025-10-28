@@ -52,6 +52,7 @@ async function syncAlgolia() {
       zip_code: attorney.zip_code,
       membership_tier: attorney.membership_tier,
       is_verified: attorney.is_verified,
+      profile_image_url: attorney.profile_image_url,
       latitude: attorney.latitude,
       longitude: attorney.longitude,
       formatted_address: attorney.formatted_address,

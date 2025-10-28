@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { AdminHeader } from './AdminHeader';
 import { AdminStats } from './AdminStats';
 import { AdminNavigation } from './AdminNavigation';
@@ -9,6 +10,7 @@ import { PracticeAreaManagement } from './PracticeAreaManagement';
 import { LeadManagement } from './LeadManagement';
 import { UserManagement } from './UserManagement';
 import { AdminSettings } from './AdminSettings';
+import { fadeIn, pageTransition } from '@/lib/animations/variants';
 
 export type AdminTab = 'overview' | 'attorneys' | 'practice-areas' | 'leads' | 'users' | 'settings';
 
@@ -72,7 +74,18 @@ export function AdminDashboard() {
       </div>
 
       <div className="mt-8">
-        {renderTabContent()}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            variants={pageTransition}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={{ duration: 0.2 }}
+          >
+            {renderTabContent()}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );
