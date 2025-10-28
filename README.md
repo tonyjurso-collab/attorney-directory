@@ -25,10 +25,13 @@ A comprehensive legal services platform that connects clients with qualified att
 
 ### Key Components
 - Dynamic route structure (`/d/[state]/[category]`)
-- AI chatbot with conversation management
-- Attorney profiles with contact forms
-- Lead capture and submission system
+- AI chatbot with conversation management and session handling
+- Attorney profiles with contact forms and avatar support
+- Lead capture and submission system with queue processing
 - Search functionality powered by Algolia
+- Remote API client for chat functionality
+- Session management with Redis and Supabase stores
+- Comprehensive logging and error handling
 
 ## 📁 Project Structure
 
@@ -146,6 +149,12 @@ The `practice_areas_config.json` file defines:
 - **[API Documentation](API_DOCUMENTATION.md)** - Complete API reference
 - **[Testing Guide](TESTING_GUIDE.md)** - Testing strategies and test cases
 - **[Deployment Guide](DEPLOYMENT_GUIDE.md)** - Production deployment instructions
+- **[Setup Guide](SETUP_GUIDE.md)** - Initial setup and configuration instructions
+- **[Production Deployment](PRODUCTION_DEPLOYMENT.md)** - Production deployment details
+- **[Chat Architecture](docs/CHAT_ARCHITECTURE.md)** - Chat system architecture documentation
+- **[Chat Runbook](docs/CHAT_RUNBOOK.md)** - Chat system operations and troubleshooting
+- **[Test Results](TEST_RESULTS.md)** - Comprehensive test results and analysis
+- **[Integration Complete](INTEGRATION_COMPLETE.md)** - Integration completion summary
 - **[Product Requirements](PRD.md)** - Product requirements and specifications
 
 ## 🧪 Testing
@@ -167,19 +176,28 @@ node test-required-fields.js
 # Test session reset functionality
 node test-reset.js
 
+# Test chat flow
+node scripts/test-chat-flow.js
+
+# Test infrastructure
+node scripts/test-infrastructure.js
+
 # Windows-specific chatbot testing
 .\test-chatbot.ps1
 ```
 
 ### Running Tests
 ```bash
-# Run all tests
+# Run all tests (Jest)
 npm run test
 
 # Run specific test suites
 npm run test:unit
 npm run test:integration
 npm run test:e2e
+
+# Test chat flow directly
+npm run test:chat-flow
 ```
 
 ## 🚀 Deployment
