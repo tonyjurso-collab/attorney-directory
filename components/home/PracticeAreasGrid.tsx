@@ -22,7 +22,7 @@ const practiceAreas = [
     icon: Heart,
     color: 'text-red-600',
     bgColor: 'bg-red-50',
-    href: '/search?practice_area=personal injury law',
+    href: '/personal-injury',
   },
   {
     id: 'family-law',
@@ -31,7 +31,7 @@ const practiceAreas = [
     icon: Scale,
     color: 'text-pink-600',
     bgColor: 'bg-pink-50',
-    href: '/search?practice_area=family law',
+    href: '/family-law',
   },
   {
     id: 'criminal-defense',
@@ -40,7 +40,7 @@ const practiceAreas = [
     icon: Shield,
     color: 'text-blue-600',
     bgColor: 'bg-blue-50',
-    href: '/search?practice_area=criminal law',
+    href: '/criminal-defense',
   },
   {
     id: 'business-law',
@@ -49,7 +49,7 @@ const practiceAreas = [
     icon: Building2,
     color: 'text-green-600',
     bgColor: 'bg-green-50',
-    href: '/search?practice_area=business law',
+    href: '/business-law',
   },
   {
     id: 'real-estate-law',
@@ -58,7 +58,7 @@ const practiceAreas = [
     icon: Home,
     color: 'text-yellow-600',
     bgColor: 'bg-yellow-50',
-    href: '/search?practice_area=real estate law',
+    href: '/real-estate-law',
   },
   {
     id: 'estate-planning',
@@ -67,7 +67,7 @@ const practiceAreas = [
     icon: FileText,
     color: 'text-purple-600',
     bgColor: 'bg-purple-50',
-    href: '/search?practice_area=estate planning',
+    href: '/estate-planning',
   },
   {
     id: 'immigration-law',
@@ -76,7 +76,7 @@ const practiceAreas = [
     icon: Globe,
     color: 'text-indigo-600',
     bgColor: 'bg-indigo-50',
-    href: '/search?practice_area=immigration law',
+    href: '/immigration-law',
   },
   {
     id: 'employment-law',
@@ -85,7 +85,7 @@ const practiceAreas = [
     icon: Briefcase,
     color: 'text-orange-600',
     bgColor: 'bg-orange-50',
-    href: '/search?practice_area=employment law',
+    href: '/employment-law',
   },
   {
     id: 'bankruptcy',
@@ -94,7 +94,7 @@ const practiceAreas = [
     icon: CreditCard,
     color: 'text-gray-600',
     bgColor: 'bg-gray-50',
-    href: '/search?practice_area=bankruptcy',
+    href: '/bankruptcy-law',
   },
   {
     id: 'dui-defense',
@@ -103,7 +103,7 @@ const practiceAreas = [
     icon: Car,
     color: 'text-teal-600',
     bgColor: 'bg-teal-50',
-    href: '/search?practice_area=dui defense',
+    href: '/dui-law',
   },
 ];
 
