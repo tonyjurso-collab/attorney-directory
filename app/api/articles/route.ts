@@ -94,7 +94,9 @@ export async function GET(request: NextRequest) {
     }
 
     // Pagination
-    query = query.range(filters.offset, filters.offset + filters.limit - 1);
+    const offset = filters.offset ?? 0;
+    const limit = filters.limit ?? 20;
+    query = query.range(offset, offset + limit - 1);
 
     const { data: articles, error, count } = await query;
 
