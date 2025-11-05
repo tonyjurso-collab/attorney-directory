@@ -168,12 +168,14 @@ export async function POST(request: NextRequest) {
             }
           } else {
             // No valid fields extracted, ask for clarification
-            reply = getFormattedQuestion(session.main_category, currentField, session.answers);
+            const fieldToAsk = currentField || 'describe';
+            reply = getFormattedQuestion(session.main_category, fieldToAsk, session.answers);
             nextField = currentField;
           }
         } else {
           // No fields extracted, ask for clarification
-          reply = getFormattedQuestion(session.main_category, currentField, session.answers);
+          const fieldToAsk = currentField || 'describe';
+          reply = getFormattedQuestion(session.main_category, fieldToAsk, session.answers);
           nextField = currentField;
         }
       } else {
