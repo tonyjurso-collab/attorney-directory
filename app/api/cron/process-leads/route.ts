@@ -3,6 +3,7 @@ import { processJobImmediately, workerHealthCheck } from '@/lib/queue/lead-worke
 import { getNextJob, markJobCompleted, markJobFailed, getQueueStats } from '@/lib/queue/lead-queue';
 import { submitLeadToLeadProsper, validateLeadForSubmission } from '@/lib/leadprosper/client';
 import { updateSessionData, addConversationMessage } from '@/lib/chat/session';
+import { LeadData } from '@/lib/chat/services/lead-generation-supabase.service';
 
 // Cron configuration
 const CRON_CONFIG = {
@@ -167,7 +168,7 @@ async function processNextJobInBatch(results: {
     });
     
     // Validate lead data
-    const validation = validateLeadForSubmission(job.leadData);
+    const validation = validateLeadForSubmission(job.leadData as LeadData);
     
     if (!validation.valid) {
       throw new Error(`Validation failed: ${validation.errors.join(', ')}`);
