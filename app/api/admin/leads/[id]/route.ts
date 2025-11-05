@@ -3,9 +3,10 @@ import { createClient } from '@/lib/supabase/server';
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createClient();
     
     // Check admin authentication
@@ -35,7 +36,7 @@ export async function PUT(
         ...updateData,
         updated_at: new Date().toISOString(),
       })
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single();
 
@@ -53,9 +54,10 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createClient();
     
     // Check admin authentication
@@ -79,7 +81,7 @@ export async function DELETE(
     const { error } = await supabase
       .from('leads')
       .delete()
-      .eq('id', params.id);
+      .eq('id', id);
 
     if (error) {
       console.error('Error deleting lead:', error);

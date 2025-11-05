@@ -3,9 +3,10 @@ import { createClient } from '@/lib/supabase/server';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createClient();
     
     // Check admin authentication
@@ -28,7 +29,7 @@ export async function GET(
     const { data: practiceArea, error } = await supabase
       .from('practice_areas')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
 
     if (error) {
@@ -45,9 +46,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createClient();
     
     // Check admin authentication
@@ -74,7 +76,7 @@ export async function PUT(
     const { data: practiceArea, error } = await supabase
       .from('practice_areas')
       .update(updateData)
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single();
 
@@ -92,9 +94,10 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const supabase = await createClient();
     
     // Check admin authentication
@@ -118,7 +121,7 @@ export async function DELETE(
     const { data: attorneyPracticeAreas } = await supabase
       .from('attorney_practice_areas')
       .select('id')
-      .eq('practice_area_id', params.id)
+      .eq('practice_area_id', id)
       .limit(1);
 
     if (attorneyPracticeAreas && attorneyPracticeAreas.length > 0) {
@@ -131,7 +134,7 @@ export async function DELETE(
     const { error } = await supabase
       .from('practice_areas')
       .delete()
-      .eq('id', params.id);
+      .eq('id', id);
 
     if (error) {
       console.error('Error deleting practice area:', error);
