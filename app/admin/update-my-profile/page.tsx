@@ -3,11 +3,12 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { motion } from 'framer-motion';
-import { User, Save, CheckCircle, AlertCircle } from 'lucide-react';
+import { User as UserIcon, Save, CheckCircle, AlertCircle } from 'lucide-react';
+import type { User } from '@supabase/supabase-js';
 
 export default function UpdateMyProfilePage() {
-  const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [message, setMessage] = useState('');
@@ -117,7 +118,7 @@ export default function UpdateMyProfilePage() {
           transition={{ duration: 0.6 }}
         >
           <div className="flex items-center mb-6">
-            <User className="h-6 w-6 text-blue-600 mr-2" />
+            <UserIcon className="h-6 w-6 text-blue-600 mr-2" />
             <h1 className="text-2xl font-bold text-gray-900">Update My Profile</h1>
           </div>
           
