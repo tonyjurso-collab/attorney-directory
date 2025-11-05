@@ -226,12 +226,12 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    const err = error instanceof ChatError ? error : new ChatError('An unexpected error occurred.', 'UNKNOWN_ERROR', 500, error);
-    logger.error(`❌ Chat API error for session ${session?.sid || 'N/A'}: ${err.message}`, { error: err });
+    const err = error instanceof ChatError ? error : new ChatError('An unexpected error occurred.', 'UNKNOWN_ERROR', 500);
+    logger.error(`❌ Chat API error for session ${session?.sid || 'N/A'}: ${err.message}`, { error: err, originalError: error });
 
     // Log AI error response
     if (session) {
-      await addConversationMessage(session.sid, 'assistant', err.displayMessage, {
+      await addConversationMessage(session.sid, 'assistant', err.message, {
         stage: session.stage,
         error: err.code,
       });
@@ -239,7 +239,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       {
-        reply: err.displayMessage,
+        reply: err.message,
         complete: false,
         error: err.message,
         errorCode: err.code,
