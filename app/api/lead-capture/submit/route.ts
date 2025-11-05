@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
     const lpConfig = practiceArea.lp_config as any;
     if (lpConfig?.required_fields) {
       // Add any additional required fields from the config
-      Object.keys(lpConfig.required_fields).forEach(fieldName => {
+      Object.keys(lpConfig.required_fields).forEach((fieldName: string) => {
         if (body[fieldName] && fieldName !== 'lp_campaign_id' && fieldName !== 'lp_supplier_id' && fieldName !== 'lp_key') {
           leadProsperPayload[fieldName] = body[fieldName];
         }
