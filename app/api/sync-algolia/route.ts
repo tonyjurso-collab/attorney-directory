@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { attorneysAdminIndex } from '@/lib/algolia/server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -49,10 +48,16 @@ export async function POST(request: NextRequest) {
       })).filter(pa => pa.id) || [],
     }));
 
-    // Use existing Algolia index
-    if (!attorneysAdminIndex) {
-      return NextResponse.json({ error: 'Algolia not configured' }, { status: 500 });
+    // Initialize Algolia client
+    const algoliaAppId = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID;
+    const algoliaAdminKey = process.env.ALGOLIA_ADMIN_API_KEY;
+    
+    if (!algoliaAppId || !algoliaAdminKey) {
+      return NextResponse.json({ error: 'Algolia credentials not configured' }, { status: 500 });
     }
+
+    const { algoliasearch } = await import('algoliasearch');
+    const client = algoliasearch(algoliaAppId, algoliaAdminKey);
 
     // Transform attorneys for Algolia
     const algoliaAttorneys = transformedAttorneys.map(attorney => ({
@@ -88,8 +93,11 @@ export async function POST(request: NextRequest) {
 
     console.log(`📤 Syncing ${algoliaAttorneys.length} attorneys to Algolia...`);
 
-    // Index attorneys to Algolia
-    await attorneysAdminIndex.saveObjects(algoliaAttorneys);
+    // Index attorneys to Algolia using v5 API
+    await client.saveObjects({
+      indexName: 'attorneys',
+      objects: algoliaAttorneys,
+    });
 
     console.log('✅ Successfully synced attorneys to Algolia');
 
