@@ -119,14 +119,11 @@ export function Navigation() {
               <Image
                 src="/LegalHubLogo.png"
                 alt="LegalHub Logo"
-                width={32}
-                height={32}
-                className="h-8 w-auto object-contain"
+                width={120}
+                height={40}
+                className="h-10 w-auto object-contain"
                 priority
               />
-              <span className="ml-2 text-xl font-bold text-gray-900">
-                LegalHub
-              </span>
             </Link>
           </div>
 
