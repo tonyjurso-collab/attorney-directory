@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
     const config = loadPracticeAreasConfig();
     health.services.config = {
       status: 'ok',
-      practiceAreas: config.practiceAreas.length,
+      practiceAreas: Object.keys(config.legal_practice_areas).length,
     };
   } catch (error) {
     health.services.config = {
