@@ -155,7 +155,7 @@ export function FeaturedAttorneys() {
               name: apa.practice_areas?.name,
               slug: apa.practice_areas?.slug,
               is_primary: apa.is_primary,
-            })).filter(pa => pa.id) || [],
+            })).filter((pa: any) => pa.id) || [],
           }));
           
           console.log('📋 Processed attorney data:', processedAttorneys[0]); // Log first processed attorney
@@ -171,10 +171,8 @@ export function FeaturedAttorneys() {
       }
     };
 
-    // Only fetch if we're still using mock data
-    if (attorneys === mockAttorneys) {
-      fetchAttorneys();
-    }
+    // Fetch attorneys on mount
+    fetchAttorneys();
   }, []);
 
   console.log('🎯 FeaturedAttorneys render with', attorneys.length, 'attorneys (loading:', isLoading, ')');

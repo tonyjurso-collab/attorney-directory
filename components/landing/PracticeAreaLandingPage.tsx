@@ -185,7 +185,7 @@ export function PracticeAreaLandingPage({
               {attorneys.map((attorney, index) => (
                 <motion.div key={attorney.id} variants={staggerItem}>
                   <AttorneyCardVertical 
-                    attorney={attorney}
+                    attorney={attorney as any}
                   />
                 </motion.div>
               ))}
