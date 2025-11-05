@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
-// Sync attorneys from Supabase to Algolia search index
+/**
+ * Sync attorneys from Supabase to Algolia search index
+ * This endpoint syncs all active attorneys with their practice areas to Algolia
+ */
 export async function POST(request: NextRequest) {
   try {
     console.log('🔄 Starting Algolia sync...');
