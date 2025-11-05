@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     console.log('🔍 All keys in leadData:', Object.keys(leadData));
     
     // Get the practice area configuration
-    const practiceArea = leadData.category || 'general';
+    const practiceArea = (leadData.category || 'general') as keyof typeof practiceAreasConfig.legal_practice_areas;
     const config = practiceAreasConfig.legal_practice_areas[practiceArea];
     
     if (!config) {
