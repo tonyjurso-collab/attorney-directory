@@ -66,8 +66,8 @@ export async function POST(request: NextRequest) {
     const landingPageUrl = referer || 'https://attorney-directory.com';
     
            // Use real tracking IDs from frontend (or fallback to placeholders if not provided)
-           const jornayaLeadId = leadData.jornaya_leadid || `jornaya_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-           const trustedFormCertUrl = leadData.trustedform_cert_url || `https://cert.trustedform.com/${Math.random().toString(36).substr(2, 9)}`;
+          const jornayaLeadId = leadData.jornaya_leadid || `jornaya_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+          const trustedFormCertUrl = leadData.trustedform_cert_url || `https://cert.trustedform.com/${Math.random().toString(36).slice(2, 11)}`;
            
           console.log('📊 Tracking IDs:', {
             jornayaLeadId: leadData.jornaya_leadid ? 
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
     
     // Prepare LeadProsper submission data
     // Generate a session ID for this direct lead submission (not from chat session)
-    const sessionId = `lead-capture-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const sessionId = `lead-capture-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
     
     const submissionData: LeadData = {
       sid: sessionId,

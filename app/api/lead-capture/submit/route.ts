@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { submitLeadToLeadProsper } from '@/lib/leadprosper/client';
+import { LeadData } from '@/lib/chat/services/lead-generation-supabase.service';
 
 export async function POST(request: NextRequest) {
   try {
@@ -47,8 +48,12 @@ export async function POST(request: NextRequest) {
       );
     }
     
+    // Generate session ID for this direct lead submission
+    const sessionId = `lead-submit-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+    
     // Build LeadProsper submission payload with all required fields
-    const leadProsperPayload: Record<string, any> = {
+    const leadProsperPayload: LeadData = {
+      sid: sessionId,
       lp_campaign_id: practiceArea.lp_campaign_id,
       lp_supplier_id: practiceArea.lp_supplier_id,
       lp_key: practiceArea.lp_key,
@@ -60,6 +65,8 @@ export async function POST(request: NextRequest) {
       city: body.city || '',
       state: body.state || '',
       zip_code: body.zip_code || '',
+      main_category: body.practice_area || body.main_category || '',
+      sub_category: body.sub_category || body.subcategory || '',
       // Server-side required fields
       ip_address: ipAddress || '0.0.0.0',
       user_agent: userAgent,
@@ -81,7 +88,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Submit to LeadProsper API
-    const result = await submitLeadToLeadProsper(leadProsperPayload as any);
+    const result = await submitLeadToLeadProsper(leadProsperPayload);
     
     if (result.success) {
       console.log('✅ Lead submitted successfully to LeadProsper, ID:', result.lead_id);
