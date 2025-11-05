@@ -4,7 +4,16 @@ import OpenAI from 'openai';
 import { loadPracticeAreasConfig } from '@/lib/chat/config/practice-areas-loader';
 
 export async function GET(request: NextRequest) {
-  const health = {
+  const health: {
+    status: string;
+    timestamp: string;
+    version: string;
+    services: {
+      supabase: { status: string; latency?: number; error?: string };
+      openai: { status: string; latency?: number; error?: string };
+      config: { status: string; practiceAreas?: number; error?: string };
+    };
+  } = {
     status: 'ok',
     timestamp: new Date().toISOString(),
     version: '2.0.0',
