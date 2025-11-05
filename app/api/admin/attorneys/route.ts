@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform the data to match the expected format
-    const transformedAttorneys = attorneys?.map(attorney => ({
+    const transformedAttorneys = attorneys?.map((attorney: any) => ({
       ...attorney,
       practice_areas: attorney.attorney_practice_areas?.map((apa: any) => ({
         id: apa.practice_areas?.id,
