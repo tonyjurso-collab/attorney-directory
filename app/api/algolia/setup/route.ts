@@ -8,10 +8,11 @@ export async function POST(request: NextRequest) {
       process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
       process.env.ALGOLIA_ADMIN_API_KEY!
     );
-    const index = client.initIndex('attorneys');
 
-    // Configure the index settings
-    await index.setSettings({
+    // Configure the index settings using v5 API
+    await client.setSettings({
+      indexName: 'attorneys',
+      indexSettings: {
       // Searchable attributes (in order of importance)
       searchableAttributes: [
         'name',
@@ -96,6 +97,7 @@ export async function POST(request: NextRequest) {
           synonyms: ['criminal defense', 'criminal charges', 'felony', 'misdemeanor', 'assault', 'theft', 'fraud']
         }
       ]
+      }
     });
 
     return NextResponse.json({ 
