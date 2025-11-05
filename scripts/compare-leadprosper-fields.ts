@@ -10,12 +10,10 @@
  * Example: node scripts/compare-leadprosper-fields.ts submission-results.json
  */
 
-const { config } = require('dotenv');
+const dotenvConfig = require('dotenv');
+dotenvConfig.config({ path: '.env.local' });
 const fs = require('fs');
 const path = require('path');
-
-// Load environment variables
-config({ path: '.env.local' });
 
 // Load practice areas config
 const configPath = path.join(__dirname, '../chat/practice_areas_config.json');

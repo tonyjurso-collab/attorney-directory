@@ -120,6 +120,7 @@ export async function addConversationMessage(
   return addTranscriptMessage(sid, {
     role,
     text: content,
+    timestamp: new Date().toISOString(),
     metadata,
   });
 }
@@ -130,8 +131,8 @@ export async function addConversationMessage(
 export function toLegacySession(sessionData: ChatSessionData): ChatSession {
   return {
     collectedFields: sessionData.answers,
-    category: sessionData.main_category,
-    subcategory: sessionData.sub_category,
+    category: sessionData.main_category || undefined,
+    subcategory: sessionData.sub_category || undefined,
     conversationHistory: [], // Will be populated from transcript
     conversationStep: sessionData.stage === 'READY_TO_SUBMIT' ? 'ready_to_submit' : 'collecting_fields',
   };

@@ -95,7 +95,7 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceDetails | n
  * @returns boolean indicating if format is valid
  */
 export function isValidPlaceId(placeId: string): boolean {
-  return placeId && placeId.startsWith('ChIJ') && placeId.length > 20;
+  return !!placeId && placeId.startsWith('ChIJ') && placeId.length > 20;
 }
 
 /**

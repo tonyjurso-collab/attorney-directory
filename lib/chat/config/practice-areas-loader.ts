@@ -109,11 +109,7 @@ export function getPracticeAreaConfig(category: string): PracticeAreaConfig | nu
 export function getPracticeAreaBySlug(slug: string): any | null {
   try {
     const config = loadPracticeAreasConfig();
-    // Try new format first
-    if (config.practiceAreas) {
-      return config.practiceAreas.find(area => area.slug === slug) || null;
-    }
-    // Fall back to old format
+    // Use legal_practice_areas (Record format) - slug is the key
     return config.legal_practice_areas[slug] || null;
   } catch (error) {
     console.error('Error getting practice area by slug:', error);

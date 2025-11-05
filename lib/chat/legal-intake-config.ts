@@ -21,8 +21,8 @@ interface PracticeAreaConfig {
 }
 
 export function getPracticeAreaConfig(category: string): PracticeAreaConfig | null {
-  const practiceArea = practiceAreasConfig.legal_practice_areas[category];
-  return practiceArea || null;
+  const practiceArea = practiceAreasConfig.legal_practice_areas[category as keyof typeof practiceAreasConfig.legal_practice_areas];
+  return (practiceArea as PracticeAreaConfig) || null;
 }
 
 export function getRequiredFieldsForCategory(category: string): string[] {

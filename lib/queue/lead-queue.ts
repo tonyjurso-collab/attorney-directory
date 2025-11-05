@@ -69,19 +69,20 @@ export async function enqueueLeadJob(leadJob: Omit<LeadJob, 'jobId' | 'attempts'
  */
 export async function getNextJob(): Promise<LeadJob | null> {
   try {
-    const jobData = await redis.blpop(QUEUE_KEY, 5); // Wait up to 5 seconds
+    // Upstash Redis doesn't support blpop, use lpop instead
+    const jobData = await redis.lpop<string>(QUEUE_KEY);
     
-    if (!jobData || !jobData[1]) {
+    if (!jobData) {
       return null;
     }
     
-    const job = JSON.parse(jobData[1]) as LeadJob;
+    const job = JSON.parse(jobData) as LeadJob;
     
     // Move to processing
     job.status = 'processing';
     job.updatedAt = new Date().toISOString();
     
-    await redis.hset(PROCESSING_KEY, job.jobId, JSON.stringify(job));
+    await redis.hset(PROCESSING_KEY, { [job.jobId]: JSON.stringify(job) });
     await redis.expire(PROCESSING_KEY, JOB_TTL);
     
     console.log(`🔄 Job moved to processing: ${job.jobId}`);
@@ -111,7 +112,7 @@ export async function markJobCompleted(jobId: string, vendorResponse?: any): Pro
     job.vendorResponse = vendorResponse;
     
     // Move to completed
-    await redis.hset(COMPLETED_KEY, jobId, JSON.stringify(job));
+    await redis.hset(COMPLETED_KEY, { [jobId]: JSON.stringify(job) });
     await redis.expire(COMPLETED_KEY, JOB_TTL);
     
     // Remove from processing
@@ -160,7 +161,7 @@ export async function markJobFailed(jobId: string, error: string): Promise<boole
     } else {
       // Max attempts reached: move to dead letter
       job.status = 'dead_letter';
-      await redis.hset(DEAD_LETTER_KEY, jobId, JSON.stringify(job));
+      await redis.hset(DEAD_LETTER_KEY, { [jobId]: JSON.stringify(job) });
       await redis.expire(DEAD_LETTER_KEY, JOB_TTL);
       
       console.log(`💀 Job moved to dead letter: ${jobId}`, {
@@ -266,6 +267,9 @@ export async function cleanupOldJobs(): Promise<{
   try {
     // Clean up completed jobs older than 7 days
     const completedJobs = await redis.hgetall(COMPLETED_KEY);
+    if (!completedJobs) {
+      return { cleaned: 0, errors: [] };
+    }
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     
@@ -316,6 +320,9 @@ export async function getJobsByStatus(status: LeadJob['status'], limit: number =
     }
     
     const jobsData = await redis.hgetall(key);
+    if (!jobsData) {
+      return [];
+    }
     const jobs: LeadJob[] = [];
     
     for (const [jobId, jobData] of Object.entries(jobsData)) {

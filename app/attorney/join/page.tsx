@@ -2,6 +2,8 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { AttorneyJoinForm } from '@/components/attorney/AttorneyJoinForm';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AttorneyJoinPage() {
   try {
     const supabase = await createClient();

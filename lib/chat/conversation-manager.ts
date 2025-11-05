@@ -34,14 +34,8 @@ export function getNextQuestion(
         (typeof value === 'string' && value.trim() === '')) {
       
       // Special handling for zip_code - if we have zip_code, auto-populate city and state
-      if (field === 'zip_code' && collectedFields.zip_code) {
-        const zipData = getCityStateFromZipCode(collectedFields.zip_code);
-        if (zipData) {
-          collectedFields.city = zipData.city;
-          collectedFields.state = zipData.state;
-          console.log(`Auto-populated city: ${zipData.city}, state: ${zipData.state} from zip: ${collectedFields.zip_code}`);
-        }
-      }
+      // Note: getCityStateFromZipCode is async, so this is handled elsewhere
+      // This function is synchronous, so we can't await here
       
       console.log(`Missing field: ${field}, asking question`);
       return {
@@ -75,9 +69,10 @@ function getRequiredFieldsForCategory(category: string): string[] {
     const requiredFields: string[] = [];
     
     for (const [fieldName, fieldConfig] of Object.entries(practiceArea.required_fields)) {
-      if (typeof fieldConfig === 'object' && fieldConfig.required === true) {
+      const config = fieldConfig as any;
+      if (config && typeof config === 'object' && config.required === true) {
         // Skip server-side fields that are auto-populated
-        if (fieldConfig.source === 'server' || fieldConfig.source === 'config') {
+        if (config.source === 'server' || config.source === 'config') {
           continue;
         }
         

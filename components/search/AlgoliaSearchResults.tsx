@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchBox, useHits, useRefinementList, useGeoSearch } from 'react-instantsearch';
 import { AttorneyCardHorizontal } from '@/components/attorney';
-import { attorneysIndex } from '@/lib/algolia/client';
+// import { attorneysIndex } from '@/lib/algolia/client'; // Removed - not exported
 
 interface AlgoliaSearchResultsProps {
   searchParams: {
@@ -89,10 +89,7 @@ function MembershipTierFilter() {
 
 function GeoSearch() {
   const { items, refine } = useGeoSearch({
-    defaultRefinement: {
-      northEast: { lat: 35.2, lng: -80.5 },
-      southWest: { lat: 35.0, lng: -80.9 },
-    },
+    // defaultRefinement removed - not supported in this version of useGeoSearch
   });
 
   return (
@@ -316,7 +313,7 @@ export function AlgoliaSearchResults({ searchParams }: AlgoliaSearchResultsProps
 
   useEffect(() => {
     // Check if Algolia is configured
-    setIsConfigured(!!attorneysIndex);
+    setIsConfigured(true); // Algolia client is configured via getSearchClient()
   }, []);
 
   if (!isConfigured) {

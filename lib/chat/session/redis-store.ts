@@ -203,7 +203,7 @@ export async function extendSessionTTL(sid: string): Promise<boolean> {
   
   try {
     const result = await redis.expire(sessionKey, SESSION_TTL);
-    return result;
+    return result === 1;
   } catch (error) {
     console.error('❌ Error extending session TTL:', error);
     return false;

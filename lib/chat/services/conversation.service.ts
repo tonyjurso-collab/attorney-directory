@@ -20,15 +20,16 @@ export class ConversationService {
     }
 
     // Get required fields with chat flow order
-    const chatFlow = getChatFlow(session.main_category);
+    const chatFlow = getChatFlow(session.main_category || 'general_legal_assistance');
     const requiredFieldsConfig = practiceArea.required_fields || {};
     
     // Get all required fields (excluding server/config/tracking/compliance sourced fields)
     const requiredFields = Object.entries(requiredFieldsConfig)
       .filter(([fieldName, field]) => {
+        const fieldConfig = field as any;
         // Skip auto-populated fields from various sources
-        if (field.source === 'server' || field.source === 'config' || 
-            field.source === 'tracking' || field.source === 'compliance') {
+        if (fieldConfig.source === 'server' || fieldConfig.source === 'config' || 
+            fieldConfig.source === 'tracking' || fieldConfig.source === 'compliance') {
           return false;
         }
         
@@ -38,9 +39,9 @@ export class ConversationService {
         }
         
         // Only include required fields
-        return field.required === true;
+        return fieldConfig.required === true;
       })
-      .map(([fieldName, field]) => ({ name: fieldName, ...field }));
+      .map(([fieldName, field]) => ({ name: fieldName, ...(field as any) }));
     
     const collectedFields = requiredFields.filter(field => 
       session.answers[field.name] && session.answers[field.name] !== ''

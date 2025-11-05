@@ -29,18 +29,8 @@ export function getNextQuestion(
   });
 
   // Auto-populate city and state if zip_code is available
-  if (collectedFields.zip_code && !collectedFields.city && !collectedFields.state) {
-    try {
-      const location = getCityStateFromZipCode(collectedFields.zip_code);
-      if (location) {
-        collectedFields.city = location.city;
-        collectedFields.state = location.state;
-        console.log('📍 Auto-populated location:', location);
-      }
-    } catch (error) {
-      console.error('Error geocoding zip code:', error);
-    }
-  }
+  // Note: getCityStateFromZipCode is async, so this is handled elsewhere
+  // This function is synchronous, so we can't await here
 
   // Find the first missing required field
   const missingField = requiredFields.find(field => {

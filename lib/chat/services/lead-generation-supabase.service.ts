@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { submitLeadToLeadProsper } from '@/lib/leadprosper/client';
 import { ChatError } from '@/lib/errors/chat-error';
 import { getPracticeAreaConfig } from '../config/practice-areas-loader';
+import { updateSessionData } from '../session';
 
 // Define the schema for a lead to be submitted
 export const LeadDataSchema = z.object({
@@ -120,7 +121,7 @@ export class LeadGenerationService {
         const fieldName = flowItem.field;
         const fieldValue = session.answers[fieldName];
         if (fieldValue !== undefined && fieldValue !== null && fieldValue !== '') {
-          rawLeadData[fieldName] = fieldValue;
+          (rawLeadData as any)[fieldName] = fieldValue;
         }
       });
     }

@@ -99,7 +99,7 @@ Return ONLY valid JSON in this exact format:
 
   } catch (error) {
     logger.error('Error during AI practice area detection:', error);
-    throw new ChatError('AI practice area detection failed', 'AI_DETECTION_ERROR', 500, error);
+    throw new ChatError('AI practice area detection failed', 'AI_DETECTION_ERROR', 500);
   }
 }
 

@@ -95,14 +95,14 @@ async function processJobAsync(job: LeadJob): Promise<void> {
   
   try {
     // Validate lead data
-    const validation = validateLeadForSubmission(job.leadData);
+    const validation = validateLeadForSubmission(job.leadData as any);
     
     if (!validation.valid) {
       throw new Error(`Validation failed: ${validation.errors.join(', ')}`);
     }
     
     // Submit to LeadProsper
-    const result = await submitLeadToLeadProsper(job.leadData);
+    const result = await submitLeadToLeadProsper(job.leadData as any);
     
     const processingTime = Date.now() - startTime;
     
@@ -112,8 +112,8 @@ async function processJobAsync(job: LeadJob): Promise<void> {
       
       // Update session with success
       await updateSessionData(job.sid, {
-        lead_status: 'sent',
-        vendor_response: result,
+        leadStatus: 'sent',
+        leadprosper_response: result,
       });
       
       // Log success message
@@ -147,8 +147,8 @@ async function processJobAsync(job: LeadJob): Promise<void> {
     
     // Update session with failure
     await updateSessionData(job.sid, {
-      lead_status: 'failed',
-      vendor_response: { error: errorMessage },
+      leadStatus: 'failed',
+      leadprosper_response: { error: errorMessage },
     });
     
     // Log failure message

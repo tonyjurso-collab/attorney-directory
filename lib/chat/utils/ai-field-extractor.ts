@@ -14,7 +14,7 @@ export interface FieldExtractionResult {
 
 export interface FieldDefinition {
   name: string;
-  type: 'text' | 'email' | 'phone' | 'zip' | 'state' | 'city' | 'date' | 'enum' | 'numeric' | 'ip' | 'url';
+  type: 'text' | 'email' | 'phone' | 'zip' | 'state' | 'city' | 'date' | 'enum' | 'numeric' | 'ip' | 'url' | 'postal_code';
   required: boolean;
   description?: string;
   allowed_values?: string[];
@@ -41,9 +41,12 @@ export async function extractFieldsWithAI(
     // Build field definitions for remaining fields
     const fieldDefinitions = remainingFields.map(fieldName => {
       const fieldConfig = config.required_fields[fieldName];
+      const fieldType = fieldConfig?.type || 'text';
+      // Map postal_code to zip for compatibility
+      const mappedType = fieldType === 'postal_code' ? 'zip' : fieldType;
       return {
         name: fieldName,
-        type: fieldConfig?.type || 'text',
+        type: mappedType as FieldDefinition['type'],
         required: fieldConfig?.required || false,
         description: fieldConfig?.description,
         allowed_values: fieldConfig?.allowed_values,

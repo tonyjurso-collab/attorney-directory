@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { v4 as uuidv4 } from 'uuid';
-import { LeadData } from '../services/lead-generation.service';
+import { LeadData } from '@/lib/chat/services/lead-generation-supabase.service';
 
 export interface QueueJob {
   id: string;
@@ -251,7 +251,7 @@ export class SupabaseQueue {
       return { queued: 0, processing: 0, completed: 0, failed: 0, deadLetter: 0, total: 0 };
     }
 
-    const stats = data.reduce((acc, row) => {
+    const stats = data.reduce((acc: Record<string, number>, row: any) => {
       acc[row.status] = (acc[row.status] || 0) + 1;
       acc.total += 1;
       return acc;

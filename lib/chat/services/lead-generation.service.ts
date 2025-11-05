@@ -86,7 +86,7 @@ export function generateLeadData(
             leadData[field as keyof LeadData] = fieldConfig.value;
             break;
           case 'server':
-            leadData[field as keyof LeadData] = getServerValue(field, serverData);
+            (leadData as any)[field] = getServerValue(field, serverData);
             break;
         }
       } else if (collectedData[field] !== undefined) {

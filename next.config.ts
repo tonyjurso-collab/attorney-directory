@@ -11,8 +11,7 @@ const nextConfig: NextConfig = {
     formats: ['image/avif', 'image/webp'],
   },
   
-  // Enable SWC minification (default in Next.js 16)
-  swcMinify: true,
+  // SWC minification is enabled by default in Next.js 16, no need to specify
 };
 
 export default nextConfig;

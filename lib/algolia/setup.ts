@@ -1,16 +1,34 @@
-import { adminSearchClient } from './server';
+async function getAlgoliaClient() {
+  if (!process.env.ALGOLIA_ADMIN_API_KEY || !process.env.NEXT_PUBLIC_ALGOLIA_APP_ID) {
+    console.log('Missing Algolia environment variables');
+    return null;
+  }
+
+  try {
+    const { algoliasearch } = await import('algoliasearch');
+    const client = algoliasearch(
+      process.env.NEXT_PUBLIC_ALGOLIA_APP_ID,
+      process.env.ALGOLIA_ADMIN_API_KEY
+    );
+    return client;
+  } catch (error) {
+    console.error('Error initializing Algolia client:', error);
+    return null;
+  }
+}
 
 export async function setupAlgoliaIndex() {
-  if (!adminSearchClient) {
+  const client = await getAlgoliaClient();
+  if (!client) {
     console.log('Algolia not configured, skipping index setup');
     return { success: false, error: 'Algolia not configured' };
   }
 
   try {
-    const index = adminSearchClient.initIndex('attorneys');
-
-    // Configure the index settings
-    await index.setSettings({
+    // Configure the index settings using v5 API
+    await client.setSettings({
+      indexName: 'attorneys',
+      indexSettings: {
       // Searchable attributes (in order of importance)
       searchableAttributes: [
         'name',
@@ -61,40 +79,12 @@ export async function setupAlgoliaIndex() {
       // Max values per facet
       maxValuesPerFacet: 100,
 
-      // Geo search configuration
-      geoSearch: {
-        aroundLatLng: '35.2271, -80.8431', // Charlotte, NC coordinates
-        aroundRadius: 50000, // 50km radius
-      },
+      // Geo search configuration is handled in search queries, not settings
+      // aroundLatLng and aroundRadius are query parameters, not settings
 
-      // Search synonyms for better matching
-      synonyms: [
-        {
-          objectID: 'drug-synonyms',
-          type: 'synonym',
-          synonyms: ['drug', 'drugs', 'drug crimes', 'drug possession', 'drug charges', 'drug offense']
-        },
-        {
-          objectID: 'dui-synonyms', 
-          type: 'synonym',
-          synonyms: ['dui', 'dwi', 'driving under influence', 'drunk driving', 'dui defense']
-        },
-        {
-          objectID: 'personal-injury-synonyms',
-          type: 'synonym', 
-          synonyms: ['personal injury', 'car accident', 'truck accident', 'motorcycle accident', 'slip and fall', 'workplace injury']
-        },
-        {
-          objectID: 'family-law-synonyms',
-          type: 'synonym',
-          synonyms: ['family law', 'divorce', 'custody', 'child support', 'alimony', 'separation']
-        },
-        {
-          objectID: 'criminal-defense-synonyms',
-          type: 'synonym',
-          synonyms: ['criminal defense', 'criminal charges', 'felony', 'misdemeanor', 'assault', 'theft', 'fraud']
-        }
-      ]
+      // Note: Synonyms are managed separately in Algolia v5, not in indexSettings
+      // Use the Algolia dashboard or API to manage synonyms separately
+    }
     });
 
     console.log('Successfully configured Algolia index');

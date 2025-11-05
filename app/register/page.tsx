@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { RegisterForm } from '@/components/auth/RegisterForm';
@@ -31,7 +31,7 @@ const planDetails = {
   }
 };
 
-export default function RegisterPage() {
+function RegisterContent() {
   const searchParams = useSearchParams();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [planInfo, setPlanInfo] = useState<any>(null);
@@ -146,5 +146,13 @@ export default function RegisterPage() {
         <RegisterForm selectedPlan={selectedPlan} />
       </motion.div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Loading...</div>}>
+      <RegisterContent />
+    </Suspense>
   );
 }

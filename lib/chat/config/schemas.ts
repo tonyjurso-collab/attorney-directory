@@ -191,7 +191,8 @@ export function validateField(
 ): { valid: boolean; value?: any; error?: string } {
   try {
     const schema = getCategorySchema(category);
-    const fieldSchema = schema.shape[fieldName];
+    // Check if schema has shape property (ZodObject)
+    const fieldSchema = (schema as any).shape?.[fieldName];
     
     if (!fieldSchema) {
       return { valid: false, error: `Field ${fieldName} not found in schema` };
