@@ -45,15 +45,15 @@ export async function GET() {
 
   // Group variables by category
   const categorizedVars = {
-    algolia: allEnvKeys.filter(key => key.includes('ALGOLIA')),
-    supabase: allEnvKeys.filter(key => key.includes('SUPABASE')),
-    openai: allEnvKeys.filter(key => key.includes('OPENAI')),
-    iron: allEnvKeys.filter(key => key.includes('IRON')),
-    google: allEnvKeys.filter(key => key.includes('GOOGLE')),
-    stripe: allEnvKeys.filter(key => key.includes('STRIPE')),
-    leadprosper: allEnvKeys.filter(key => key.includes('LEADPROSPER')),
-    nextPublic: allEnvKeys.filter(key => key.startsWith('NEXT_PUBLIC_')),
-    other: allEnvKeys.filter(key => 
+    algolia: allEnvKeys.filter((key: string) => key.includes('ALGOLIA')),
+    supabase: allEnvKeys.filter((key: string) => key.includes('SUPABASE')),
+    openai: allEnvKeys.filter((key: string) => key.includes('OPENAI')),
+    iron: allEnvKeys.filter((key: string) => key.includes('IRON')),
+    google: allEnvKeys.filter((key: string) => key.includes('GOOGLE')),
+    stripe: allEnvKeys.filter((key: string) => key.includes('STRIPE')),
+    leadprosper: allEnvKeys.filter((key: string) => key.includes('LEADPROSPER')),
+    nextPublic: allEnvKeys.filter((key: string) => key.startsWith('NEXT_PUBLIC_')),
+    other: allEnvKeys.filter((key: string) => 
       !key.includes('ALGOLIA') && 
       !key.includes('SUPABASE') && 
       !key.includes('OPENAI') && 
