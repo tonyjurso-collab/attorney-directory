@@ -67,7 +67,7 @@ export async function GET() {
   };
 
   // Check which variables have values vs are undefined
-  const varStatus = Object.entries(specificVars).reduce((acc, [key, value]) => {
+  const varStatus = Object.entries(specificVars).reduce((acc: Record<string, string>, [key, value]: [string, string | undefined]) => {
     acc[key] = value ? 'SET' : 'NOT SET';
     return acc;
   }, {} as Record<string, string>);
@@ -77,7 +77,7 @@ export async function GET() {
     timestamp: new Date().toISOString(),
     
     // Specific variable values (masked for security)
-    specificVars: Object.entries(specificVars).reduce((acc, [key, value]) => {
+    specificVars: Object.entries(specificVars).reduce((acc: Record<string, string>, [key, value]: [string, string | undefined]) => {
       acc[key] = value ? `${value.substring(0, 4)}...` : 'NOT SET';
       return acc;
     }, {} as Record<string, string>),

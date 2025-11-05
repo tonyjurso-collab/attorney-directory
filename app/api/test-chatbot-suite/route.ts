@@ -127,18 +127,18 @@ export async function POST(request: NextRequest) {
     // Generate summary
     const summary = {
       totalTests: results.length,
-      successfulTests: results.filter(r => r.success).length,
-      failedTests: results.filter(r => !r.success).length,
+      successfulTests: results.filter((r: any) => r.success).length,
+      failedTests: results.filter((r: any) => !r.success).length,
       commonIssues: results
-        .filter(r => !r.success)
-        .map(r => r.error || 'Unknown error')
-        .reduce((acc, error) => {
+        .filter((r: any) => !r.success)
+        .map((r: any) => r.error || 'Unknown error')
+        .reduce((acc: Record<string, number>, error: string) => {
           acc[error] = (acc[error] || 0) + 1;
           return acc;
         }, {} as Record<string, number>),
       fieldExtractionIssues: results
-        .filter(r => r.success && r.analysis)
-        .map(r => ({
+        .filter((r: any) => r.success && r.analysis)
+        .map((r: any) => ({
           testId: r.testId,
           extractedFields: r.analysis.extractedFields,
           expectedFields: r.testCase.expectedFields,

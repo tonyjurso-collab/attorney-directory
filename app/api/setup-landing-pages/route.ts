@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     const sqlContent = fs.readFileSync(sqlPath, 'utf8');
     
     // Split by semicolon and execute each statement
-    const statements = sqlContent.split(';').filter(stmt => stmt.trim());
+    const statements = sqlContent.split(';').filter((stmt: string) => stmt.trim());
     
     for (const statement of statements) {
       if (statement.trim()) {
