@@ -175,7 +175,7 @@ async function processNextJobInBatch(results: {
     }
     
     // Submit to LeadProsper with timeout
-    const submissionPromise = submitLeadToLeadProsper(job.leadData);
+    const submissionPromise = submitLeadToLeadProsper(job.leadData as LeadData);
     const timeoutPromise = new Promise<never>((_, reject) => {
       setTimeout(() => reject(new Error('Job timeout')), CRON_CONFIG.timeout);
     });
