@@ -1,11 +1,15 @@
 'use client';
 
+import Link from 'next/link';
+import { PRACTICE_AREA_SUBCATEGORIES } from '@/lib/utils/practice-areas';
+
 interface PracticeAreaContentProps {
   practiceArea: string;
   state: string;
+  category?: string;
 }
 
-export function PracticeAreaContent({ practiceArea, state }: PracticeAreaContentProps) {
+export function PracticeAreaContent({ practiceArea, state, category }: PracticeAreaContentProps) {
   const formatPracticeArea = (area: string) => {
     return area.split(' ').map(word => 
       word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
@@ -144,6 +148,36 @@ export function PracticeAreaContent({ practiceArea, state }: PracticeAreaContent
 
   const content = getContentSections();
 
+  // Helper function to map service name to subcategory slug
+  const getSubcategorySlug = (serviceName: string): string | null => {
+    if (!category) return null;
+    
+    const subcategories = PRACTICE_AREA_SUBCATEGORIES[category] || [];
+    
+    // Normalize for comparison: lowercase, remove trailing 's', trim
+    const normalize = (str: string) => str.toLowerCase().replace(/s$/, '').trim();
+    const normalizedServiceName = normalize(serviceName);
+    
+    // Find matching subcategory
+    const subcategory = subcategories.find(sub => {
+      const normalizedSubName = normalize(sub.name);
+      // Check exact match after normalization
+      if (normalizedSubName === normalizedServiceName) return true;
+      // Check if service name matches subcategory name directly (case-insensitive)
+      if (sub.name.toLowerCase() === serviceName.toLowerCase()) return true;
+      // Check if removing plural from both matches
+      if (normalize(sub.name) === normalizedServiceName) return true;
+      return false;
+    });
+    
+    return subcategory?.slug || null;
+  };
+
+  // Helper function to get state slug for URL
+  const getStateSlug = (): string => {
+    return state.toLowerCase();
+  };
+
   return (
     <div className="bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -185,16 +219,60 @@ export function PracticeAreaContent({ practiceArea, state }: PracticeAreaContent
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {content.services.items.map((service, index) => (
-              <div key={index} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow duration-200">
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                  {service.name}
-                </h3>
-                <p className="text-gray-600">
-                  {service.description}
-                </p>
-              </div>
-            ))}
+            {content.services.items.map((service, index) => {
+              const subcategorySlug = getSubcategorySlug(service.name);
+              const stateSlug = getStateSlug();
+              const hasLink = category && subcategorySlug;
+              
+              const CardContent = ({ isLink }: { isLink: boolean }) => (
+                <div className={`bg-white border border-gray-200 rounded-lg p-6 transition-all duration-200 ${
+                  isLink 
+                    ? 'hover:shadow-lg hover:border-blue-300 hover:-translate-y-1 cursor-pointer' 
+                    : 'hover:shadow-lg'
+                }`}>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className={`text-xl font-semibold mb-3 ${
+                        isLink ? 'text-gray-900 group-hover:text-blue-600' : 'text-gray-900'
+                      }`}>
+                        {service.name}
+                      </h3>
+                      <p className="text-gray-600">
+                        {service.description}
+                      </p>
+                    </div>
+                    {isLink && (
+                      <svg 
+                        className="w-5 h-5 text-gray-400 ml-2 flex-shrink-0 mt-1 group-hover:text-blue-600 transition-colors" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    )}
+                  </div>
+                </div>
+              );
+
+              if (hasLink) {
+                return (
+                  <Link
+                    key={index}
+                    href={`/d/${stateSlug}/${category}/${subcategorySlug}`}
+                    className="block group"
+                  >
+                    <CardContent isLink={true} />
+                  </Link>
+                );
+              }
+
+              return (
+                <div key={index}>
+                  <CardContent isLink={false} />
+                </div>
+              );
+            })}
           </div>
         </div>
 

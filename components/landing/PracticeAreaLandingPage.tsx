@@ -123,6 +123,7 @@ export function PracticeAreaLandingPage({
       <PracticeAreaContent 
         practiceArea={practiceArea}
         state={state}
+        category={category}
       />
 
       {/* Attorneys Section */}
