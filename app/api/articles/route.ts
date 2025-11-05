@@ -112,8 +112,8 @@ export async function GET(request: NextRequest) {
       success: true,
       articles: articles || [],
       total: count || 0,
-      limit: filters.limit,
-      offset: filters.offset
+      limit: limit,
+      offset: offset
     });
 
   } catch (error: any) {
