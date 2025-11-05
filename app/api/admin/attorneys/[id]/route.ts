@@ -56,7 +56,7 @@ export async function GET(
         name: apa.practice_areas?.name,
         slug: apa.practice_areas?.slug,
         is_primary: apa.is_primary,
-      })).filter(pa => pa.id) || [],
+      })).filter((pa: { id?: string | number }) => pa.id) || [],
     };
 
     return NextResponse.json(transformedAttorney);
