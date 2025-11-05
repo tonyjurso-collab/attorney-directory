@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     const client = algoliasearch(algoliaAppId, algoliaAdminKey);
 
     // Transform attorneys for Algolia
-    const algoliaAttorneys = transformedAttorneys.map(attorney => ({
+    const algoliaAttorneys = transformedAttorneys.map((attorney: any) => ({
       objectID: attorney.id,
       name: `${attorney.first_name} ${attorney.last_name}`,
       firm_name: attorney.firm_name,
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
       zip_code: attorney.zip_code,
       membership_tier: attorney.membership_tier,
       is_verified: attorney.is_verified,
-      practice_areas: attorney.practice_areas.map(pa => ({
+      practice_areas: attorney.practice_areas.map((pa: any) => ({
         name: pa.name,
         slug: pa.slug,
         is_primary: pa.is_primary,

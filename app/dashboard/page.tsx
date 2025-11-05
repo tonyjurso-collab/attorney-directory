@@ -144,7 +144,7 @@ export default function DashboardPage() {
             name: apa.practice_areas?.name,
             slug: apa.practice_areas?.slug,
             category_id: apa.practice_areas?.category_id,
-          })).filter(pa => pa.id) || [], // Filter out any null/undefined practice areas
+          })).filter((pa: { id?: string | number }) => pa.id) || [], // Filter out any null/undefined practice areas
         };
 
         setAttorney(transformedAttorney);

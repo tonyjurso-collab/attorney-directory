@@ -33,8 +33,8 @@ export default function TestArticlesAPIPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             ...formData,
-            practice_area_ids: formData.practice_area_ids ? formData.practice_area_ids.split(',').map(id => id.trim()) : [],
-            tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : []
+            practice_area_ids: formData.practice_area_ids ? formData.practice_area_ids.split(',').map((id: string) => id.trim()) : [],
+            tags: formData.tags ? formData.tags.split(',').map((tag: string) => tag.trim()) : []
           })
         });
       } else if (action === 'get') {

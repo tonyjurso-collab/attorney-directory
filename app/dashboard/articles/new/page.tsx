@@ -88,7 +88,7 @@ export default function NewArticlePage() {
           excerpt: excerpt || undefined,
           meta_description: metaDescription || undefined,
           practice_area_ids: practiceAreaIds,
-          tags: tags ? tags.split(',').map(t => t.trim()) : [],
+          tags: tags ? tags.split(',').map((t: string) => t.trim()) : [],
         }),
       });
 
@@ -224,7 +224,7 @@ export default function NewArticlePage() {
                       if (e.target.checked) {
                         setPracticeAreaIds([...practiceAreaIds, pa.id]);
                       } else {
-                        setPracticeAreaIds(practiceAreaIds.filter(id => id !== pa.id));
+                        setPracticeAreaIds(practiceAreaIds.filter((id: string) => id !== pa.id));
                       }
                     }}
                     className="rounded border-gray-300"

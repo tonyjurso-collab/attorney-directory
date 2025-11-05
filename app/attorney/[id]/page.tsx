@@ -100,14 +100,14 @@ const getAttorney = cache(async (id: string) => {
         id: apc.practice_area_categories?.id,
         name: apc.practice_area_categories?.name,
         slug: apc.practice_area_categories?.slug,
-      })).filter(cat => cat.id) || [],
+      })).filter((cat: { id?: string | number }) => cat.id) || [],
       practice_areas: attorney.attorney_practice_areas?.map((apa: any) => ({
         id: apa.practice_areas?.id,
         name: apa.practice_areas?.name,
         slug: apa.practice_areas?.slug,
         description: apa.practice_areas?.description,
         category_id: apa.practice_areas?.category_id,
-      })).filter(pa => pa.id) || [], // Filter out any null/undefined practice areas
+      })).filter((pa: { id?: string | number }) => pa.id) || [], // Filter out any null/undefined practice areas
       average_rating: averageRating,
       review_count: attorney.reviews?.length || 0,
       googleReviews: googleReviews,
