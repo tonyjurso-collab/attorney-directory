@@ -21,6 +21,8 @@ export const LeadDataSchema = z.object({
   lp_campaign_id: z.number().optional(),
   lp_supplier_id: z.number().optional(),
   lp_key: z.string().optional(),
+  lp_subid1: z.string().optional(),
+  lp_subid2: z.string().optional(),
   // Case details
   describe: z.string().optional(),
   date_of_incident: z.string().optional(),
