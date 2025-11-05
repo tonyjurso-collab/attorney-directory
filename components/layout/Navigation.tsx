@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Menu, X, Search, User, LogOut, Settings, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -115,11 +116,16 @@ export function Navigation() {
           {/* Logo */}
           <div className="flex-shrink-0">
             <Link href="/" className="flex items-center">
-              <div className="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">AD</span>
-              </div>
+              <Image
+                src="/LegalHubLogo.png"
+                alt="LegalHub Logo"
+                width={32}
+                height={32}
+                className="h-8 w-auto object-contain"
+                priority
+              />
               <span className="ml-2 text-xl font-bold text-gray-900">
-                Attorney Directory
+                LegalHub
               </span>
             </Link>
           </div>

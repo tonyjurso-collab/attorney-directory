@@ -126,7 +126,7 @@
             <header class="flex-shrink-0 px-3 sm:px-4 md:px-6 py-3 sm:py-4 border-b border-indigo-100 bg-white/95 backdrop-blur-sm safe-top">
                 <div class="flex items-center gap-2 sm:gap-3 md:gap-4">
                     <div class="relative flex-shrink-0">
-                        <div class="w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-xl bg-indigo-600 text-white font-semibold flex items-center justify-center shadow-md text-sm sm:text-base">LH</div>
+                        <img src="/legal-hub-site-icon.png" alt="LegalHub" class="w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-xl object-contain shadow-md" />
                         <span class="absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-white grid place-items-center shadow">
                             <span class="inline-block w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-emerald-500"></span>
                         </span>

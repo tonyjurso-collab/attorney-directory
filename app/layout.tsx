@@ -27,12 +27,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Attorney Directory - Find the Right Lawyer Near You",
+  title: "LegalHub - Find the Right Lawyer Near You",
   description: "Connect with qualified attorneys in your area. Search by practice area, location, and get matched with the right legal professional for your needs.",
   keywords: "attorney, lawyer, legal, directory, find lawyer, legal services",
-  authors: [{ name: "Attorney Directory" }],
+  authors: [{ name: "LegalHub" }],
+  icons: {
+    icon: "/legal-hub-site-icon.png",
+    apple: "/legal-hub-site-icon.png",
+  },
   openGraph: {
-    title: "Attorney Directory - Find the Right Lawyer Near You",
+    title: "LegalHub - Find the Right Lawyer Near You",
     description: "Connect with qualified attorneys in your area. Search by practice area, location, and get matched with the right legal professional for your needs.",
     type: "website",
     locale: "en_US",
