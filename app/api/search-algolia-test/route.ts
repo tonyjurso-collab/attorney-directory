@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
       requests: [{
         indexName: 'attorneys',
         query: '',
-        params: { hitsPerPage: 10 },
+        hitsPerPage: 10,
       }],
     });
     const emptySearch = emptyResponse.results[0];
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
       requests: [{
         indexName: 'attorneys',
         query: 'sarah',
-        params: { hitsPerPage: 10 },
+        hitsPerPage: 10,
       }],
     });
     const sarahSearch = sarahResponse.results[0];
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
       requests: [{
         indexName: 'attorneys',
         query: 'Sarah',
-        params: { hitsPerPage: 10 },
+        hitsPerPage: 10,
       }],
     });
     const SarahSearch = SarahResponse.results[0];
@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
       requests: [{
         indexName: 'attorneys',
         query: 's',
-        params: { hitsPerPage: 10 },
+        hitsPerPage: 10,
       }],
     });
     const sSearch = sResponse.results[0];
@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
       requests: [{
         indexName: 'attorneys',
         query: 'johnson',
-        params: { hitsPerPage: 10 },
+        hitsPerPage: 10,
       }],
     });
     const johnsonSearch = johnsonResponse.results[0];
@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
       requests: [{
         indexName: 'attorneys',
         query: 'personal',
-        params: { hitsPerPage: 10 },
+        hitsPerPage: 10,
       }],
     });
     const personalSearch = personalResponse.results[0];

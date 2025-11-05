@@ -101,11 +101,9 @@ export async function GET(request: NextRequest) {
       requests: [{
         indexName: 'attorneys',
         query: '',
-        params: {
-          aroundLatLng: `${lat},${lng}`,
-          aroundRadius: parseInt(radius) * 1609.34, // Convert miles to meters
-          hitsPerPage: 10,
-        },
+        aroundLatLng: `${lat},${lng}`,
+        aroundRadius: parseInt(radius) * 1609.34, // Convert miles to meters
+        hitsPerPage: 10,
       }],
     });
 

@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
       requests: [{
         indexName: 'attorneys',
         query: '',
-        params: { hitsPerPage: 10 },
+        hitsPerPage: 10,
       }],
     });
     const searchResult = searchResponse.results[0];
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
       requests: [{
         indexName: 'attorneys',
         query: 'sarah',
-        params: { hitsPerPage: 5 },
+        hitsPerPage: 5,
       }],
     });
     const sarahSearch = sarahResponse.results[0];
@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
       requests: [{
         indexName: 'attorneys',
         query: 'Sarah',
-        params: { hitsPerPage: 5 },
+        hitsPerPage: 5,
       }],
     });
     const sarahSearch2 = sarahResponse2.results[0];
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
       requests: [{
         indexName: 'attorneys',
         query: 's',
-        params: { hitsPerPage: 5 },
+        hitsPerPage: 5,
       }],
     });
     const sarahSearch3 = sarahResponse3.results[0];

@@ -15,9 +15,7 @@ export async function GET(request: NextRequest) {
       requests: [{
         indexName: 'attorneys',
         query: '',
-        params: {
-          hitsPerPage: 50,
-        },
+        hitsPerPage: 50,
       }],
     });
     
