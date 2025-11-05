@@ -117,7 +117,9 @@ export async function POST(request: NextRequest) {
         
         try {
           // For initial rich messages, extract from ALL remaining fields, not just current field
-          const fieldsToExtract = isInitialRichMessage ? remainingFields : [currentField, ...remainingFields];
+          const fieldsToExtract = isInitialRichMessage 
+            ? remainingFields 
+            : [currentField, ...remainingFields].filter((field): field is string => field !== null);
           
           extractionResult = await extractFieldsWithAI(
             message,
