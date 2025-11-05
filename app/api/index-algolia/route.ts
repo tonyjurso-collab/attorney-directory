@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
         slug: apa.practice_areas?.slug,
         description: apa.practice_areas?.description,
         is_primary: apa.is_primary,
-      })).filter(pa => pa.id) || [],
+      })).filter((pa: { id?: string | number }) => pa.id) || [],
     }));
 
     // Transform attorneys for Algolia
