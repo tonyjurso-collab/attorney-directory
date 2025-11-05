@@ -19,6 +19,7 @@ interface TrackingData {
   trustedFormCertUrl: string;
   isLoading: boolean;
   error?: string;
+  captureTrackingIds: () => { jornayaLeadId: string; trustedFormCertUrl: string };
 }
 
 /**
@@ -26,7 +27,7 @@ interface TrackingData {
  * Handles script loading and ID capture for all lead forms
  */
 export function useLeadTracking(): TrackingData {
-  const [trackingData, setTrackingData] = useState<TrackingData>({
+  const [trackingData, setTrackingData] = useState<Omit<TrackingData, 'captureTrackingIds'>>({
     jornayaLeadId: '',
     trustedFormCertUrl: '',
     isLoading: true,

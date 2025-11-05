@@ -64,3 +64,4 @@ export function StatesLinksSection({ category }: StatesLinksSectionProps) {
     </div>
   );
 }
+

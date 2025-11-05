@@ -225,3 +225,4 @@ export function PracticeAreaOnlyContent({ practiceArea }: PracticeAreaOnlyConten
     </div>
   );
 }
+

@@ -38,17 +38,18 @@ export default function TestAlgoliaDirectPage() {
           }]
         });
 
+        const emptyResult = emptySearch.results[0] as any;
         testResults.push({
           test: 'Empty search (should return all records)',
           success: true,
-          results: emptySearch.results[0]?.hits || [],
-          totalHits: emptySearch.results[0]?.nbHits,
-          processingTime: emptySearch.results[0]?.processingTimeMS
+          results: emptyResult?.hits || [],
+          totalHits: emptyResult?.nbHits,
+          processingTime: emptyResult?.processingTimeMS
         });
 
         console.log('✅ Empty search results:', {
-          totalHits: emptySearch.results[0]?.nbHits,
-          hits: emptySearch.results[0]?.hits?.length
+          totalHits: emptyResult?.nbHits,
+          hits: emptyResult?.hits?.length
         });
       } catch (error: any) {
         testResults.push({
@@ -70,17 +71,18 @@ export default function TestAlgoliaDirectPage() {
           }]
         });
 
+        const sarahResult = sarahSearch.results[0] as any;
         testResults.push({
           test: 'Search for "sarah"',
           success: true,
-          results: sarahSearch.results[0]?.hits || [],
-          totalHits: sarahSearch.results[0]?.nbHits,
-          processingTime: sarahSearch.results[0]?.processingTimeMS
+          results: sarahResult?.hits || [],
+          totalHits: sarahResult?.nbHits,
+          processingTime: sarahResult?.processingTimeMS
         });
 
         console.log('✅ Sarah search results:', {
-          totalHits: sarahSearch.results[0]?.nbHits,
-          hits: sarahSearch.results[0]?.hits?.length
+          totalHits: sarahResult?.nbHits,
+          hits: sarahResult?.hits?.length
         });
       } catch (error: any) {
         testResults.push({
@@ -102,17 +104,18 @@ export default function TestAlgoliaDirectPage() {
           }]
         });
 
+        const SarahResult = SarahSearch.results[0] as any;
         testResults.push({
           test: 'Search for "Sarah" (capitalized)',
           success: true,
-          results: SarahSearch.results[0]?.hits || [],
-          totalHits: SarahSearch.results[0]?.nbHits,
-          processingTime: SarahSearch.results[0]?.processingTimeMS
+          results: SarahResult?.hits || [],
+          totalHits: SarahResult?.nbHits,
+          processingTime: SarahResult?.processingTimeMS
         });
 
         console.log('✅ Sarah (capitalized) search results:', {
-          totalHits: SarahSearch.results[0]?.nbHits,
-          hits: SarahSearch.results[0]?.hits?.length
+          totalHits: SarahResult?.nbHits,
+          hits: SarahResult?.hits?.length
         });
       } catch (error: any) {
         testResults.push({
@@ -134,17 +137,18 @@ export default function TestAlgoliaDirectPage() {
           }]
         });
 
+        const sResult = sSearch.results[0] as any;
         testResults.push({
           test: 'Search for "s" (single character)',
           success: true,
-          results: sSearch.results[0]?.hits || [],
-          totalHits: sSearch.results[0]?.nbHits,
-          processingTime: sSearch.results[0]?.processingTimeMS
+          results: sResult?.hits || [],
+          totalHits: sResult?.nbHits,
+          processingTime: sResult?.processingTimeMS
         });
 
         console.log('✅ S search results:', {
-          totalHits: sSearch.results[0]?.nbHits,
-          hits: sSearch.results[0]?.hits?.length
+          totalHits: sResult?.nbHits,
+          hits: sResult?.hits?.length
         });
       } catch (error: any) {
         testResults.push({
@@ -166,17 +170,18 @@ export default function TestAlgoliaDirectPage() {
           }]
         });
 
+        const johnsonResult = johnsonSearch.results[0] as any;
         testResults.push({
           test: 'Search for "johnson"',
           success: true,
-          results: johnsonSearch.results[0]?.hits || [],
-          totalHits: johnsonSearch.results[0]?.nbHits,
-          processingTime: johnsonSearch.results[0]?.processingTimeMS
+          results: johnsonResult?.hits || [],
+          totalHits: johnsonResult?.nbHits,
+          processingTime: johnsonResult?.processingTimeMS
         });
 
         console.log('✅ Johnson search results:', {
-          totalHits: johnsonSearch.results[0]?.nbHits,
-          hits: johnsonSearch.results[0]?.hits?.length
+          totalHits: johnsonResult?.nbHits,
+          hits: johnsonResult?.hits?.length
         });
       } catch (error: any) {
         testResults.push({
@@ -198,17 +203,18 @@ export default function TestAlgoliaDirectPage() {
           }]
         });
 
+        const personalResult = personalSearch.results[0] as any;
         testResults.push({
           test: 'Search for "personal" (practice area)',
           success: true,
-          results: personalSearch.results[0]?.hits || [],
-          totalHits: personalSearch.results[0]?.nbHits,
-          processingTime: personalSearch.results[0]?.processingTimeMS
+          results: personalResult?.hits || [],
+          totalHits: personalResult?.nbHits,
+          processingTime: personalResult?.processingTimeMS
         });
 
         console.log('✅ Personal search results:', {
-          totalHits: personalSearch.results[0]?.nbHits,
-          hits: personalSearch.results[0]?.hits?.length
+          totalHits: personalResult?.nbHits,
+          hits: personalResult?.hits?.length
         });
       } catch (error: any) {
         testResults.push({

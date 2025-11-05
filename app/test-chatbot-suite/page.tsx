@@ -243,7 +243,7 @@ export default function ChatbotTestSuite() {
             <div className="mt-4">
               <h4 className="font-medium mb-2">Common Errors:</h4>
               <ul className="text-sm">
-                {Object.entries(stats.commonErrors).map(([error, count]) => (
+                {(Object.entries(stats.commonErrors) as [string, number][]).map(([error, count]) => (
                   <li key={error} className="text-red-600">
                     {error} ({count} times)
                   </li>

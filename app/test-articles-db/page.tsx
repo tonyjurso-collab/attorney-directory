@@ -91,6 +91,10 @@ export default function TestArticlesDBPage() {
     setLoading(true);
 
     try {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized');
+      }
+
       // Check if tables exist by querying their structure
       const tables = [
         'attorney_articles',
@@ -136,6 +140,10 @@ export default function TestArticlesDBPage() {
     setLoading(true);
 
     try {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized');
+      }
+
       // First, get an attorney ID
       const { data: attorneys, error: attorneysError } = await supabase
         .from('attorneys')
@@ -188,6 +196,10 @@ export default function TestArticlesDBPage() {
     setLoading(true);
 
     try {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized');
+      }
+
       const { data, error: rlsError } = await supabase
         .from('attorney_articles')
         .select('id, status')
@@ -218,6 +230,10 @@ export default function TestArticlesDBPage() {
     setLoading(true);
 
     try {
+      if (!supabase) {
+        throw new Error('Supabase client not initialized');
+      }
+
       const { error: deleteError } = await supabase
         .from('attorney_articles')
         .delete()

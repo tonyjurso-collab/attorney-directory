@@ -56,7 +56,9 @@ export function RegisterForm({ selectedPlan }: { selectedPlan?: string | null })
         password: data.password,
         options: {
           data: {
-            full_name: data.full_name,
+            first_name: data.first_name,
+            last_name: data.last_name,
+            full_name: `${data.first_name} ${data.last_name}`,
             role: 'attorney',
           },
         },

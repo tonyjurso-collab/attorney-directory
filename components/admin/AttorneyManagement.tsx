@@ -280,7 +280,7 @@ function AttorneyForm({ attorney, onSave, onCancel }: AttorneyFormProps) {
     phone: attorney?.phone || '',
     email: attorney?.email || '',
     website: attorney?.website || '',
-    address_line1: attorney?.address_line1 || '',
+    address_line1: (attorney as any)?.address_line1 || '',
     city: attorney?.city || '',
     state: attorney?.state || '',
     zip_code: attorney?.zip_code || '',

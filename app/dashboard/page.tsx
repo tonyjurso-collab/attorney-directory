@@ -88,6 +88,13 @@ export default function DashboardPage() {
           console.log('✅ Profile created:', profile);
         }
 
+        // Ensure profile exists before checking role
+        if (!profile) {
+          console.error('❌ Profile is null after creation attempt');
+          router.push('/login');
+          return;
+        }
+
         // Check role
         if (profile.role !== 'attorney') {
           console.error('❌ User is not an attorney, role:', profile.role);

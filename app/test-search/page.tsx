@@ -131,7 +131,7 @@ export default function TestSearchPage() {
         scenario: 'Algolia liteClient - basic sarah search',
         method: 'algolia',
         success: true,
-        results: searchResponse.results[0]?.hits || [],
+        results: (searchResponse.results[0] as any)?.hits || [],
         duration: Date.now() - start4
       });
     } catch (error: any) {
@@ -166,7 +166,7 @@ export default function TestSearchPage() {
         scenario: 'Algolia liteClient - empty query (should return all)',
         method: 'algolia',
         success: true,
-        results: searchResponse.results[0]?.hits || [],
+        results: (searchResponse.results[0] as any)?.hits || [],
         duration: Date.now() - start5
       });
     } catch (error: any) {

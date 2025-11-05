@@ -66,7 +66,7 @@ export function ContactForm({ attorney }: ContactFormProps) {
         case_value: data.case_value ? parseFloat(data.case_value) : undefined,
         jornaya_leadid: jornayaLeadId,
         trustedform_cert_url: trustedFormCertUrl,
-      }, attorney.id);
+      } as any, attorney.id);
 
       if (result.success) {
         setSubmitStatus('success');
