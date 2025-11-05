@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { submitLeadToLeadProsper, LeadProsperSubmission } from '@/lib/leadprosper/client';
+import { submitLeadToLeadProsper } from '@/lib/leadprosper/client';
+import { LeadData } from '@/lib/chat/services/lead-generation-supabase.service';
 import practiceAreasConfig from '@/chat/practice_areas_config.json';
 import { getCityStateFromZipCode } from '@/lib/utils/zipcode-geocoding';
 
@@ -81,7 +82,11 @@ export async function POST(request: NextRequest) {
     const tcpaText = "By clicking 'Yes, Connect Me' I agree by electronic signature to be contacted by LegalHub through telephone calls, text messages, and email. I understand that my consent is not a condition of purchase.";
     
     // Prepare LeadProsper submission data
-    const submissionData: LeadProsperSubmission = {
+    // Generate a session ID for this direct lead submission (not from chat session)
+    const sessionId = `lead-capture-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    
+    const submissionData: LeadData = {
+      sid: sessionId,
       lp_campaign_id: lpConfig.lp_campaign_id,
       lp_supplier_id: lpConfig.lp_supplier_id,
       lp_key: lpConfig.lp_key,
