@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
 
   try {
     // Rate limiting
-    const clientIP = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
+    const clientIP = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
     if (!checkRateLimit(clientIP)) {
       return NextResponse.json(
         { error: 'Rate limit exceeded. Please wait a moment before sending another message.' },
