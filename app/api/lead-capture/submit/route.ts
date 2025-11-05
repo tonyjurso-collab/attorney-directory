@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
     const result = await submitLeadToLeadProsper(leadProsperPayload);
     
     if (result.success) {
-      console.log('✅ Lead submitted successfully to LeadProsper, ID:', result.lead_id);
+      console.log('✅ Lead submitted successfully to LeadProsper, ID:', result.leadId);
       
       // Also store lead in database for tracking
       const { error: leadError } = await supabase
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
           case_description: body.describe || '',
           source: 'website',
           status: 'new',
-          leadprosper_lead_id: result.lead_id,
+          leadprosper_lead_id: result.leadId,
         });
       
       if (leadError) {
