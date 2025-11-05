@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
@@ -12,77 +12,79 @@ export default function ArticlesPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
+  const fetchArticles = useCallback(async () => {
     const supabase = createClient();
     
-    const fetchArticles = async () => {
-      try {
-        console.log('🔍 Starting fetchArticles...');
-        
-        // Get current user
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
-        console.log('👤 User:', user, 'Auth error:', authError);
+    try {
+      console.log('🔍 Starting fetchArticles...');
+      setLoading(true);
+      setError(null);
+      
+      // Get current user
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      console.log('👤 User:', user, 'Auth error:', authError);
 
-        if (authError || !user) {
-          console.log('❌ No user, redirecting to login');
-          router.push('/login');
-          return;
-        }
-
-        // Get attorney_id from user_id
-        console.log('🔍 Fetching attorney for user:', user.id);
-        const { data: attorney, error: attorneyError } = await supabase
-          .from('attorneys')
-          .select('id')
-          .eq('user_id', user.id)
-          .single();
-
-        console.log('👨‍⚖️ Attorney:', attorney, 'Error:', attorneyError);
-
-        if (attorneyError || !attorney) {
-          console.log('❌ No attorney found, redirecting to dashboard');
-          setError('Attorney profile not found');
-          setLoading(false);
-          return;
-        }
-
-        // Fetch articles for this attorney
-        console.log('🔍 Fetching articles for attorney:', attorney.id);
-        const { data, error: articlesError } = await supabase
-          .from('attorney_articles')
-          .select(`
-            *,
-            attorney:attorneys!inner(
-              id,
-              first_name,
-              last_name,
-              firm_name,
-              profile_image_url
-            )
-          )
-          `)
-          .eq('attorney_id', attorney.id)
-          .order('created_at', { ascending: false });
-
-        console.log('📝 Articles response:', { data, error: articlesError });
-
-        if (articlesError) {
-          console.error('❌ Articles error:', articlesError);
-          throw articlesError;
-        }
-
-        console.log('✅ Articles fetched:', data?.length || 0);
-        setArticles(data || []);
-      } catch (err: any) {
-        console.error('❌ Error fetching articles:', err);
-        setError(err.message || 'Failed to load articles');
-      } finally {
-        setLoading(false);
+      if (authError || !user) {
+        console.log('❌ No user, redirecting to login');
+        router.push('/login');
+        return;
       }
-    };
 
-    fetchArticles();
+      // Get attorney_id from user_id
+      console.log('🔍 Fetching attorney for user:', user.id);
+      const { data: attorney, error: attorneyError } = await supabase
+        .from('attorneys')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      console.log('👨‍⚖️ Attorney:', attorney, 'Error:', attorneyError);
+
+      if (attorneyError || !attorney) {
+        console.log('❌ No attorney found, redirecting to dashboard');
+        setError('Attorney profile not found');
+        setLoading(false);
+        return;
+      }
+
+      // Fetch articles for this attorney
+      console.log('🔍 Fetching articles for attorney:', attorney.id);
+      const { data, error: articlesError } = await supabase
+        .from('attorney_articles')
+        .select(`
+          *,
+          attorney:attorneys!inner(
+            id,
+            first_name,
+            last_name,
+            firm_name,
+            profile_image_url
+          )
+        )
+        `)
+        .eq('attorney_id', attorney.id)
+        .order('created_at', { ascending: false });
+
+      console.log('📝 Articles response:', { data, error: articlesError });
+
+      if (articlesError) {
+        console.error('❌ Articles error:', articlesError);
+        throw articlesError;
+      }
+
+      console.log('✅ Articles fetched:', data?.length || 0);
+      setArticles((data as ArticleWithRelations[]) || []);
+    } catch (err: any) {
+      console.error('❌ Error fetching articles:', err);
+      setError(err.message || 'Failed to load articles');
+    } finally {
+      setLoading(false);
+    }
   }, [router]);
+
+  useEffect(() => {
+    fetchArticles();
+  }, [fetchArticles]);
 
 
   const getStatusBadge = (status: string) => {
