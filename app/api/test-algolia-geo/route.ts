@@ -107,7 +107,7 @@ export async function GET(request: NextRequest) {
       }],
     });
 
-    const searchResults = searchResponse.results[0];
+    const searchResults = searchResponse.results[0] as any;
 
     return NextResponse.json({
       message: 'Geo search test results',

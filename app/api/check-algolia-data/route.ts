@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
       }],
     });
     
-    const searchResults = allRecords.results[0];
+    const searchResults = allRecords.results[0] as any;
     
     console.log('📊 All records:', {
       totalHits: searchResults.nbHits,

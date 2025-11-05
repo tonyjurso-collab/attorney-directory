@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
         hitsPerPage: 10,
       }],
     });
-    const emptySearch = emptyResponse.results[0];
+    const emptySearch = emptyResponse.results[0] as any;
     console.log('Empty search results:', {
       totalHits: emptySearch.nbHits,
       hits: emptySearch.hits.length,
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
         hitsPerPage: 10,
       }],
     });
-    const sarahSearch = sarahResponse.results[0];
+    const sarahSearch = sarahResponse.results[0] as any;
     console.log('Sarah search results:', {
       totalHits: sarahSearch.nbHits,
       hits: sarahSearch.hits.length,
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
         hitsPerPage: 10,
       }],
     });
-    const SarahSearch = SarahResponse.results[0];
+    const SarahSearch = SarahResponse.results[0] as any;
     console.log('Sarah (capitalized) search results:', {
       totalHits: SarahSearch.nbHits,
       hits: SarahSearch.hits.length,
@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
         hitsPerPage: 10,
       }],
     });
-    const sSearch = sResponse.results[0];
+    const sSearch = sResponse.results[0] as any;
     console.log('S search results:', {
       totalHits: sSearch.nbHits,
       hits: sSearch.hits.length,
@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
         hitsPerPage: 10,
       }],
     });
-    const johnsonSearch = johnsonResponse.results[0];
+    const johnsonSearch = johnsonResponse.results[0] as any;
     console.log('Johnson search results:', {
       totalHits: johnsonSearch.nbHits,
       hits: johnsonSearch.hits.length,
@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
         hitsPerPage: 10,
       }],
     });
-    const personalSearch = personalResponse.results[0];
+    const personalSearch = personalResponse.results[0] as any;
     console.log('Personal search results:', {
       totalHits: personalSearch.nbHits,
       hits: personalSearch.hits.length,

@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
         hitsPerPage: 10,
       }],
     });
-    const searchResult = searchResponse.results[0];
+    const searchResult = searchResponse.results[0] as any;
     
     console.log('🔍 Search results:', {
       totalHits: searchResult.nbHits,
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
         hitsPerPage: 5,
       }],
     });
-    const sarahSearch = sarahResponse.results[0];
+    const sarahSearch = sarahResponse.results[0] as any;
     
     const sarahResponse2 = await client.search({
       requests: [{
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
         hitsPerPage: 5,
       }],
     });
-    const sarahSearch2 = sarahResponse2.results[0];
+    const sarahSearch2 = sarahResponse2.results[0] as any;
     
     const sarahResponse3 = await client.search({
       requests: [{
@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
         hitsPerPage: 5,
       }],
     });
-    const sarahSearch3 = sarahResponse3.results[0];
+    const sarahSearch3 = sarahResponse3.results[0] as any;
     
     console.log('🔍 Sarah searches:', {
       'sarah': sarahSearch.nbHits,

@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
         hitsPerPage: 100,
       }],
     });
-    const allResults = allResponse.results[0];
+    const allResults = allResponse.results[0] as any;
     
     // Test 3: Search for "sarah" using v5 API
     console.log('Searching for "sarah"...');
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
         hitsPerPage: 20,
       }],
     });
-    const sarahResults = sarahResponse.results[0];
+    const sarahResults = sarahResponse.results[0] as any;
     
     // Test 4: Search for "Sarah" (capitalized) using v5 API
     console.log('Searching for "Sarah"...');
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
         hitsPerPage: 20,
       }],
     });
-    const sarahCapitalResults = sarahCapitalResponse.results[0];
+    const sarahCapitalResults = sarahCapitalResponse.results[0] as any;
     
     // Test 5: Search for any name containing "s" using v5 API
     console.log('Searching for "s"...');
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
         hitsPerPage: 20,
       }],
     });
-    const sResults = sResponse.results[0];
+    const sResults = sResponse.results[0] as any;
 
     return NextResponse.json({
       message: 'Algolia index test completed',
