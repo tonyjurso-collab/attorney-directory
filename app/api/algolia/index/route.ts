@@ -55,7 +55,6 @@ export async function POST(request: NextRequest) {
       process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
       process.env.ALGOLIA_ADMIN_API_KEY!
     );
-    const index = client.initIndex('attorneys');
 
     // Transform attorneys for Algolia
     const algoliaAttorneys = transformedAttorneys.map(attorney => ({
@@ -73,7 +72,7 @@ export async function POST(request: NextRequest) {
       membership_tier: attorney.membership_tier,
       is_verified: attorney.is_verified,
       profile_image_url: attorney.profile_image_url,
-      practice_areas: attorney.practice_areas.map(pa => ({
+      practice_areas: attorney.practice_areas.map((pa: any) => ({
         name: pa.name,
         slug: pa.slug,
         is_primary: pa.is_primary,
@@ -90,8 +89,11 @@ export async function POST(request: NextRequest) {
       } : undefined,
     }));
 
-    // Index attorneys to Algolia
-    await index.saveObjects(algoliaAttorneys);
+    // Index attorneys to Algolia using v5 API
+    await client.saveObjects({
+      indexName: 'attorneys',
+      objects: algoliaAttorneys,
+    });
 
     return NextResponse.json({ 
       message: `Successfully indexed ${transformedAttorneys.length} attorneys`,

@@ -29,10 +29,9 @@ export async function POST(request: NextRequest) {
       process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
       process.env.ALGOLIA_ADMIN_API_KEY!
     );
-    const index = client.initIndex('attorneys');
 
     // Transform attorneys for Algolia
-    const algoliaAttorneys = attorneys.map(attorney => ({
+    const algoliaAttorneys = attorneys.map((attorney: any) => ({
       objectID: attorney.id,
       name: `${attorney.first_name} ${attorney.last_name}`,
       firm_name: attorney.firm_name,
@@ -57,8 +56,11 @@ export async function POST(request: NextRequest) {
 
     console.log('Indexing attorneys to Algolia...');
     
-    // Index attorneys to Algolia
-    await index.saveObjects(algoliaAttorneys);
+    // Index attorneys to Algolia using v5 API
+    await client.saveObjects({
+      indexName: 'attorneys',
+      objects: algoliaAttorneys,
+    });
 
     console.log('Successfully indexed attorneys');
 
