@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Transform for display
-    const results = filteredResults.map(attorney => ({
+    const results = filteredResults.map((attorney: any) => ({
       objectID: attorney.id,
       name: `${attorney.first_name} ${attorney.last_name}`,
       first_name: attorney.first_name,  // Add individual fields for AttorneyCard
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
       zip_code: attorney.zip_code,
       membership_tier: attorney.membership_tier,
       is_verified: attorney.is_verified,
-      practice_areas: attorney.practice_areas.map(pa => ({
+      practice_areas: attorney.practice_areas.map((pa: any) => ({
         name: pa.name,
         slug: pa.slug,
         is_primary: pa.is_primary,

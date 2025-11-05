@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     console.log(`📊 Found ${attorneys.length} attorneys in Supabase`);
 
     // Simple transformation for manual sync
-    const simpleAttorneys = attorneys.map(attorney => ({
+    const simpleAttorneys = attorneys.map((attorney: any) => ({
       objectID: attorney.id,
       name: `${attorney.first_name} ${attorney.last_name}`,
       firm_name: attorney.firm_name,
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ 
       message: `Prepared ${simpleAttorneys.length} attorneys for sync`,
       count: simpleAttorneys.length,
-      attorneys: simpleAttorneys.map(a => ({ 
+      attorneys: simpleAttorneys.map((a: any) => ({ 
         id: a.objectID, 
         name: a.name, 
         city: a.city, 

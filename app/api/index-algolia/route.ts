@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     }));
 
     // Transform attorneys for Algolia
-    const algoliaAttorneys = transformedAttorneys.map(attorney => ({
+    const algoliaAttorneys = transformedAttorneys.map((attorney: any) => ({
       objectID: attorney.id,
       name: `${attorney.first_name} ${attorney.last_name}`,
       firm_name: attorney.firm_name,
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
       membership_tier: attorney.membership_tier,
       is_verified: attorney.is_verified,
       profile_image_url: attorney.profile_image_url,
-      practice_areas: attorney.practice_areas.map(pa => ({
+      practice_areas: attorney.practice_areas.map((pa: any) => ({
         name: pa.name,
         slug: pa.slug,
         is_primary: pa.is_primary,
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
           'X-Algolia-Application-ID': algoliaAppId,
         },
         body: JSON.stringify({
-          requests: algoliaAttorneys.map(attorney => ({
+          requests: algoliaAttorneys.map((attorney: any) => ({
             action: 'addObject',
             body: attorney
           }))
@@ -127,9 +127,9 @@ export async function POST(request: NextRequest) {
       algoliaResult: batchResult,
       summary: {
         total: algoliaAttorneys.length,
-        withGeo: algoliaAttorneys.filter(a => a._geoloc).length,
-        withoutGeo: algoliaAttorneys.filter(a => !a._geoloc).length,
-        withPracticeAreas: algoliaAttorneys.filter(a => a.practice_areas.length > 0).length
+        withGeo: algoliaAttorneys.filter((a: any) => a._geoloc).length,
+        withoutGeo: algoliaAttorneys.filter((a: any) => !a._geoloc).length,
+        withPracticeAreas: algoliaAttorneys.filter((a: any) => a.practice_areas.length > 0).length
       }
     });
   } catch (error) {

@@ -207,7 +207,7 @@ export async function PATCH(
 
       // Insert new links
       if (body.practice_area_ids.length > 0) {
-        const practiceAreaLinks = body.practice_area_ids.map(pa_id => ({
+        const practiceAreaLinks = body.practice_area_ids.map((pa_id: string) => ({
           article_id: id,
           practice_area_id: pa_id
         }));

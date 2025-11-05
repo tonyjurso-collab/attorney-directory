@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ 
       message: `Successfully synced ${transformedAttorneys.length} attorneys to Algolia`,
       count: transformedAttorneys.length,
-      attorneys: algoliaAttorneys.map(a => ({ id: a.objectID, name: a.name, city: a.city, state: a.state }))
+      attorneys: algoliaAttorneys.map((a: any) => ({ id: a.objectID, name: a.name, city: a.city, state: a.state }))
     });
   } catch (error) {
     console.error('Error in sync route:', error);

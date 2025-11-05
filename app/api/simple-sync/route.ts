@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     console.log(`📊 Found ${attorneys.length} attorneys in Supabase`);
 
     // Transform attorneys for Algolia (simple version)
-    const algoliaAttorneys = attorneys.map(attorney => ({
+    const algoliaAttorneys = attorneys.map((attorney: any) => ({
       objectID: attorney.id,
       name: `${attorney.first_name} ${attorney.last_name}`,
       firm_name: attorney.firm_name,
@@ -57,8 +57,8 @@ export async function POST(request: NextRequest) {
       attorneys: algoliaAttorneys,
       summary: {
         total: algoliaAttorneys.length,
-        withGeo: algoliaAttorneys.filter(a => a._geoloc).length,
-        withoutGeo: algoliaAttorneys.filter(a => !a._geoloc).length
+        withGeo: algoliaAttorneys.filter((a: any) => a._geoloc).length,
+        withoutGeo: algoliaAttorneys.filter((a: any) => !a._geoloc).length
       }
     });
   } catch (error) {

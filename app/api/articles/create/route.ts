@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
       .from('attorney_articles')
       .select('slug');
     
-    const existingSlugs = existingArticles?.map(a => a.slug) || [];
+    const existingSlugs = existingArticles?.map((a: any) => a.slug) || [];
     const slug = generateUniqueSlug(body.title, existingSlugs);
 
     // Create the article
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
 
     // Link practice areas if provided
     if (body.practice_area_ids && body.practice_area_ids.length > 0) {
-      const practiceAreaLinks = body.practice_area_ids.map(pa_id => ({
+      const practiceAreaLinks = body.practice_area_ids.map((pa_id: string) => ({
         article_id: article.id,
         practice_area_id: pa_id
       }));
