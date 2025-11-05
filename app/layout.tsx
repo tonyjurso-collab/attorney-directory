@@ -32,9 +32,20 @@ export const metadata: Metadata = {
   keywords: "attorney, lawyer, legal, directory, find lawyer, legal services",
   authors: [{ name: "LegalHub" }],
   icons: {
-    icon: "/legal-hub-site-icon.png",
-    apple: "/legal-hub-site-icon.png",
+    icon: [
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    other: [
+      { rel: "android-chrome-192x192", url: "/android-chrome-192x192.png", sizes: "192x192", type: "image/png" },
+      { rel: "android-chrome-512x512", url: "/android-chrome-512x512.png", sizes: "512x512", type: "image/png" },
+    ],
   },
+  manifest: "/site.webmanifest",
   openGraph: {
     title: "LegalHub - Find the Right Lawyer Near You",
     description: "Connect with qualified attorneys in your area. Search by practice area, location, and get matched with the right legal professional for your needs.",

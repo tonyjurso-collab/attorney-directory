@@ -119,8 +119,8 @@ export function Navigation() {
               <Image
                 src="/LegalHubLogo.png"
                 alt="LegalHub Logo"
-                width={120}
-                height={40}
+                width={300}
+                height={60}
                 className="h-10 w-auto object-contain"
                 priority
               />
