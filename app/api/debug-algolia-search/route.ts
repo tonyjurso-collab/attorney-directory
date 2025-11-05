@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
       searchParams,
       results: {
         totalHits: result?.nbHits,
-        hits: result?.hits?.length,
+        hitsCount: result?.hits?.length,
         processingTime: result?.processingTimeMS,
         hits: result?.hits || []
       }
