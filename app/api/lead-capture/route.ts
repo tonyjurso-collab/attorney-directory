@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Get LeadProsper configuration
-    const lpConfig = config.lead_prosper_config;
+    const lpConfig = (config as any).lead_prosper_config;
     if (!lpConfig) {
       console.error('❌ LeadProsper config not found for:', practiceArea);
       return NextResponse.json(
