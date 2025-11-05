@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     );
 
     // Transform attorneys for Algolia
-    const algoliaAttorneys = transformedAttorneys.map(attorney => ({
+    const algoliaAttorneys = transformedAttorneys.map((attorney: any) => ({
       objectID: attorney.id,
       name: `${attorney.first_name} ${attorney.last_name}`,
       firm_name: attorney.firm_name,
