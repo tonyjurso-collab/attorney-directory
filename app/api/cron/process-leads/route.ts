@@ -191,8 +191,8 @@ async function processNextJobInBatch(results: {
       
       // Update session with success
       await updateSessionData(job.sid, {
-        lead_status: 'sent',
-        vendor_response: result,
+        leadStatus: 'sent',
+        leadprosper_response: result,
       });
       
       // Log success message
@@ -229,8 +229,8 @@ async function processNextJobInBatch(results: {
         
         // Update session with failure
         await updateSessionData(job.sid, {
-          lead_status: 'failed',
-          vendor_response: { error: errorMessage },
+          leadStatus: 'failed',
+          leadprosper_response: { error: errorMessage },
         });
       }
     } catch (markError) {
