@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
         { 
           success: true, 
           message: 'Your inquiry has been submitted successfully. We\'ll be in touch soon!',
-          lead_id: result.lead_id
+          lead_id: result.leadId
         },
         { status: 200 }
       );
