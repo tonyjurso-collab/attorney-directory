@@ -8,7 +8,7 @@ import { staggerContainer, staggerItem } from '@/lib/animations/variants';
 import { createClient } from '@/lib/supabase/client';
 
 // Static mock data as fallback
-const mockAttorneys: AttorneyWithDetails[] = [
+const mockAttorneys = [
   {
     id: 'mock-featured-1',
     first_name: 'John',
@@ -16,9 +16,9 @@ const mockAttorneys: AttorneyWithDetails[] = [
     email: 'john.smith@lawfirm.com',
     phone: '(555) 123-4567',
     bio: 'Experienced personal injury attorney with over 15 years of practice.',
-    years_experience: 15,
-    law_school: 'Harvard Law School',
-    bar_admissions: ['NJ', 'NY'],
+    experience_years: 15,
+    law_school: 'Harvard Law School' as any,
+    bar_admissions: ['NJ', 'NY'] as any,
     city: 'Newark',
     state: 'NJ',
     zip_code: '07102',
@@ -78,7 +78,7 @@ const mockAttorneys: AttorneyWithDetails[] = [
 ];
 
 export function FeaturedAttorneys() {
-  const [attorneys, setAttorneys] = useState<AttorneyWithDetails[]>(mockAttorneys);
+  const [attorneys, setAttorneys] = useState<AttorneyWithDetails[]>(mockAttorneys as any as AttorneyWithDetails[]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
