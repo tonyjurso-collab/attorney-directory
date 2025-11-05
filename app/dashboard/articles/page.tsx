@@ -72,8 +72,20 @@ export default function ArticlesPage() {
         throw articlesError;
       }
 
-      console.log('✅ Articles fetched:', data?.length || 0);
-      setArticles((data as ArticleWithRelations[]) || []);
+      // Type guard: ensure data is an array before setting
+      // Cast to unknown first to avoid type inference issues
+      const articlesData = data as unknown;
+      
+      if (!articlesData || !Array.isArray(articlesData)) {
+        console.log('✅ Articles fetched: 0 (no data or not an array)');
+        setArticles([]);
+        return;
+      }
+
+      console.log('✅ Articles fetched:', articlesData.length);
+      
+      // Now TypeScript knows articlesData is an array, cast to correct type
+      setArticles(articlesData as ArticleWithRelations[]);
     } catch (err: any) {
       console.error('❌ Error fetching articles:', err);
       setError(err.message || 'Failed to load articles');
