@@ -64,39 +64,13 @@ export async function POST(request: NextRequest) {
       hitsPerPage: 20,
 
       // Max values per facet
-      maxValuesPerFacet: 100,
+      maxValuesPerFacet: 100
 
       // Geo search is automatically enabled when _geoloc attribute is present
       // _geoloc is the special attribute name for geo coordinates in Algolia
 
-      // Search synonyms for better matching
-      synonyms: [
-        {
-          objectID: 'drug-synonyms',
-          type: 'synonym',
-          synonyms: ['drug', 'drugs', 'drug crimes', 'drug possession', 'drug charges', 'drug offense']
-        },
-        {
-          objectID: 'dui-synonyms', 
-          type: 'synonym',
-          synonyms: ['dui', 'dwi', 'driving under influence', 'drunk driving', 'dui defense']
-        },
-        {
-          objectID: 'personal-injury-synonyms',
-          type: 'synonym', 
-          synonyms: ['personal injury', 'car accident', 'truck accident', 'motorcycle accident', 'slip and fall', 'workplace injury']
-        },
-        {
-          objectID: 'family-law-synonyms',
-          type: 'synonym',
-          synonyms: ['family law', 'divorce', 'custody', 'child support', 'alimony', 'separation']
-        },
-        {
-          objectID: 'criminal-defense-synonyms',
-          type: 'synonym',
-          synonyms: ['criminal defense', 'criminal charges', 'felony', 'misdemeanor', 'assault', 'theft', 'fraud']
-        }
-      ]
+      // Note: Synonyms are managed separately using saveSynonyms() method in Algolia v5
+      // They cannot be set as part of indexSettings
       }
     });
 
