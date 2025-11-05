@@ -168,14 +168,15 @@ async function processNextJobInBatch(results: {
     });
     
     // Validate lead data
-    const validation = validateLeadForSubmission(job.leadData as LeadData);
+    const leadData = job.leadData as unknown as LeadData;
+    const validation = validateLeadForSubmission(leadData);
     
     if (!validation.valid) {
       throw new Error(`Validation failed: ${validation.errors.join(', ')}`);
     }
     
     // Submit to LeadProsper with timeout
-    const submissionPromise = submitLeadToLeadProsper(job.leadData as LeadData);
+    const submissionPromise = submitLeadToLeadProsper(leadData);
     const timeoutPromise = new Promise<never>((_, reject) => {
       setTimeout(() => reject(new Error('Job timeout')), CRON_CONFIG.timeout);
     });
