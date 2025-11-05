@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
     }
     
     const total = stats?.length || 0;
-    const geocoded = stats?.filter(attorney => 
+    const geocoded = stats?.filter((attorney: { id: string; latitude: number | null; longitude: number | null }) => 
       attorney.latitude !== null && attorney.longitude !== null
     ).length || 0;
     const notGeocoded = total - geocoded;
