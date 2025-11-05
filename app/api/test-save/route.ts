@@ -10,8 +10,6 @@ export async function POST(request: NextRequest) {
       process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
       process.env.ALGOLIA_ADMIN_API_KEY!
     );
-    const index = client.initIndex('attorneys');
-
     // Test with a simple object
     const testObject = {
       objectID: 'test-123',
@@ -21,7 +19,10 @@ export async function POST(request: NextRequest) {
     };
 
     console.log('Saving test object to Algolia...');
-    await index.saveObject(testObject);
+    await client.saveObjects({
+      indexName: 'attorneys',
+      objects: [testObject],
+    });
     console.log('Test object saved successfully');
 
     return NextResponse.json({ 

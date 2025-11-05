@@ -12,8 +12,6 @@ export async function POST(request: NextRequest) {
       process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
       process.env.ALGOLIA_ADMIN_API_KEY!
     );
-    const index = client.initIndex('attorneys');
-
     // Test attorney with coordinates near Clifton, NJ
     const testAttorney = {
       objectID: 'test-attorney-nj-001',
@@ -53,8 +51,11 @@ export async function POST(request: NextRequest) {
       }
     };
 
-    // Add the test attorney to Algolia
-    await index.saveObject(testAttorney);
+    // Add the test attorney to Algolia using v5 API
+    await client.saveObjects({
+      indexName: 'attorneys',
+      objects: [testAttorney],
+    });
 
     return NextResponse.json({
       message: 'Test attorney added to Algolia with geo coordinates',
@@ -94,21 +95,28 @@ export async function GET(request: NextRequest) {
       process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
       process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY!
     );
-    const index = client.initIndex('attorneys');
 
-    // Test geo search
-    const searchResponse = await index.search('', {
-      aroundLatLng: `${lat},${lng}`,
-      aroundRadius: parseInt(radius) * 1609.34, // Convert miles to meters
-      hitsPerPage: 10
+    // Test geo search using v5 API
+    const searchResponse = await client.search({
+      requests: [{
+        indexName: 'attorneys',
+        query: '',
+        params: {
+          aroundLatLng: `${lat},${lng}`,
+          aroundRadius: parseInt(radius) * 1609.34, // Convert miles to meters
+          hitsPerPage: 10,
+        },
+      }],
     });
+
+    const searchResults = searchResponse.results[0];
 
     return NextResponse.json({
       message: 'Geo search test results',
       searchLocation: { lat: parseFloat(lat), lng: parseFloat(lng) },
       radius: `${radius} miles`,
-      results: searchResponse.hits,
-      totalHits: searchResponse.nbHits
+      results: searchResults.hits,
+      totalHits: searchResults.nbHits
     });
 
   } catch (error) {

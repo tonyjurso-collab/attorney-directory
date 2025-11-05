@@ -10,10 +10,10 @@ export async function POST(request: NextRequest) {
       process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
       process.env.ALGOLIA_ADMIN_API_KEY!
     );
-    const index = client.initIndex('attorneys');
-
     console.log('Trying to get index settings...');
-    const settings = await index.getSettings();
+    const settings = await client.getSettings({
+      indexName: 'attorneys',
+    });
     console.log('Settings retrieved:', settings);
 
     return NextResponse.json({ 

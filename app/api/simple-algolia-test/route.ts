@@ -41,15 +41,16 @@ export async function GET(request: NextRequest) {
       }, { status: 500 });
     }
 
-    // Test creating index
-    let index;
+    // Test getting index settings (v5 API doesn't use initIndex)
     try {
-      index = client.initIndex('attorneys');
-      console.log('✅ Algolia index created successfully');
+      await client.getSettings({
+        indexName: 'attorneys',
+      });
+      console.log('✅ Algolia index settings retrieved successfully');
     } catch (indexError) {
-      console.error('❌ Failed to create Algolia index:', indexError);
+      console.error('❌ Failed to get Algolia index settings:', indexError);
       return NextResponse.json({ 
-        error: 'Failed to create Algolia index',
+        error: 'Failed to get Algolia index settings',
         details: indexError instanceof Error ? indexError.message : 'Unknown index error'
       }, { status: 500 });
     }
@@ -60,7 +61,7 @@ export async function GET(request: NextRequest) {
         'algoliasearch imported',
         'environment variables loaded',
         'client created',
-        'index created'
+        'index settings retrieved'
       ]
     });
   } catch (error) {

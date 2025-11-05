@@ -9,31 +9,37 @@ export async function GET(request: NextRequest) {
       process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
       process.env.ALGOLIA_ADMIN_API_KEY!
     );
-    const index = client.initIndex('attorneys');
-    
-    // Just try to get all records
+    // Just try to get all records using v5 API
     console.log('🔍 Getting all records...');
-    const allRecords = await index.search('', {
-      hitsPerPage: 50
+    const allRecords = await client.search({
+      requests: [{
+        indexName: 'attorneys',
+        query: '',
+        params: {
+          hitsPerPage: 50,
+        },
+      }],
     });
     
+    const searchResults = allRecords.results[0];
+    
     console.log('📊 All records:', {
-      totalHits: allRecords.nbHits,
-      hits: allRecords.hits.length,
-      processingTime: allRecords.processingTimeMS
+      totalHits: searchResults.nbHits,
+      hits: searchResults.hits.length,
+      processingTime: searchResults.processingTimeMS
     });
     
     // Log the actual records
-    if (allRecords.hits.length > 0) {
-      console.log('📋 First record:', JSON.stringify(allRecords.hits[0], null, 2));
+    if (searchResults.hits.length > 0) {
+      console.log('📋 First record:', JSON.stringify(searchResults.hits[0], null, 2));
     }
     
     return NextResponse.json({
       message: 'Algolia data check completed',
-      totalHits: allRecords.nbHits,
-      hitsCount: allRecords.hits.length,
-      processingTime: allRecords.processingTimeMS,
-      records: allRecords.hits.map((hit: any) => ({
+      totalHits: searchResults.nbHits,
+      hitsCount: searchResults.hits.length,
+      processingTime: searchResults.processingTimeMS,
+      records: searchResults.hits.map((hit: any) => ({
         objectID: hit.objectID,
         name: hit.name,
         city: hit.city,

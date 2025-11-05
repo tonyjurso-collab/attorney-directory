@@ -9,68 +9,96 @@ export async function GET(request: NextRequest) {
       process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
       process.env.ALGOLIA_ADMIN_API_KEY!
     );
-    const index = client.initIndex('attorneys');
-    
-    // Test 1: Empty search (should return all records)
+    // Test 1: Empty search (should return all records) using v5 API
     console.log('🔍 Test 1: Empty search...');
-    const emptySearch = await index.search('', {
-      hitsPerPage: 10
+    const emptyResponse = await client.search({
+      requests: [{
+        indexName: 'attorneys',
+        query: '',
+        params: { hitsPerPage: 10 },
+      }],
     });
+    const emptySearch = emptyResponse.results[0];
     console.log('Empty search results:', {
       totalHits: emptySearch.nbHits,
       hits: emptySearch.hits.length,
       processingTime: emptySearch.processingTimeMS
     });
     
-    // Test 2: Search for "sarah"
+    // Test 2: Search for "sarah" using v5 API
     console.log('🔍 Test 2: Search for "sarah"...');
-    const sarahSearch = await index.search('sarah', {
-      hitsPerPage: 10
+    const sarahResponse = await client.search({
+      requests: [{
+        indexName: 'attorneys',
+        query: 'sarah',
+        params: { hitsPerPage: 10 },
+      }],
     });
+    const sarahSearch = sarahResponse.results[0];
     console.log('Sarah search results:', {
       totalHits: sarahSearch.nbHits,
       hits: sarahSearch.hits.length,
       processingTime: sarahSearch.processingTimeMS
     });
     
-    // Test 3: Search for "Sarah"
+    // Test 3: Search for "Sarah" using v5 API
     console.log('🔍 Test 3: Search for "Sarah"...');
-    const SarahSearch = await index.search('Sarah', {
-      hitsPerPage: 10
+    const SarahResponse = await client.search({
+      requests: [{
+        indexName: 'attorneys',
+        query: 'Sarah',
+        params: { hitsPerPage: 10 },
+      }],
     });
+    const SarahSearch = SarahResponse.results[0];
     console.log('Sarah (capitalized) search results:', {
       totalHits: SarahSearch.nbHits,
       hits: SarahSearch.hits.length,
       processingTime: SarahSearch.processingTimeMS
     });
     
-    // Test 4: Search for "s"
+    // Test 4: Search for "s" using v5 API
     console.log('🔍 Test 4: Search for "s"...');
-    const sSearch = await index.search('s', {
-      hitsPerPage: 10
+    const sResponse = await client.search({
+      requests: [{
+        indexName: 'attorneys',
+        query: 's',
+        params: { hitsPerPage: 10 },
+      }],
     });
+    const sSearch = sResponse.results[0];
     console.log('S search results:', {
       totalHits: sSearch.nbHits,
       hits: sSearch.hits.length,
       processingTime: sSearch.processingTimeMS
     });
     
-    // Test 5: Search for "johnson"
+    // Test 5: Search for "johnson" using v5 API
     console.log('🔍 Test 5: Search for "johnson"...');
-    const johnsonSearch = await index.search('johnson', {
-      hitsPerPage: 10
+    const johnsonResponse = await client.search({
+      requests: [{
+        indexName: 'attorneys',
+        query: 'johnson',
+        params: { hitsPerPage: 10 },
+      }],
     });
+    const johnsonSearch = johnsonResponse.results[0];
     console.log('Johnson search results:', {
       totalHits: johnsonSearch.nbHits,
       hits: johnsonSearch.hits.length,
       processingTime: johnsonSearch.processingTimeMS
     });
     
-    // Test 6: Search for "personal"
+    // Test 6: Search for "personal" using v5 API
     console.log('🔍 Test 6: Search for "personal"...');
-    const personalSearch = await index.search('personal', {
-      hitsPerPage: 10
+    const personalResponse = await client.search({
+      requests: [{
+        indexName: 'attorneys',
+        query: 'personal',
+        params: { hitsPerPage: 10 },
+      }],
     });
+    const personalSearch = personalResponse.results[0];
     console.log('Personal search results:', {
       totalHits: personalSearch.nbHits,
       hits: personalSearch.hits.length,

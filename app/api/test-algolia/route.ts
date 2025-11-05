@@ -22,10 +22,11 @@ export async function GET(request: NextRequest) {
 
     // Test Algolia connection
     const client = algoliasearch(appId, adminKey);
-    const index = client.initIndex('attorneys');
 
-    // Try to get index settings
-    const settings = await index.getSettings();
+    // Try to get index settings using v5 API
+    const settings = await client.getSettings({
+      indexName: 'attorneys',
+    });
     
     return NextResponse.json({ 
       message: 'Algolia connection successful',

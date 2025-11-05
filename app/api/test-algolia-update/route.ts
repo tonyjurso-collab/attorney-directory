@@ -28,13 +28,12 @@ export async function POST(request: NextRequest) {
     // Update the bio in the attorney object
     const updatedAttorney = { ...attorney, bio };
 
-    // Initialize Algolia client using the same pattern as working routes
+    // Initialize Algolia client using v5 API
     const { algoliasearch } = await import('algoliasearch');
     const client = algoliasearch(
       process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
       process.env.ALGOLIA_ADMIN_API_KEY!
     );
-    const index = (client as any).initIndex('attorneys');
 
     // Transform attorney for Algolia
     const algoliaData = {
@@ -62,8 +61,11 @@ export async function POST(request: NextRequest) {
 
     console.log('Indexing to Algolia...', JSON.stringify(algoliaData, null, 2));
 
-    // Save to Algolia
-    await index.saveObject(algoliaData);
+    // Save to Algolia using v5 API
+    await client.saveObjects({
+      indexName: 'attorneys',
+      objects: [algoliaData],
+    });
 
     console.log('Successfully updated in Algolia');
 

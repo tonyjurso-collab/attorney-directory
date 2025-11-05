@@ -34,8 +34,6 @@ export async function POST(request: NextRequest) {
       process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
       process.env.ALGOLIA_ADMIN_API_KEY!
     );
-    const index = client.initIndex('attorneys');
-
     // Transform attorney for Algolia
     const algoliaAttorney = {
       objectID: attorney.id,
@@ -63,8 +61,11 @@ export async function POST(request: NextRequest) {
     console.log('Indexing attorney to Algolia...');
     console.log('Algolia data:', JSON.stringify(algoliaAttorney, null, 2));
     
-    // Index attorney to Algolia - same method as simple-index
-    await index.saveObjects([algoliaAttorney]);
+    // Index attorney to Algolia using v5 API
+    await client.saveObjects({
+      indexName: 'attorneys',
+      objects: [algoliaAttorney],
+    });
 
     console.log('Successfully indexed attorney');
 

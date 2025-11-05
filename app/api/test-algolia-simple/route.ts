@@ -19,16 +19,22 @@ export async function GET(request: NextRequest) {
     }
     
     const client = algoliasearch(appId, adminKey);
-    const index = client.initIndex('attorneys');
     
-    // Get index stats
-    const stats = await index.getSettings();
+    // Get index stats using v5 API
+    const stats = await client.getSettings({
+      indexName: 'attorneys',
+    });
     console.log('📊 Index settings:', stats);
     
-    // Try to search for anything
-    const searchResult = await index.search('', {
-      hitsPerPage: 10
+    // Try to search for anything using v5 API
+    const searchResponse = await client.search({
+      requests: [{
+        indexName: 'attorneys',
+        query: '',
+        params: { hitsPerPage: 10 },
+      }],
     });
+    const searchResult = searchResponse.results[0];
     
     console.log('🔍 Search results:', {
       totalHits: searchResult.nbHits,
@@ -36,18 +42,33 @@ export async function GET(request: NextRequest) {
       processingTime: searchResult.processingTimeMS
     });
     
-    // Try specific searches
-    const sarahSearch = await index.search('sarah', {
-      hitsPerPage: 5
+    // Try specific searches using v5 API
+    const sarahResponse = await client.search({
+      requests: [{
+        indexName: 'attorneys',
+        query: 'sarah',
+        params: { hitsPerPage: 5 },
+      }],
     });
+    const sarahSearch = sarahResponse.results[0];
     
-    const sarahSearch2 = await index.search('Sarah', {
-      hitsPerPage: 5
+    const sarahResponse2 = await client.search({
+      requests: [{
+        indexName: 'attorneys',
+        query: 'Sarah',
+        params: { hitsPerPage: 5 },
+      }],
     });
+    const sarahSearch2 = sarahResponse2.results[0];
     
-    const sarahSearch3 = await index.search('s', {
-      hitsPerPage: 5
+    const sarahResponse3 = await client.search({
+      requests: [{
+        indexName: 'attorneys',
+        query: 's',
+        params: { hitsPerPage: 5 },
+      }],
     });
+    const sarahSearch3 = sarahResponse3.results[0];
     
     console.log('🔍 Sarah searches:', {
       'sarah': sarahSearch.nbHits,

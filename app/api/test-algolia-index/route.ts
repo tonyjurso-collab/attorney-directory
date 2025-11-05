@@ -10,35 +10,55 @@ export async function GET(request: NextRequest) {
       process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
       process.env.ALGOLIA_ADMIN_API_KEY!
     );
-    const index = client.initIndex('attorneys');
-
-    // Test 1: Get index settings
+    // Test 1: Get index settings using v5 API
     console.log('Getting index settings...');
-    const settings = await index.getSettings();
+    const settings = await client.getSettings({
+      indexName: 'attorneys',
+    });
     
-    // Test 2: Search for all records (empty query)
+    // Test 2: Search for all records (empty query) using v5 API
     console.log('Searching for all records...');
-    const allResults = await index.search('', {
-      hitsPerPage: 100
+    const allResponse = await client.search({
+      requests: [{
+        indexName: 'attorneys',
+        query: '',
+        params: { hitsPerPage: 100 },
+      }],
     });
+    const allResults = allResponse.results[0];
     
-    // Test 3: Search for "sarah"
+    // Test 3: Search for "sarah" using v5 API
     console.log('Searching for "sarah"...');
-    const sarahResults = await index.search('sarah', {
-      hitsPerPage: 20
+    const sarahResponse = await client.search({
+      requests: [{
+        indexName: 'attorneys',
+        query: 'sarah',
+        params: { hitsPerPage: 20 },
+      }],
     });
+    const sarahResults = sarahResponse.results[0];
     
-    // Test 4: Search for "Sarah" (capitalized)
+    // Test 4: Search for "Sarah" (capitalized) using v5 API
     console.log('Searching for "Sarah"...');
-    const sarahCapitalResults = await index.search('Sarah', {
-      hitsPerPage: 20
+    const sarahCapitalResponse = await client.search({
+      requests: [{
+        indexName: 'attorneys',
+        query: 'Sarah',
+        params: { hitsPerPage: 20 },
+      }],
     });
+    const sarahCapitalResults = sarahCapitalResponse.results[0];
     
-    // Test 5: Search for any name containing "s"
+    // Test 5: Search for any name containing "s" using v5 API
     console.log('Searching for "s"...');
-    const sResults = await index.search('s', {
-      hitsPerPage: 20
+    const sResponse = await client.search({
+      requests: [{
+        indexName: 'attorneys',
+        query: 's',
+        params: { hitsPerPage: 20 },
+      }],
     });
+    const sResults = sResponse.results[0];
 
     return NextResponse.json({
       message: 'Algolia index test completed',
@@ -49,7 +69,7 @@ export async function GET(request: NextRequest) {
       },
       results: {
         totalRecords: allResults.nbHits,
-        allHits: allResults.hits.map(hit => ({
+        allHits: allResults.hits.map((hit: any) => ({
           objectID: hit.objectID,
           name: hit.name,
           city: hit.city,
@@ -58,7 +78,7 @@ export async function GET(request: NextRequest) {
         sarahSearch: {
           query: 'sarah',
           totalHits: sarahResults.nbHits,
-          hits: sarahResults.hits.map(hit => ({
+          hits: sarahResults.hits.map((hit: any) => ({
             objectID: hit.objectID,
             name: hit.name,
             city: hit.city,
@@ -68,7 +88,7 @@ export async function GET(request: NextRequest) {
         sarahCapitalSearch: {
           query: 'Sarah',
           totalHits: sarahCapitalResults.nbHits,
-          hits: sarahCapitalResults.hits.map(hit => ({
+          hits: sarahCapitalResults.hits.map((hit: any) => ({
             objectID: hit.objectID,
             name: hit.name,
             city: hit.city,
@@ -78,7 +98,7 @@ export async function GET(request: NextRequest) {
         sSearch: {
           query: 's',
           totalHits: sResults.nbHits,
-          hits: sResults.hits.map(hit => ({
+          hits: sResults.hits.map((hit: any) => ({
             objectID: hit.objectID,
             name: hit.name,
             city: hit.city,
